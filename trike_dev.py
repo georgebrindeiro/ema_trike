@@ -31,7 +31,7 @@ stim = stimulator.Stimulator(serialPortStimulator)
 
 # Setting up
 print "Hello, EMA here!"
-print "Beggining calibration..."
+print "Beginning calibration..."
 
 calibrationError = 10
 while calibrationError > 0.1 :

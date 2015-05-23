@@ -18,7 +18,7 @@ class RealTimePloter:
         fig = pylab.figure(1, figsize=(13,10))
         self.ax = fig.add_subplot(411)
         self.ax.grid(True)
-        self.ax.set_title("Realtime Cycling Plot")
+        self.ax.set_title("Real time Cycling Plot")
         self.ax.set_xlabel("")
         self.ax.set_ylabel("Angle")
         self.ax.axis([0,self.xRange,-1.5,1.5])
