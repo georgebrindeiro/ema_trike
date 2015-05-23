@@ -7,11 +7,11 @@ Created on Sat May 23 14:28:22 2015
 
 import pylab
 
-class RealTimePloter:
-    def __init__(self):
+class RealTimePlotter:
+    def __init__(self, ang, signal_femoral, signal_gastrocnemius, filtered_speed, speed, signal_speed_actual, signal_speed_ref, xRange):
         ####################################
         # Grafico
-        self.xRange = 500
+        self.xRange = xRange
         xAchse=pylab.arange(0,self.xRange,1)
         yAchse=pylab.array([0]*self.xRange)
         
@@ -54,7 +54,7 @@ class RealTimePloter:
         self.manager = pylab.get_current_fig_manager()
         
         timer = fig.canvas.new_timer(interval=10)
-        timer.add_callback(self.RealtimePloter, ())
+        timer.add_callback(self.plotter, ())
         timer.start()
         
         pylab.show()
@@ -62,7 +62,7 @@ class RealTimePloter:
     ####################################
         
 
-    def RealtimePloter(self, ang, signal_femoral, signal_gastrocnemius, filtered_speed, speed, signal_speed_actual, signal_speed_ref):
+    def plotter(self, ang, signal_femoral, signal_gastrocnemius, filtered_speed, speed, signal_speed_actual, signal_speed_ref):
       global values, speed, filtered_speed
       CurrentXAxis=pylab.arange(len(ang)-self.xRange,len(ang),1)
       
