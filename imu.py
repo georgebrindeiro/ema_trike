@@ -67,8 +67,8 @@ class IMU:
     def checkButtons(self):
         
         try:  
-            if self.serialPort is not None:
-                self.serialPort.write((">" + str(self.address) + ",250\n".encode())) #Get button state) # e escreve na porta
+            if self.serial_port is not None:
+                self.serial_port.write((">" + str(self.address) + ",250\n".encode())) #Get button state) # e escreve na porta
                 dados = readData(self.serial_port)
                 botao = dados.split(",")
                 if len(botao) == 4:               

@@ -50,9 +50,9 @@ def femoral(phase): ### femoral esquerdo
     elif phase == 7:
         out = float(0)/30
     elif phase == 8:
-        out = float(25)/30
+        out = float(30)/30
     elif phase == 9:
-        out = float(25)/30
+        out = float(30)/30
     return out  
 ####################################
 ####################################
@@ -100,9 +100,9 @@ def gastrocnemius(phase): ##### femoral direito
     elif phase == 7:
         out = float(0)/30
     elif phase == 8:
-        out = float(25)/30
+        out = float(30)/30
     elif phase == 9:
-        out = float(25)/30
+        out = float(30)/30
     return out    
 ####################################
 ####################################

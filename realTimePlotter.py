@@ -8,7 +8,7 @@ Created on Sat May 23 14:28:22 2015
 import pylab
 
 class RealTimePlotter:
-    def __init__(self, ang, signal_femoral, signal_gastrocnemius, filtered_speed, speed, signal_speed_actual, signal_speed_ref, xRange):
+    def __init__(self, ang, signal_femoral, signal_gastrocnemius, filtered_speed, angSpeed, controlSignal, angSpeedRefHistory, xRange):
         ####################################
         # Grafico
         self.xRange = xRange
@@ -54,7 +54,7 @@ class RealTimePlotter:
         self.manager = pylab.get_current_fig_manager()
         
         timer = fig.canvas.new_timer(interval=10)
-        timer.add_callback(self.plotter, ())
+        timer.add_callback(self.plotter, ang, signal_femoral, signal_gastrocnemius, filtered_speed, angSpeed, controlSignal, angSpeedRefHistory)
         timer.start()
         
         pylab.show()
@@ -62,17 +62,16 @@ class RealTimePlotter:
     ####################################
         
 
-    def plotter(self, ang, signal_femoral, signal_gastrocnemius, filtered_speed, speed, signal_speed_actual, signal_speed_ref):
-      global values, speed, filtered_speed
+    def plotter(self, ang, signal_femoral, signal_gastrocnemius, filtered_speed, angSpeed, controlSignal, angSpeedRefHistory):
       CurrentXAxis=pylab.arange(len(ang)-self.xRange,len(ang),1)
       
       self.line1[0].set_data(CurrentXAxis,pylab.array(ang[-self.xRange:]))
       self.line2[0].set_data(CurrentXAxis,pylab.array(signal_femoral[-self.xRange:]))  
       self.line3[0].set_data(CurrentXAxis,pylab.array(signal_gastrocnemius[-self.xRange:]))
       self.line4[0].set_data(CurrentXAxis,pylab.array(filtered_speed[-self.xRange:]))
-      self.line5[0].set_data(CurrentXAxis,pylab.array(speed[-self.xRange:]))  
-      self.line6[0].set_data(CurrentXAxis,pylab.array(signal_speed_actual[-self.xRange:])) 
-      self.line7[0].set_data(CurrentXAxis,pylab.array(signal_speed_ref[-self.xRange:])) 
+      self.line5[0].set_data(CurrentXAxis,pylab.array(angSpeed[-self.xRange:]))  
+      self.line6[0].set_data(CurrentXAxis,pylab.array(angSpeedRefHistory[-self.xRange:])) 
+      self.line7[0].set_data(CurrentXAxis,pylab.array(controlSignal[-self.xRange:])) 
       
       self.ax.axis([CurrentXAxis.min(),CurrentXAxis.max(),-5,365])
       self.ax2.axis([CurrentXAxis.min(),CurrentXAxis.max(),-0.2,1.2])
