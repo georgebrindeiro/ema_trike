@@ -55,7 +55,7 @@ stim.initialization(freq, channels)
 print "Done"
 
 # Ready to go
-print "Whenever you're ready, press button 1 (the left one)"
+print "Whenever you're ready, press button 1 (the left one)!"
 
 
 
