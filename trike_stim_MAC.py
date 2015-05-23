@@ -355,6 +355,7 @@ def control(error):
     try:    
         p = 1/float(5000)
         i = 1/float(100000)
+        #se o erro mudar de sinal, zera o histórico do erro
         if (error[-2] > 0) & (error[-1] <= 0):
             inst_error = error[-1]
             error_speed = [0 for x in range(len(error))]
@@ -366,6 +367,8 @@ def control(error):
             error_speed[-1] = inst_error
             error = error_speed
         signal = p*error[-1]+i*sum(error)
+        
+        #se o sinal for maior que 1, satura e zera o ultimo erro (?)
         if signal > 1:
             signal = 1
             error_speed[-1] = 0
