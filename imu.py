@@ -89,8 +89,24 @@ class IMU:
 # Get Euler Angles
 ########################################
 
-    def get_euler_angles(self):
+    def getEulerAngles(self):
         msg = ">" + str(self.address) + ",1\n".encode()        
+        try:                
+            if self.serial_port is not None:
+                self.serial_port.write(msg) # e escreve na porta
+                dados = readData(self.serial_port)
+                return dados            
+            else:
+                return 'Port error'               
+        except ValueError:
+            return 'Error'
+            
+########################################
+# Get Gyro Data
+########################################
+
+    def getGyroData(self):
+        msg = ">" + str(self.address) + ",33\n".encode()        
         try:                
             if self.serial_port is not None:
                 self.serial_port.write(msg) # e escreve na porta
