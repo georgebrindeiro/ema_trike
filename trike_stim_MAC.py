@@ -804,7 +804,7 @@ try:
             print "Hello!"
             freq=int(raw_input("Input frequency: "))
             channels=int(raw_input("Input channels: "))
-            print "Initilizing..."
+            print "Initializing..."
             initialization(freq, channels)
             print "DONE"
 #            pulse_width_str = raw_input("Input pulse width: ")
