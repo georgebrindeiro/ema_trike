@@ -86,14 +86,18 @@ def main():
         controlSignal.append(control.control(errorHistory))              
         
         # Calculate stimulation signal
-        signal_gastrocnemius.append((perfil.gastrocnemius(perfil.phase(ang)))*(controlSignal[-1]))
-        signal_femoral.append((perfil.femoral(perfil.phase(ang)))*(controlSignal[-1]))
+        signal_gastrocnemius.append((perfil.gastrocnemius(angle, speed))*(controlSignal[-1]))
+        signal_femoral.append((perfil.femoral(angle, speed))*(controlSignal[-1]))
     
         # Signal double safety saturation        
         if signal_femoral[-1] > 1:
             signal_femoral[-1] = 1
+        elif signal_femoral[-1] < 0:
+            signal_femoral[-1] = 0
         if signal_gastrocnemius[-1] > 1:
             signal_gastrocnemius[-1] = 1
+        elif signal_gastrocnemius[-1] < 0:
+            signal_gastrocnemius[-1] = 0
     
         # Electrical stimulation parameters settings    
         stim_femoral = signal_femoral[-1]*femoral_max
@@ -160,11 +164,11 @@ try:
     print "Here we go!"
     
     # Start main function
-#    thread.start_new_thread(main, ())
-    main()
+    thread.start_new_thread(main, ())
+#    main()
 
     # Start real time plotter
-#    realTimePlotter.RealTimePlotter(angle, signal_femoral, signal_gastrocnemius, filtered_speed, angSpeed, controlSignal, angSpeedRefHistory, errorHistory, xRange)
+    realTimePlotter.RealTimePlotter(angle, signal_femoral, signal_gastrocnemius, filtered_speed, angSpeed, controlSignal, angSpeedRefHistory, errorHistory, xRange)
     
     # Save the data
     with open("data_angle", 'w') as f:
