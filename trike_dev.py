@@ -7,7 +7,7 @@ Created on Sat May 23 13:49:13 2015
 # imports
 import serial
 import imu
-#import stimulator
+import stimulator
 import perfil
 import time
 import math
@@ -41,8 +41,9 @@ femoral_max = 500
 speed_ref = 300 ###
 
 # Ports and addresses
-portIMU = 'COM4'
-#portStimulator = ''
+#portIMU = 'COM4'
+portIMU = '/dev/tty.usbmodemfd121'
+portStimulator = '/dev/tty.usbserial-HMQYVD6B'
 addressPedal = 1
 addressRemoteControl = 0
 
@@ -80,9 +81,13 @@ def main():
         # Filter the speed
         if counter >= filter_size:
             filtered_speed.append(numpy.mean(angSpeed[-filter_size:]))
-            controlSignal.append(control.control(errorHistory))  
-            signal_gastrocnemius.append((perfil.gastrocnemius(perfil.phase(ang)))*(controlSignal[-1]))
-            signal_femoral.append((perfil.femoral(perfil.phase(ang)))*(controlSignal[-1]))
+            
+        # Calculate control signal
+        controlSignal.append(control.control(errorHistory))              
+        
+        # Calculate stimulation signal
+        signal_gastrocnemius.append((perfil.gastrocnemius(perfil.phase(ang)))*(controlSignal[-1]))
+        signal_femoral.append((perfil.femoral(perfil.phase(ang)))*(controlSignal[-1]))
     
         # Signal double safety saturation        
         if signal_femoral[-1] > 1:
@@ -91,21 +96,21 @@ def main():
             signal_gastrocnemius[-1] = 1
     
         # Electrical stimulation parameters settings    
-#            stim_femoral = signal_femoral[-1]*femoral_max
-#            stim_gastrocnemius = signal_gastrocnemius[-1]*gastrocnemius_max    
-#            pulse_width = [stim_femoral,stim_gastrocnemius]
+        stim_femoral = signal_femoral[-1]*femoral_max
+        stim_gastrocnemius = signal_gastrocnemius[-1]*gastrocnemius_max    
+        pulse_width = [stim_femoral,stim_gastrocnemius]
         
         # Electrical stimulator signal update
-    #    stim.update(channels, pulse_width, current)
+        stim.update(channels, pulse_width, current)
     
         counter += 1   
         
         
     # Stop stimulator
-    #stim.stop()
+    stim.stop()
     
     # Close ports
-    #serialPortStimulator.close()
+    serialPortStimulator.close()
     serialPortIMU.close()
     
     
@@ -113,12 +118,12 @@ def main():
 try:
     # Open ports
     serialPortIMU = serial.Serial(portIMU, timeout=1, writeTimeout=1, baudrate=115200)
-    #serialPortStimulator = serial.Serial(portStimulator, timeout=1, writeTimeout=1, baudrate=115200)
+    serialPortStimulator = serial.Serial(portStimulator, timeout=1, writeTimeout=1, baudrate=115200)
     
     # Construct objects
     IMUPedal = imu.IMU(serialPortIMU,addressPedal)
     IMURemoteControl = imu.IMU(serialPortIMU,addressRemoteControl)
-    #stim = stimulator.Stimulator(serialPortStimulator)
+    stim = stimulator.Stimulator(serialPortStimulator)
     
     # Setting up
     print "Hello, EMA here!"
@@ -134,14 +139,14 @@ try:
     print "Done"
     
     # Asking for user input
-#        freq=int(raw_input("Input frequency: "))
-#        channels=int(raw_input("Input channels: "))
-#        current_str = raw_input("Input current: ")
-#        current = [int(i) for i in (current_str.split(","))]
+    freq=int(raw_input("Input frequency: "))
+    channels=int(raw_input("Input channels: "))
+    current_str = raw_input("Input current: ")
+    current = [int(i) for i in (current_str.split(","))]
     
     # Initialize stimulator
     print "Initializing stimulator..."
-    #stim.initialization(freq, channels)
+    stim.initialization(freq, channels)
     print "Done"
     
     # Ready to go. 
@@ -155,10 +160,11 @@ try:
     print "Here we go!"
     
     # Start main function
-    thread.start_new_thread(main, ())
+#    thread.start_new_thread(main, ())
+    main()
 
     # Start real time plotter
-    realTimePlotter.RealTimePlotter(angle, signal_femoral, signal_gastrocnemius, filtered_speed, angSpeed, controlSignal, angSpeedRefHistory, xRange)
+#    realTimePlotter.RealTimePlotter(angle, signal_femoral, signal_gastrocnemius, filtered_speed, angSpeed, controlSignal, angSpeedRefHistory, errorHistory, xRange)
     
     # Save the data
     with open("data_angle", 'w') as f:

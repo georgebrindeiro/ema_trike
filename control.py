@@ -12,10 +12,10 @@ def control(error):
         i = 1/float(100000)
         
         # If there is a change of signal, reset
-        if ((error[-2] > 0) and (error[-1] <= 0)) or ((error[-2] < 0) and (error[-1] >= 0)):
-            errorTemp = [0 for x in range(len(error))]
-            errorTemp[-1] = error[-1]
-            error = errorTemp
+#        if ((error[-2] >= 0) and (error[-1] < 0)) or ((error[-2] < 0) and (error[-1] >= 0)):
+#            errorTemp = [0 for x in range(len(error))]
+#            errorTemp[-1] = error[-1]
+#            error = errorTemp
         
         signal = p*error[-1]+i*sum(error)
         
@@ -23,6 +23,10 @@ def control(error):
         if signal > 1:
             signal = 1
             error[-1] = 0
+        elif signal < 0:
+            signal = 0
+            error[-1] = 0
+            
     except ValueError:
         return "Control error"
-    return signal  
+    return signal
