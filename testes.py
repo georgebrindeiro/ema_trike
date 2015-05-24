@@ -8,8 +8,9 @@ import serial
 import imu
 
 port = 'COM5'
+address = 2
 serialPort = serial.Serial(port, timeout=1, writeTimeout=1, baudrate=115200)
-x = imu.IMU(serialPort,1)
-print x.calibrate()
-print x.get_euler_angles();
+x = imu.IMU(serialPort,address)
+print 'Calibration: ' + x.calibrate()
+print 'Euler angles: ' + x.get_euler_angles();
 serialPort.close()
