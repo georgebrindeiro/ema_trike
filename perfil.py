@@ -34,16 +34,16 @@ def phase(ang):
 #    return    
 ####################################
 ####################################
-def femoral(angle, angSpeed): ### femoral esquerdo
+def femoral(angle, angSpeed, speed_ref): ### femoral esquerdo
     
     # Calculate initial and final angles based on angular speed    
-    angInitial = 325-(angSpeed/300)*35
-    angFinal = angInitial + 95
+    angInitial = 300-(angSpeed/speed_ref)*35
+    angFinal = angInitial + 100
     if angFinal > 360:
         angFinal -= 360
-
+#        print angInitial
     # Stimulate if it is in the stimulation zone    
-    if ((angle > angInitial) and (angle < angFinal)) or ((angle < angInitial) and (angle < angFinal)):
+    if ((angle > angInitial) and (angle < angFinal)) or ((angFinal < angInitial) and ((angle < angFinal) or (angle > angInitial))):
         return 1
     else:
         return 0
@@ -71,10 +71,10 @@ def femoral(angle, angSpeed): ### femoral esquerdo
 #    return out  
 ####################################
 ####################################
-def gastrocnemius(angle, angSpeed): ##### femoral direito
+def gastrocnemius(angle, angSpeed, speed_ref): ##### femoral direito
     # Calculate initial and final angles based on angular speed       
-    angInitial = 145-(angSpeed/300)*35
-    angFinal = angInitial + 95
+    angInitial = 120-(angSpeed/speed_ref)*35
+    angFinal = angInitial + 100
     if angFinal > 360:
         angFinal -= 360
 

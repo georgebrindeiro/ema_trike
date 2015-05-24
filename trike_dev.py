@@ -44,8 +44,8 @@ speed_ref = 300 ###
 #portIMU = 'COM4'
 portIMU = '/dev/tty.usbmodemfd121'
 portStimulator = '/dev/tty.usbserial-HMQYVD6B'
-addressPedal = 1
-addressRemoteControl = 0
+addressPedal = 0
+addressRemoteControl = 1
 
 
 # Main function
@@ -67,47 +67,47 @@ def main():
         ##############################################
             
         # Get angular speed
-        speed = IMUPedal.getGyroData()
-        speed = speed.split(",")        
-        if len(speed) == 6:            
-            speed = float(speed[4])
-            speed = speed/(math.pi) * 180
-            angSpeed.append(speed)
-            angSpeedRefHistory.append(speed_ref)
-            errorHistory.append(speed_ref - filtered_speed[-1])
-            time_stamp.append(time.clock()-timeStart)    
+            speed = IMUPedal.getGyroData()
+            speed = speed.split(",")        
+            if len(speed) == 6:            
+                speed = float(speed[4])
+                speed = speed/(math.pi) * 180
+                angSpeed.append(speed)
+                angSpeedRefHistory.append(speed_ref)
+                errorHistory.append(speed_ref - filtered_speed[-1])
+                time_stamp.append(time.clock()-timeStart)    
         ##############################################
                 
         # Filter the speed
-        if counter >= filter_size:
-            filtered_speed.append(numpy.mean(angSpeed[-filter_size:]))
+                if counter >= filter_size:
+                    filtered_speed.append(numpy.mean(angSpeed[-filter_size:]))
+                    
+                # Calculate control signal
+                controlSignal.append(control.control(errorHistory))              
+                
+                # Calculate stimulation signal
+                signal_gastrocnemius.append((perfil.gastrocnemius(angle[-1], angSpeed[-1], speed_ref))*(controlSignal[-1]))
+                signal_femoral.append((perfil.femoral(angle[-1], angSpeed[-1], speed_ref))*(controlSignal[-1]))
             
-        # Calculate control signal
-        controlSignal.append(control.control(errorHistory))              
-        
-        # Calculate stimulation signal
-        signal_gastrocnemius.append((perfil.gastrocnemius(angle, speed))*(controlSignal[-1]))
-        signal_femoral.append((perfil.femoral(angle, speed))*(controlSignal[-1]))
-    
-        # Signal double safety saturation        
-        if signal_femoral[-1] > 1:
-            signal_femoral[-1] = 1
-        elif signal_femoral[-1] < 0:
-            signal_femoral[-1] = 0
-        if signal_gastrocnemius[-1] > 1:
-            signal_gastrocnemius[-1] = 1
-        elif signal_gastrocnemius[-1] < 0:
-            signal_gastrocnemius[-1] = 0
-    
-        # Electrical stimulation parameters settings    
-        stim_femoral = signal_femoral[-1]*femoral_max
-        stim_gastrocnemius = signal_gastrocnemius[-1]*gastrocnemius_max    
-        pulse_width = [stim_femoral,stim_gastrocnemius]
-        
-        # Electrical stimulator signal update
-        stim.update(channels, pulse_width, current)
-    
-        counter += 1   
+                # Signal double safety saturation        
+                if signal_femoral[-1] > 1:
+                    signal_femoral[-1] = 1
+                elif signal_femoral[-1] < 0:
+                    signal_femoral[-1] = 0
+                if signal_gastrocnemius[-1] > 1:
+                    signal_gastrocnemius[-1] = 1
+                elif signal_gastrocnemius[-1] < 0:
+                    signal_gastrocnemius[-1] = 0
+            
+                # Electrical stimulation parameters settings    
+                stim_femoral = signal_femoral[-1]*femoral_max
+                stim_gastrocnemius = signal_gastrocnemius[-1]*gastrocnemius_max    
+                pulse_width = [stim_femoral,stim_gastrocnemius]
+                
+                # Electrical stimulator signal update
+                stim.update(channels, pulse_width, current)
+            
+                counter += 1   
         
         
     # Stop stimulator

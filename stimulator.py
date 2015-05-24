@@ -61,7 +61,7 @@ class Stimulator:
             data = self.serial_port.read(self.serial_port.inWaiting()) # le da porta bytearray
             dados = data.decode()  # transforma bytearray em string
             i += 1
-            if i > 10000:
+            if i > 700:
 #                        print "Sem resposta."
                 dados = 'No answer'
                 return dados
@@ -126,7 +126,7 @@ class Stimulator:
                 data = self.serial_port.read(self.serial_port.inWaiting()) # le da porta bytearray
                 dados = data.decode()  # transforma bytearray em string
                 i += 1
-                if i > 10000:
+                if i > 700:
     #                        print "Sem resposta."
                     dados = 'No answer'
                     return dados       
@@ -159,7 +159,7 @@ class Stimulator:
                 data = self.serial_port.read(self.serial_port.inWaiting()) # le da porta bytearray
                 dados = data.decode()  # transforma bytearray em string
                 i += 1
-                if i > 10000:
+                if i > 700:
     #                        print "Sem resposta."
                     dados = 'No answer'
                     return dados        

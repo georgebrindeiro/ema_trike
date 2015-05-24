@@ -148,7 +148,7 @@ def readData(port):
         data = port.read(port.inWaiting()) # le da porta bytearray
         dados = data.decode()  # transforma bytearray em string
         i += 1
-        if i > 10000:
+        if i > 700:
             dados = 'No answer'
             break
     return dados
