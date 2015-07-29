@@ -15,7 +15,7 @@
 
 
   <author email="lucasfonseca27@gmail.com">Lucas Fonseca</author>
-  <author email="anacsousa1@gmail.com">Ana de Sousa</author>
+  <author email="stephany0303@hotmail.com">Stephany Ribeiro</author>
 
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>roscpp</build_depend>
