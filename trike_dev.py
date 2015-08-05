@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+#!/usr/bin/env python
 """
 Created on Sat May 23 13:49:13 2015
 
@@ -15,6 +16,8 @@ import numpy
 import realTimePlotter
 import control
 import thread
+import sys
+import os
 
 # Initialize variables
 xRange = 500
@@ -42,6 +45,8 @@ speed_ref = 300 ###
 
 # Ports and addresses
 #portIMU = 'COM4'
+#portIMU = '/dev/ttyACM0'
+#portStimulator = '/dev/ttyUSB0'
 portIMU = '/dev/tty.usbmodemfd121'
 portStimulator = '/dev/tty.usbserial-HMQYVD6B'
 addressPedal = 0
@@ -134,11 +139,13 @@ try:
     print "Beginning calibration..."
     calibrationError = 10
     while calibrationError > 0.1 :
-        IMUPedal.setEulerToYXZ()
-        IMUPedal.calibrate()
-        IMUPedal.tare()
-        ang = IMUPedal.getEulerAngles()
-        ang = ang.split(",")
+        ang = []
+        while(len(ang) < 6):
+            IMUPedal.setEulerToYXZ()
+            IMUPedal.calibrate()
+            IMUPedal.tare()
+            ang = IMUPedal.getEulerAngles()
+            ang = ang.split(",")
         calibrationError = float(ang[3]) + float(ang[4]) + float(ang[5])
     print "Done"
     
@@ -196,6 +203,9 @@ try:
 except Exception as err:    
     print "Error"
     print(err.args)
+    exc_type, exc_obj, exc_tb = sys.exc_info()
+    fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+    print(exc_type, fname, exc_tb.tb_lineno)
     if serialPortIMU is not None:
         serialPortIMU.close()
 
