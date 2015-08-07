@@ -15,7 +15,7 @@ serialPortIMU = serial.Serial(portIMU, timeout=1, writeTimeout=1, baudrate=11520
 IMUPedal = imu.IMU(serialPortIMU,addressPedal)
 
 
-while not raw_input('Press ENTER to continue'):
+while not raw_input('Press ENTER to continue, or anything else and ENTER to stop'):
     ang = IMUPedal.getEulerAngles()
     print ang
         
