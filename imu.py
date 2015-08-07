@@ -140,15 +140,22 @@ class IMU:
         return dados
         
 def readData(port):
-    dados = ''
-    data = ''
-    i = 1
-    while dados == "":            
-        port.flush()
-        data = port.read(port.inWaiting()) # le da porta bytearray
-        dados = data.decode()  # transforma bytearray em string
-        i += 1
-        if i > 700:
-            dados = 'No answer'
-            break
-    return dados
+    #dados = ''
+    #data = ''
+    #i = 1
+    # while dados == "":
+    #     port.flush()
+    #     data = port.read(port.inWaiting()) # le da porta bytearray
+    #     dados = data.decode()  # transforma bytearray em string
+    #     i += 1
+    #     if i > 700:
+    #         dados = 'No answer'
+    #         break
+    while port.inWaiting() == 0:
+        #print "Waiting for response"
+        pass
+
+    data = port.read(port.inWaiting()) # le da porta bytearray
+    print data
+    return data
+    #return dados
