@@ -1,0 +1,5 @@
+<launch>
+  <rosparam command="load" file="$(find ema-trike)/config/trike.yaml" />
+
+  <node name="trike" pkg="ema-trike" type="trike.py" output="screen" />
+</launch>
