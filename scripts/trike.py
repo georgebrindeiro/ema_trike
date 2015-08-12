@@ -157,10 +157,24 @@ try:
     print "Done"
 
     # Asking for user input
-    freq=int(raw_input("Input frequency: "))
-    channels=int(raw_input("Input channels: "))
-    current_str = raw_input("Input current: ")
-    current = [int(i) for i in (current_str.split(","))]
+    try:
+        freq=int(raw_input("Input frequency (default 50): "))
+    except ValueError:
+        print "Adopting default value: 50"
+        freq = 50
+
+    try:
+        channels=int(raw_input("Input channels (default 3): "))
+    except ValueError:
+        print "Adopting default value: 3"
+        channels = 3
+
+    try:
+        current_str = raw_input("Input current (default 6,6): ")
+        current = [int(i) for i in (current_str.split(","))]
+    except ValueError:
+        print "Adopting default value: 6,6"
+        current = [6,6]
 
     # Initialize stimulator
     print "Initializing stimulator..."
