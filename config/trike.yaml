@@ -1,16 +1,5 @@
 # Variables
 xRange: 500
-filter_size: 20
-gastrocnemius_max: 500
-femoral_max: 500
-speed_ref: 300
-
-# Ports
-#portIMU: 'COM4'
-portIMU: '/dev/ttyACM0'
-#portIMU: '/dev/tty.usbmodemfd121'
-portStimulator: '/dev/ttyUSB0'
-#portStimulator: '/dev/tty.usbserial-HMQYVD6B'
 
 # Addresses
 addressPedal: 0
