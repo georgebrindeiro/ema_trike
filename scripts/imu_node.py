@@ -6,6 +6,7 @@ import rospy
 import serial
 import modules.imu
 from sensor_msgs.msg import Imu
+#from std_msgs.msg import Float64
 
 import serial
 import modules.imu
@@ -40,6 +41,8 @@ def main():
 
     # list published topics
     pub = rospy.Publisher('imu', Imu, queue_size=10)
+    #pub_angle = rospy.Publisher('angle', Float64, queue_size=10)
+    #pub_angSpeed = rospy.Publisher('angSpeed', Float64, queue_size=10)
 
     # config imu
 
@@ -121,6 +124,37 @@ def main():
                     filtered_speed.append(numpy.mean(angSpeed[-filter_size:]))
         # publish work
         ## send imu data
+        imuMsg = Imu()
+        imuMsg.header.stamp= rospy.Time.now()
+        imuMsg.header.frame_id = 'base_link'
+
+        imuMsg.orientation.x = 0
+        imuMsg.orientation.y = 0
+        imuMsg.orientation.z = 0
+        imuMsg.orientation.w = 1
+        imuMsg.orientation_covariance = [1, 0, 0, 0, 1, 0, 0, 0, 1]
+
+        imuMsg.angular_velocity.x = 0
+        imuMsg.angular_velocity.y = 0
+        imuMsg.angular_velocity.z = 0
+        imuMsg.angular_velocity_covariance = [1, 0, 0, 0, 1, 0, 0, 0, 1]
+
+        imuMsg.linear_acceleration.x = 0
+        imuMsg.linear_acceleration.y = 0
+        imuMsg.linear_acceleration.z = 0
+        imuMsg.linear_acceleration_covariance = [1, 0, 0, 0, 1, 0, 0, 0, 1]
+
+        pub.publish(imuMsg)
+
+        # angleMsg = Float64()
+        # angleMsg.data = ang
+        # 
+        # pub_angle.publish(angleMsg)
+        #
+        # angSpeedMsg = Float64()
+        # angSpeedMsg.data = speed
+        #
+        # pub_angSpeed.publish(angSpeedMsg)
 
         # sleep until it's time to work again
         rate.sleep()
