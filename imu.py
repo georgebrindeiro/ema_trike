@@ -1,5 +1,6 @@
 #IMU functions
-#import serial
+# import serial
+import struct
 
 class IMU:
     def __init__(self, port, address):     
@@ -100,6 +101,37 @@ class IMU:
                 return 'Port error'               
         except ValueError:
             return 'Error'
+
+########################################
+# Get Untared Quaternion
+########################################
+
+    def getUntaredQuaternion(self):
+        msg = bytearray('\xf8\x03\x00\x03')
+        # print msg[0]
+        try:
+            if self.serial_port is not None:
+                self.serial_port.write(msg) # e escreve na porta
+                dados = bytearray(readData(self.serial_port))
+                f = bytearray(dados[3:7])
+                f.reverse()
+                x = struct.unpack('f',f)
+                f = bytearray(dados[7:11])
+                f.reverse()
+                y = struct.unpack('f',f)
+                f = bytearray(dados[11:15])
+                f.reverse()
+                z = struct.unpack('f',f)
+                f = bytearray(dados[15:19])
+                f.reverse()
+                w = struct.unpack('f',f)
+                q = Quaternion(x[0],y[0],z[0],w[0])
+                return q
+            else:
+                return 'Port error'
+        except ValueError:
+            print ValueError.message
+            return 'Error'
             
 ########################################
 # Get Gyro Data
@@ -156,6 +188,12 @@ def readData(port):
         pass
 
     data = port.read(port.inWaiting()) # le da porta bytearray
-    print data
     return data
     #return dados
+
+class Quaternion:
+    def __init__(self, x, y, z, w):
+        self.x = x
+        self.y = y
+        self.z = z
+        self.w = w

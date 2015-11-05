@@ -4,7 +4,10 @@
 Created on Sat May 23 13:49:13 2015
 
 @author: Wall-e
-"""
+Channel 1: left
+Channel 2: right"""
+
+
 # imports
 import serial
 import imu
@@ -47,10 +50,11 @@ speed_ref = 300 ###
 #portIMU = 'COM4'
 #portIMU = '/dev/ttyACM0'
 #portStimulator = '/dev/ttyUSB0'
+# portIMU = '/dev/tty.usbmodemfa131'
 portIMU = '/dev/tty.usbmodemfd121'
 portStimulator = '/dev/tty.usbserial-HMQYVD6B'
-addressPedal = 0
-addressRemoteControl = 1
+addressPedal = 1
+addressRemoteControl = 2
 
 
 # Main function
