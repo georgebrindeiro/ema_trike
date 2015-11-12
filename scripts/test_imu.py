@@ -12,13 +12,14 @@ import modules.imu
 imu = modules.imu
 
 port = '/dev/ttyACM0'
-address = 2
+address = 3
 serialPort = serial.Serial(port, timeout=1, writeTimeout=1, baudrate=115200)
 x = imu.IMU(serialPort,address)
 print 'Calibration: ' + x.calibrate()
 
 while True:
-    print 'Euler angles: ' + x.getEulerAngles()
+    #print 'Euler angles: ' + x.getEulerAngles()
+    print 'z Speed: ' + x.getGyroData()
     time.sleep(0.01)
 
 serialPort.close()

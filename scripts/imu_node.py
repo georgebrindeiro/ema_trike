@@ -24,16 +24,19 @@ import os
 imu = modules.imu
 
 xRange = 500
-filter_size = 20 ###
+filter_size = 5 ###
 
 angle = []
-angle = [0 for x in range(xRange)]
+angle = [0]# for x in range(xRange)]
+
+filtered_angle = []
+filtered_angle = [0]# for x in range(xRange)]
 
 angSpeed = []
-angSpeed = [0 for x in range(xRange)]
+angSpeed = [0]# for x in range(xRange)]
 
 filtered_speed = []
-filtered_speed = [0 for x in range(xRange)]
+filtered_speed = [0]# for x in range(xRange)]
 
 def main():
     # init 'imu' node
@@ -90,7 +93,7 @@ def main():
         current = [6,6]
 
     # define loop rate (in hz)
-    rate = rospy.Rate(100)
+    rate = rospy.Rate(200)
 
     # node loop
     while not rospy.is_shutdown():
@@ -106,21 +109,22 @@ def main():
             else:
                 ang = 360 - ((-(ang) / math.pi) * 180)
             angle.append(ang)
-            print ang
-        ##############################################
+
+            # Filter the speed
+            if counter >= filter_size:
+                filtered_angle.append(numpy.median(angle[-filter_size:]))
 
         # Get angular speed
-            speed = IMUPedal.getGyroData()
-            speed = speed.split(",")
-            if len(speed) == 6:
-                speed = float(speed[4])
-                speed = speed/(math.pi) * 180
-                angSpeed.append(speed)
-        ##############################################
+        speed = IMUPedal.getGyroData()
+        speed = speed.split(",")
+        if len(speed) == 6:
+            speed = float(speed[4])
+            speed = speed/(math.pi) * 180
+            angSpeed.append(speed)
 
         # Filter the speed
-                if counter >= filter_size:
-                    filtered_speed.append(numpy.mean(angSpeed[-filter_size:]))
+            if counter >= filter_size:
+                filtered_speed.append(numpy.median(angSpeed[-filter_size:]))
         # publish work
         ## send imu data
         imuMsg = Imu()
@@ -146,14 +150,16 @@ def main():
         pub.publish(imuMsg)
 
         angleMsg = Float64()
-        angleMsg.data = angle[-1]
+        angleMsg.data = filtered_angle[-1]
 
         pub_angle.publish(angleMsg)
 
         angSpeedMsg = Float64()
-        angSpeedMsg.data = angSpeed[-1]
+        angSpeedMsg.data = filtered_speed[-1]
 
         pub_angSpeed.publish(angSpeedMsg)
+
+        print "%d\t%d\t%.3f\t%.3f\t%.3f\t%.3f" % (len(angle),len(angSpeed),angle[-1],filtered_angle[-1],angSpeed[-1],filtered_speed[-1])
 
         # sleep until it's time to work again
         rate.sleep()
