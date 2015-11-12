@@ -44,7 +44,7 @@ controlSignal = [0 for x in range(xRange)]
 errorHistory = []
 errorHistory = [0 for x in range(xRange)]
 time_stamp = []
-filter_size = 20 ###
+filter_size = 50 ###
 gastrocnemius_max = 500
 femoral_max = 500
 speed_ref = 300 ###
@@ -52,11 +52,11 @@ speed_ref = 300 ###
 # Ports and addresses
 #portIMU = 'COM4'
 portIMU = '/dev/ttyACM0'
-portStimulator = '/dev/ttyUSB0'
+#portStimulator = '/dev/ttyUSB0'
 #portIMU = '/dev/tty.usbmodemfd121'
 #portStimulator = '/dev/tty.usbserial-HMQYVD6B'
-addressPedal = 0
-addressRemoteControl = 1
+addressPedal = 3
+addressRemoteControl = 2
 
 
 # Main function
@@ -70,11 +70,13 @@ def main():
         ang = ang.split(",")
         if len(ang) == 6:
             ang = float(ang[4])
+            print ang
             if ang >= 0:
                 ang = (ang / math.pi) * 180
             else:
                 ang = 360 - ((-(ang) / math.pi) * 180)
             angle.append(ang)
+            time.sleep(0.1)
         ##############################################
 
         # Get angular speed
@@ -116,16 +118,16 @@ def main():
                 pulse_width = [stim_femoral,stim_gastrocnemius]
 
                 # Electrical stimulator signal update
-                stim.update(channels, pulse_width, current)
+                #stim.update(channels, pulse_width, current)
 
                 counter += 1
 
 
     # Stop stimulator
-    stim.stop()
+    #stim.stop()
 
     # Close ports
-    serialPortStimulator.close()
+    #serialPortStimulator.close()
     serialPortIMU.close()
 
 
@@ -133,12 +135,12 @@ def main():
 try:
     # Open ports
     serialPortIMU = serial.Serial(portIMU, timeout=1, writeTimeout=1, baudrate=115200)
-    serialPortStimulator = serial.Serial(portStimulator, timeout=1, writeTimeout=1, baudrate=115200)
+    #serialPortStimulator = serial.Serial(portStimulator, timeout=1, writeTimeout=1, baudrate=115200)
 
     # Construct objects
     IMUPedal = imu.IMU(serialPortIMU,addressPedal)
     IMURemoteControl = imu.IMU(serialPortIMU,addressRemoteControl)
-    stim = stimulator.Stimulator(serialPortStimulator)
+    #stim = stimulator.Stimulator(serialPortStimulator)
 
     # Setting up
     print "Hello, EMA here!"
@@ -178,7 +180,7 @@ try:
 
     # Initialize stimulator
     print "Initializing stimulator..."
-    stim.initialization(freq, channels)
+    #stim.initialization(freq, channels)
     print "Done"
 
     # Ready to go.

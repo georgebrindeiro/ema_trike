@@ -6,7 +6,7 @@ import rospy
 import serial
 import modules.imu
 from sensor_msgs.msg import Imu
-#from std_msgs.msg import Float64
+from std_msgs.msg import Float64
 
 import serial
 import modules.imu
@@ -41,13 +41,13 @@ def main():
 
     # list published topics
     pub = rospy.Publisher('imu', Imu, queue_size=10)
-    #pub_angle = rospy.Publisher('angle', Float64, queue_size=10)
-    #pub_angSpeed = rospy.Publisher('angSpeed', Float64, queue_size=10)
+    pub_angle = rospy.Publisher('angle', Float64, queue_size=10)
+    pub_angSpeed = rospy.Publisher('angSpeed', Float64, queue_size=10)
 
     # config imu
 
     portIMU = '/dev/ttyACM0'
-    addressPedal = 0
+    addressPedal = 3
     counter = 1
     # Open ports
     serialPortIMU = serial.Serial(portIMU, timeout=1, writeTimeout=1, baudrate=115200)
@@ -66,7 +66,6 @@ def main():
             IMUPedal.tare()
             ang = IMUPedal.getEulerAngles()
             ang = ang.split(",")
-            #print ang
         calibrationError = float(ang[3]) + float(ang[4]) + float(ang[5])
     print "Done"
 
@@ -91,7 +90,7 @@ def main():
         current = [6,6]
 
     # define loop rate (in hz)
-    rate = rospy.Rate(10)
+    rate = rospy.Rate(100)
 
     # node loop
     while not rospy.is_shutdown():
@@ -146,15 +145,15 @@ def main():
 
         pub.publish(imuMsg)
 
-        # angleMsg = Float64()
-        # angleMsg.data = ang
-        # 
-        # pub_angle.publish(angleMsg)
-        #
-        # angSpeedMsg = Float64()
-        # angSpeedMsg.data = speed
-        #
-        # pub_angSpeed.publish(angSpeedMsg)
+        angleMsg = Float64()
+        angleMsg.data = angle[-1]
+
+        pub_angle.publish(angleMsg)
+
+        angSpeedMsg = Float64()
+        angSpeedMsg.data = angSpeed[-1]
+
+        pub_angSpeed.publish(angSpeedMsg)
 
         # sleep until it's time to work again
         rate.sleep()

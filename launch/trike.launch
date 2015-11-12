@@ -4,7 +4,8 @@
   <rosparam command="load" file="$(find ema-trike)/config/stim.yaml" />
   <rosparam command="load" file="$(find ema-trike)/config/control.yaml" />
 
-  <!--<node name="imu" pkg="ema-trike" type="imu_node.py" output="screen" />-->
+  <node name="imu" pkg="ema-trike" type="imu_node.py" output="screen" />
   <!--<node name="stim" pkg="ema-trike" type="stim_node.py" output="screen" />-->
-  <node name="control" pkg="ema-trike" type="control_node.py" output="screen" />
+  <!--<node name="control" pkg="ema-trike" type="control_node.py" output="screen" />-->
+  <!--<node name="control" pkg="ema-trike" type="trike_old.py" output="screen" />-->
 </launch>

@@ -2,5 +2,5 @@
 xRange: 500
 
 # Addresses
-addressPedal: 0
-addressRemoteControl: 1
+addressRemoteControl: 2
+addressPedal: 3
