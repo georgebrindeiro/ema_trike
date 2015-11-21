@@ -4,24 +4,20 @@ import rospy
 
 # import ros msgs
 import serial
-import modules.imu
+import ema.modules.imu as imu
 from sensor_msgs.msg import Imu
 from std_msgs.msg import Float64
 
 import serial
-import modules.imu
-import modules.stimulator
-import modules.perfil
+import ema.modules.imu
+import ema.modules.stimulator
 import time
 import math
 import numpy
-import modules.realTimePlotter
-import modules.control
+import ema.modules.control
 import thread
 import sys
 import os
-
-imu = modules.imu
 
 xRange = 500
 filter_size = 5 ###
@@ -47,6 +43,9 @@ def main():
     pub_angle = rospy.Publisher('angle', Float64, queue_size=10)
     pub_angSpeed = rospy.Publisher('angSpeed', Float64, queue_size=10)
 
+    #imu.test()
+    #exit()
+
     # config imu
 
     portIMU = '/dev/ttyACM0'
@@ -57,8 +56,28 @@ def main():
 
     # Construct objects
     IMUPedal = imu.IMU(serialPortIMU,addressPedal)
+    IMUPedal2 = imu.IMU(serialPortIMU,2)
 
     print "Hello, EMA here!"
+
+    #global_name = rospy.get_param("/global_name")
+    #relative_name = rospy.get_param("relative_name")
+    #private_param = rospy.get_param('~private_name')
+    #default_param = rospy.get_param('default_param', 'default_value')
+
+    # fetch a group (dictionary) of parameters
+    names = rospy.get_param('/ema/imu/names')
+    dev_type = rospy.get_param('/ema/imu/dev_type')
+    mode = rospy.get_param('/ema/imu/mode')
+    port = rospy.get_param('/ema/imu/port')
+    address = rospy.get_param('/ema/imu/address')
+
+    print names
+    print dev_type
+    print mode
+    print port
+    print address
+
     print "Beginning calibration..."
     calibrationError = 10
     while calibrationError > 0.1 :
@@ -115,12 +134,13 @@ def main():
                 filtered_angle.append(numpy.median(angle[-filter_size:]))
 
         # Get angular speed
-        speed = IMUPedal.getGyroData()
-        speed = speed.split(",")
-        if len(speed) == 6:
-            speed = float(speed[4])
-            speed = speed/(math.pi) * 180
-            angSpeed.append(speed)
+        #IMUPedal2.getGyroData()
+        # speed = IMUPedal.getGyroData()
+        # speed = speed.split(",")
+        # if len(speed) == 6:
+        #     speed = float(speed[4])
+        #     speed = speed/(math.pi) * 180
+        #     angSpeed.append(speed)
 
         # Filter the speed
             if counter >= filter_size:

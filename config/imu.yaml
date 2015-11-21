@@ -1,1 +1,5 @@
-portIMU: '/dev/ttyACM0'
+names: ['dongle', 'pedal', 'remote']
+dev_type: {'dongle': 'DNG', 'pedal': 'WL', 'remote': 'WL'}
+mode: {'dongle': 'wired', 'pedal': 'wireless', 'remote': 'wired'}
+port: {'dongle': '/dev/ttyACM0', 'pedal': '/dev/ttyACM1', 'remote': '/dev/ttyACM2'}
+address: {'pedal': 2, 'remote': 3}
