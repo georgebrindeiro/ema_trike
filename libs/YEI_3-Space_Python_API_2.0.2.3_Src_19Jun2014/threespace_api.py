@@ -2800,7 +2800,9 @@ class TSDongle(_TSBase):
             self._setupBaseVariables()
         self._setupProtocolHeader(**self.protocol_args)
         self._setupThreadedReadLoop()
-        self.setWirelessStreamingAutoFlushMode(1)
+        _print('turned off setWirelessStreamingAutoFlushMode from TSDongle')
+        _print('also TSWLSensor had to be created manually, it does NOT come ready to index')
+        ##self.setWirelessStreamingAutoFlushMode(1)
         self.startStreaming()
 
     def reconnect(self):
