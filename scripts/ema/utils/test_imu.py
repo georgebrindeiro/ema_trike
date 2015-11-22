@@ -6,6 +6,8 @@ import signal
 import sys
 
 def signal_handler(signal, frame):
+        global dng_device, wl_device2, wl_device3
+
         print('You pressed Ctrl+C!')
         wl_device2.stopStreaming()
         wl_device3.stopStreaming()
@@ -17,6 +19,8 @@ signal.signal(signal.SIGINT, signal_handler)
 from ema.libs.yei import threespace_api as ts_api
 
 def run():
+    global dng_device, wl_device2, wl_device3
+
     com_port = '/dev/ttyACM0'
     dng_device = ts_api.TSDongle(com_port=com_port)
 
