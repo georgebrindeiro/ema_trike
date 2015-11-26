@@ -39,7 +39,8 @@ def main():
     rospy.init_node('imu', anonymous=True)
 
     # list published topics
-    pub = rospy.Publisher('imu', Imu, queue_size=10)
+    pub = rospy.Publisher('imu2', Imu, queue_size=10)
+    pub3 = rospy.Publisher('imu3', Imu, queue_size=10)
     pub_angle = rospy.Publisher('angle', Float64, queue_size=10)
     pub_angSpeed = rospy.Publisher('angSpeed', Float64, queue_size=10)
 
@@ -109,13 +110,11 @@ def main():
                 filtered_angle.append(numpy.median(angle[-filter_size:]))
 
         # Get angular speed
-        #IMUPedal2.getGyroData()
-        # speed = IMUPedal.getGyroData()
-        # speed = speed.split(",")
-        # if len(speed) == 6:
-        #     speed = float(speed[4])
-        #     speed = speed/(math.pi) * 180
-        #     angSpeed.append(speed)
+        speed = imu_manager.getGyroData('pedal')
+        if len(speed) == 3:
+            speed = float(speed[1])
+            speed = speed/(math.pi) * 180
+            angSpeed.append(speed)
 
         # Filter the speed
             if counter >= filter_size:
@@ -149,6 +148,35 @@ def main():
         imuMsg.linear_acceleration_covariance = [1, 0, 0, 0, 1, 0, 0, 0, 1]
 
         pub.publish(imuMsg)
+
+        ## send imu data
+        imuMsg3 = Imu()
+        imuMsg3.header.stamp= imuMsg.header.stamp
+        imuMsg3.header.frame_id = 'base_link'
+
+        orientation3 = imu_manager.getQuaternion('remote')
+        #print "orientation:",orientation
+
+        imuMsg3.orientation.x = orientation3[0]
+        imuMsg3.orientation.y = orientation3[1]
+        imuMsg3.orientation.z = orientation3[2]
+        imuMsg3.orientation.w = orientation3[3]
+        imuMsg3.orientation_covariance = [1, 0, 0, 0, 1, 0, 0, 0, 1]
+
+        angular_velocity3 = imu_manager.getGyroData('remote')
+        #print "angular_velocity:",angular_velocity
+
+        imuMsg3.angular_velocity.x = angular_velocity3[0]
+        imuMsg3.angular_velocity.y = angular_velocity3[1]
+        imuMsg3.angular_velocity.z = angular_velocity3[2]
+        imuMsg3.angular_velocity_covariance = [1, 0, 0, 0, 1, 0, 0, 0, 1]
+
+        imuMsg3.linear_acceleration.x = 0
+        imuMsg3.linear_acceleration.y = 0
+        imuMsg3.linear_acceleration.z = 0
+        imuMsg3.linear_acceleration_covariance = [1, 0, 0, 0, 1, 0, 0, 0, 1]
+
+        pub3.publish(imuMsg3)
 
         angleMsg = Float64()
         angleMsg.data = filtered_angle[-1]

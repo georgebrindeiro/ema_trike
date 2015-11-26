@@ -7,14 +7,14 @@
 # wireless_dng:   name of dongle associated to this WL device (must have configured dongle wireless table)
 # wireless_id:    logical id of WL device in associated dongle's wireless table
 
-# dev_names: ['pc', 'pedal', 'remote']
-# dev_type: {'pc': 'DNG', 'pedal': 'WL', 'remote': 'WL'}
-# imu_mode: {'pedal': 'wireless', 'remote': 'wireless'}
-# wired_port: {'pc': '/dev/ttyACM0', 'pedal': '/dev/ttyACM1', 'remote': '/dev/ttyACM2'}
-# wireless_dng: {'pedal': 'pc', 'remote': 'pc'}
-# wireless_id: {'pedal': 2, 'remote': 3}
+dev_names: ['pc', 'pedal', 'remote']
+dev_type: {'pc': 'DNG', 'pedal': 'WL', 'remote': 'WL'}
+imu_mode: {'pedal': 'wireless', 'remote': 'wireless'}
+wired_port: {'pc': '/dev/ttyACM0', 'pedal': '/dev/ttyACM1', 'remote': '/dev/ttyACM2'}
+wireless_dng: {'pedal': 'pc', 'remote': 'pc'}
+wireless_id: {'pedal': 2, 'remote': 3}
 
-dev_names: ['pedal']
-dev_type: {'pedal': 'WL'}
-imu_mode: {'pedal': 'wired'}
-wired_port: {'pedal': '/dev/ttyACM0'}
+# dev_names: ['pedal']
+# dev_type: {'pedal': 'WL'}
+# imu_mode: {'pedal': 'wired'}
+# wired_port: {'pedal': '/dev/ttyACM0'}
