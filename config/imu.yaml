@@ -1,5 +1,20 @@
-names: ['dongle', 'pedal', 'remote']
-dev_type: {'dongle': 'DNG', 'pedal': 'WL', 'remote': 'WL'}
-mode: {'dongle': 'wired', 'pedal': 'wireless', 'remote': 'wired'}
-port: {'dongle': '/dev/ttyACM0', 'pedal': '/dev/ttyACM1', 'remote': '/dev/ttyACM2'}
-address: {'pedal': 2, 'remote': 3}
+## IMU config
+#
+# dev_names:      string identifier to find configs for each device (NOTE: list dongle devices first)
+# dev_type:       YEI device type (only DNG and WL supported for now)
+# imu_mode:           wireless or wired (only needed for WL devices)
+# wired_port:     port address for device when wired
+# wireless_dng:   name of dongle associated to this WL device (must have configured dongle wireless table)
+# wireless_id:    logical id of WL device in associated dongle's wireless table
+
+# dev_names: ['pc', 'pedal', 'remote']
+# dev_type: {'pc': 'DNG', 'pedal': 'WL', 'remote': 'WL'}
+# imu_mode: {'pedal': 'wireless', 'remote': 'wireless'}
+# wired_port: {'pc': '/dev/ttyACM0', 'pedal': '/dev/ttyACM1', 'remote': '/dev/ttyACM2'}
+# wireless_dng: {'pedal': 'pc', 'remote': 'pc'}
+# wireless_id: {'pedal': 2, 'remote': 3}
+
+dev_names: ['pedal']
+dev_type: {'pedal': 'WL'}
+imu_mode: {'pedal': 'wired'}
+wired_port: {'pedal': '/dev/ttyACM0'}
