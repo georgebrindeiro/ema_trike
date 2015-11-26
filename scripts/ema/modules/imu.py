@@ -88,6 +88,21 @@ class IMU:
             return 0
 
 ########################################
+# Get Quaternion
+########################################
+
+    def getQuaternion(self, name):
+        dev_type = self.config_dict['dev_type'][name]
+
+        if dev_type == 'WL':
+            #print 'getQuaternion: ', name
+            return self.devices[name].getTaredOrientationAsQuaternion()
+
+        else:
+            print 'getQuaternion not defined for dev_type = ', dev_type
+            return 0
+
+########################################
 # Get Euler Angles
 ########################################
 
@@ -99,7 +114,7 @@ class IMU:
             return self.devices[name].getTaredOrientationAsEulerAngles()
 
         else:
-            #print 'getEulerAngles not defined for dev_type = ', dev_type
+            print 'getEulerAngles not defined for dev_type = ', dev_type
             return 0
 
 ########################################

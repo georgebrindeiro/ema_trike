@@ -126,15 +126,21 @@ def main():
         imuMsg.header.stamp= rospy.Time.now()
         imuMsg.header.frame_id = 'base_link'
 
-        imuMsg.orientation.x = 0
-        imuMsg.orientation.y = 0
-        imuMsg.orientation.z = 0
-        imuMsg.orientation.w = 1
+        orientation = imu_manager.getQuaternion('pedal')
+        #print "orientation:",orientation
+
+        imuMsg.orientation.x = orientation[0]
+        imuMsg.orientation.y = orientation[1]
+        imuMsg.orientation.z = orientation[2]
+        imuMsg.orientation.w = orientation[3]
         imuMsg.orientation_covariance = [1, 0, 0, 0, 1, 0, 0, 0, 1]
 
-        imuMsg.angular_velocity.x = 0
-        imuMsg.angular_velocity.y = 0
-        imuMsg.angular_velocity.z = 0
+        angular_velocity = imu_manager.getGyroData('pedal')
+        #print "angular_velocity:",angular_velocity
+
+        imuMsg.angular_velocity.x = angular_velocity[0]
+        imuMsg.angular_velocity.y = angular_velocity[1]
+        imuMsg.angular_velocity.z = angular_velocity[2]
         imuMsg.angular_velocity_covariance = [1, 0, 0, 0, 1, 0, 0, 0, 1]
 
         imuMsg.linear_acceleration.x = 0
