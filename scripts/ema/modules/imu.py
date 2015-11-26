@@ -3,121 +3,119 @@
 from ema.libs.yei import threespace_api as ts_api
 
 class IMU:
-    def __init__(self, port, address):
-        self.serial_port = port ## G: no need, get from config
-        self.address = address ## G: no need, get from config
+    def __init__(self, config_dict):
+        self.config_dict = config_dict
+        self.devices = {}
+
+        for name in config_dict['dev_names']:
+            dev_type = config_dict['dev_type'][name]
+
+            if dev_type == 'DNG':
+                wired_port = config_dict['wired_port'][name]
+                self.devices[name] = ts_api.TSDongle(com_port=wired_port)
+
+            elif dev_type == 'WL':
+                imu_mode = config_dict['imu_mode'][name]
+
+                if imu_mode == 'wired':
+                    wired_port = config_dict['wired_port'][name]
+                    self.devices[name] = ts_api.TSWLSensor(com_port=wired_port)
+
+                if imu_mode == 'wireless':
+                    wireless_dng = config_dict['wireless_dng'][name]
+                    wireless_id = config_dict['wireless_id'][name]
+
+                    self.devices[name] = ts_api.TSWLSensor(logical_id=wireless_id, dongle=self.devices[wireless_dng])
 
 ########################################
 # Calibration
 ########################################
 
-    def calibrate(self): ## G: beginGyroscopeAutoCalibration, need TSSensor (don't do for dongle)
-        msg = ">" + str(self.address) + ",165\n".encode()
-        try:
-            if self.serial_port is not None:
-                self.serial_port.write(msg) # e escreve na porta
-                dados = readData(self.serial_port)
-                return dados ## G: do we get the return value for this?
+    def calibrate(self, name): ## G: beginGyroscopeAutoCalibration, need TSSensor (don't do for dongle)
+        dev_type = self.config_dict['dev_type'][name]
 
-            else:
-                return 0
-        except ValueError:
+        if dev_type == 'WL':
+            #print 'calibrate: ', name
+            return self.devices[name].beginGyroscopeAutoCalibration()
+
+        else:
+            print 'calibrate not defined for dev_type = ', dev_type
             return 0
-
 
 ########################################
 # Set euler to YXZ
 ########################################
 
-    def setEulerToYXZ(self): ## G: setEulerAngleDecompositionOrder with angle_order = 1, need TSSensor (don't do for dongle)
-        msg = ">" + str(self.address) + ",16,1\n".encode()
-        try:
-            if self.serial_port is not None:
-                self.serial_port.write(msg) # e escreve na porta
-                dados = readData(self.serial_port)
-                return dados ## G: do we get the return value for this?
-            else:
-                return 0
-        except ValueError:
-            return 0
+    def setEulerToYXZ(self, name): ## G: setEulerAngleDecompositionOrder with angle_order = 1, need TSSensor (don't do for dongle)
+        dev_type = self.config_dict['dev_type'][name]
 
+        if dev_type == 'WL':
+            #print 'setEulerToYXZ: ', name
+            return self.devices[name].setEulerAngleDecompositionOrder(angle_order=0x01)
+
+        else:
+            #print 'setEulerToYXZ not defined for dev_type = ', dev_type
+            return 0
 
 ########################################
 # Tare with current orientation
 ########################################
 
-    def tare(self): ## G: tareWithCurrentOrientation, need TSSensor (don't do for dongle)
-        msg = ">" + str(self.address) + ",96\n".encode()
-        try:
-            if self.serial_port is not None:
-                self.serial_port.write(msg) # e escreve na porta
-                dados = readData(self.serial_port)
-                return dados
-            else:
-                return 0
-        except ValueError:
+    def tare(self, name): ## G: tareWithCurrentOrientation, need TSSensor (don't do for dongle)
+        dev_type = self.config_dict['dev_type'][name]
+
+        if dev_type == 'WL':
+            #print 'tare: ', name
+            return self.devices[name].tareWithCurrentOrientation()
+
+        else:
+            print 'tare not defined for dev_type = ', dev_type
             return 0
-
-
-
 
 ########################################
 # Check Buttons
 ########################################
 
-    def checkButtons(self): ## G: getButtonState, works with TSWLSensor (don't do for dongle)
+    def checkButtons(self, name): ## G: getButtonState, works with TSWLSensor (don't do for dongle)
+        dev_type = self.config_dict['dev_type'][name]
 
-        try:
-            if self.serial_port is not None:
-                self.serial_port.write((">" + str(self.address) + ",250\n".encode())) #Get button state) # e escreve na porta
-                dados = readData(self.serial_port)
-                botao = dados.split(",")
-                if len(botao) == 4:
-                    botao = botao[3]
-                    if (int(botao) == 1):
-                        return 1
-                    elif (int(botao) == 2):
-                        return 2
-                    else:
-                        return 0
+        if dev_type == 'WL':
+            #print 'checkButtons: ', name
+            return self.devices[name].getButtonState()
 
-        except ValueError:
-            return 'Error'
-
-
+        else:
+            print 'checkButtons not defined for dev_type = ', dev_type
+            return 0
 
 ########################################
 # Get Euler Angles
 ########################################
 
-    def getEulerAngles(self): ## G: getTaredOrientationAsEulerAngles, need TSSensor (don't do for dongle)
-        msg = ">" + str(self.address) + ",1\n".encode()
-        try:
-            if self.serial_port is not None:
-                self.serial_port.write(msg) # e escreve na porta
-                dados = readData(self.serial_port)
-                return dados
-            else:
-                return 'Port error'
-        except ValueError:
-            return 'Error'
+    def getEulerAngles(self, name): ## G: getTaredOrientationAsEulerAngles, need TSSensor (don't do for dongle)
+        dev_type = self.config_dict['dev_type'][name]
+
+        if dev_type == 'WL':
+            #print 'getEulerAngles: ', name
+            return self.devices[name].getTaredOrientationAsEulerAngles()
+
+        else:
+            #print 'getEulerAngles not defined for dev_type = ', dev_type
+            return 0
 
 ########################################
 # Get Gyro Data
 ########################################
 
-    def getGyroData(self): ## G: getNormalizedGyroRate, need TSSensor (don't do for dongle)
-        msg = ">" + str(self.address) + ",33\n".encode()
-        try:
-            if self.serial_port is not None:
-                self.serial_port.write(msg) # e escreve na porta
-                dados = readData(self.serial_port)
-                return dados
-            else:
-                return 'Port error'
-        except ValueError:
-            return 'Error'
+    def getGyroData(self, name): ## G: getNormalizedGyroRate, need TSSensor (don't do for dongle)
+        dev_type = self.config_dict['dev_type'][name]
 
+        if dev_type == 'WL':
+            #print 'getGyroData: ', name
+            return self.devices[name].getNormalizedGyroRate()
+
+        else:
+            print 'getGyroData not defined for dev_type = ', dev_type
+            return 0
 
 ########################################
 # Single Command

@@ -43,52 +43,27 @@ def main():
     pub_angle = rospy.Publisher('angle', Float64, queue_size=10)
     pub_angSpeed = rospy.Publisher('angSpeed', Float64, queue_size=10)
 
-    #imu.test()
-    #exit()
-
     # config imu
 
-    portIMU = '/dev/ttyACM0'
-    addressPedal = 3
-    counter = 1
-    # Open ports
-    serialPortIMU = serial.Serial(portIMU, timeout=1, writeTimeout=1, baudrate=115200)
+    # fetch a group (dictionary) of parameters
+    imu_manager = imu.IMU(rospy.get_param('/ema/imu'))
 
-    # Construct objects
-    IMUPedal = imu.IMU(serialPortIMU,addressPedal)
-    IMUPedal2 = imu.IMU(serialPortIMU,2)
+    counter = 1
 
     print "Hello, EMA here!"
-
-    #global_name = rospy.get_param("/global_name")
-    #relative_name = rospy.get_param("relative_name")
-    #private_param = rospy.get_param('~private_name')
-    #default_param = rospy.get_param('default_param', 'default_value')
-
-    # fetch a group (dictionary) of parameters
-    names = rospy.get_param('/ema/imu/names')
-    dev_type = rospy.get_param('/ema/imu/dev_type')
-    mode = rospy.get_param('/ema/imu/mode')
-    port = rospy.get_param('/ema/imu/port')
-    address = rospy.get_param('/ema/imu/address')
-
-    print names
-    print dev_type
-    print mode
-    print port
-    print address
 
     print "Beginning calibration..."
     calibrationError = 10
     while calibrationError > 0.1 :
+        print "error:", calibrationError
         ang = []
-        while(len(ang) < 6):
-            IMUPedal.setEulerToYXZ()
-            IMUPedal.calibrate()
-            IMUPedal.tare()
-            ang = IMUPedal.getEulerAngles()
-            ang = ang.split(",")
-        calibrationError = float(ang[3]) + float(ang[4]) + float(ang[5])
+        while(len(ang) < 3):
+            imu_manager.setEulerToYXZ('pedal') #IMUPedal.setEulerToYXZ()
+            imu_manager.calibrate('pedal') #IMUPedal.calibrate()
+            imu_manager.tare('pedal') #IMUPedal.tare()
+            ang = imu_manager.getEulerAngles('pedal') #IMUPedal.getEulerAngles()
+            #ang = ang.split(",")
+        calibrationError = ang[0] + ang[1] + ang[2]#float(ang[3]) + float(ang[4]) + float(ang[5])
     print "Done"
 
     # Asking for user input
@@ -119,10 +94,10 @@ def main():
         # get some work done
 
         # Get angle position
-        ang = IMUPedal.getEulerAngles()
-        ang = ang.split(",")
-        if len(ang) == 6:
-            ang = float(ang[4])
+        ang = imu_manager.getEulerAngles('pedal') #IMUPedal.getEulerAngles()
+        #ang = ang.split(",")
+        if len(ang) == 3:#6:
+            ang = ang[1]#float(ang[4])
             if ang >= 0:
                 ang = (ang / math.pi) * 180
             else:
