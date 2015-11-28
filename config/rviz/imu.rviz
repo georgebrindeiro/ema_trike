@@ -8,7 +8,7 @@ Panels:
         - /Status1
         - /Grid1
         - /Imu1
-        - /Imu1/Box properties1
+        - /Imu2
       Splitter Ratio: 0.5
     Tree Height: 191
   - Class: rviz/Selection
@@ -70,7 +70,7 @@ Visualization Manager:
       Class: rviz_imu_plugin/Imu
       Enabled: true
       Name: Imu
-      Topic: /ema/imu2
+      Topic: /ema/pedal
       Value: true
     - Acceleration properties:
         Acc. vector alpha: 1
@@ -91,7 +91,7 @@ Visualization Manager:
       Class: rviz_imu_plugin/Imu
       Enabled: true
       Name: Imu
-      Topic: /ema/imu3
+      Topic: /ema/remote
       Value: true
   Enabled: true
   Global Options:

@@ -6,6 +6,10 @@ class IMU:
     def __init__(self, config_dict):
         self.config_dict = config_dict
         self.devices = {}
+        self.dongles = []
+        self.imus = []
+        self.wired_imus = []
+        self.wireless_imus = []
 
         for name in config_dict['dev_names']:
             dev_type = config_dict['dev_type'][name]
@@ -13,19 +17,23 @@ class IMU:
             if dev_type == 'DNG':
                 wired_port = config_dict['wired_port'][name]
                 self.devices[name] = ts_api.TSDongle(com_port=wired_port)
+                self.dongles.append(name)
 
             elif dev_type == 'WL':
                 imu_mode = config_dict['imu_mode'][name]
+                self.imus.append(name)
 
                 if imu_mode == 'wired':
                     wired_port = config_dict['wired_port'][name]
                     self.devices[name] = ts_api.TSWLSensor(com_port=wired_port)
+                    self.wired_imus.append(name)
 
                 if imu_mode == 'wireless':
                     wireless_dng = config_dict['wireless_dng'][name]
                     wireless_id = config_dict['wireless_id'][name]
 
                     self.devices[name] = ts_api.TSWLSensor(logical_id=wireless_id, dongle=self.devices[wireless_dng])
+                    self.wireless_imus.append(name)
 
 ########################################
 # Calibration

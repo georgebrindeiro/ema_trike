@@ -6,31 +6,23 @@ import rospy
 import ema.modules.imu as imu
 from sensor_msgs.msg import Imu
 
-import math
-
-angle = []
-angle = [0]
-
-angSpeed = []
-angSpeed = [0]
-
 def main():
     global imu_manager
 
-    # init 'imu' node
+    # init imu node
     rospy.init_node('imu', anonymous=True)
 
-    # list published topics
-    pub = rospy.Publisher('imu2', Imu, queue_size=10)
-    pub3 = rospy.Publisher('imu3', Imu, queue_size=10)
-
-    # config imu
-
-    # fetch a group (dictionary) of parameters
+    # get imu config
     imu_manager = imu.IMU(rospy.get_param('/ema/imu'))
+
+    # list published topics
+    pub = {}
+    for name in imu_manager.imus:
+        pub[name] = rospy.Publisher(name, Imu, queue_size=10)
 
     print "Hello, EMA here!"
 
+    # calibrate all imus
     autocalibrate()
 
     # define loop rate (in hz)
@@ -38,11 +30,14 @@ def main():
 
     # node loop
     while not rospy.is_shutdown():
-        
+
+        timestamp = rospy.Time.now()
+        frame_id = 'base_link'
+
         ## send imu data
         imuMsg = Imu()
-        imuMsg.header.stamp= rospy.Time.now()
-        imuMsg.header.frame_id = 'base_link'
+        imuMsg.header.stamp = timestamp
+        imuMsg.header.frame_id = frame_id
 
         orientation = imu_manager.getQuaternion('pedal')
         #print "orientation:",orientation
@@ -66,12 +61,12 @@ def main():
         imuMsg.linear_acceleration.z = 0
         imuMsg.linear_acceleration_covariance = [1, 0, 0, 0, 1, 0, 0, 0, 1]
 
-        pub.publish(imuMsg)
+        pub['pedal'].publish(imuMsg)
 
         ## send imu data
         imuMsg3 = Imu()
-        imuMsg3.header.stamp= imuMsg.header.stamp
-        imuMsg3.header.frame_id = 'base_link'
+        imuMsg3.header.stamp= timestamp
+        imuMsg3.header.frame_id = frame_id
 
         orientation3 = imu_manager.getQuaternion('remote')
         #print "orientation:",orientation
@@ -95,9 +90,7 @@ def main():
         imuMsg3.linear_acceleration.z = 0
         imuMsg3.linear_acceleration_covariance = [1, 0, 0, 0, 1, 0, 0, 0, 1]
 
-        pub3.publish(imuMsg3)
-
-        print "%d\t%d\t%.3f\t%.3f" % (len(angle),len(angSpeed),angle[-1],angSpeed[-1])
+        pub['remote'].publish(imuMsg3)
 
         # sleep until it's time to work again
         rate.sleep()
@@ -105,25 +98,19 @@ def main():
 def autocalibrate():
     global imu_manager
 
-    dev_names = imu_manager.config_dict['dev_names']
-    dev_types = imu_manager.config_dict['dev_type']
-
-    for name in dev_names:
-        dev_type = dev_types[name]
-
-        if dev_type == 'WL':
-            print "Calibrating", name
-            calibrationError = 10
-            while calibrationError > 0.1 :
-                ang = []
-                while(len(ang) < 3):
-                    imu_manager.setEulerToYXZ(name)
-                    imu_manager.calibrate(name)
-                    imu_manager.tare(name)
-                    ang = imu_manager.getEulerAngles(name)
-                calibrationError = ang[0] + ang[1] + ang[2]
-                print "Error:", calibrationError
-            print "Done"
+    for name in imu_manager.imus:
+        print "Calibrating", name
+        calibrationError = 10
+        while calibrationError > 0.1 :
+            ang = []
+            while(len(ang) < 3):
+                imu_manager.setEulerToYXZ(name)
+                imu_manager.calibrate(name)
+                imu_manager.tare(name)
+                ang = imu_manager.getEulerAngles(name)
+            calibrationError = ang[0] + ang[1] + ang[2]
+            print "Error:", calibrationError
+        print "Done"
 
 if __name__ == '__main__':
     try:
