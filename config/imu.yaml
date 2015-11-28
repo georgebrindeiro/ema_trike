@@ -2,7 +2,7 @@
 #
 # dev_names:      string identifier to find configs for each device (NOTE: list dongle devices first)
 # dev_type:       YEI device type (only DNG and WL supported for now)
-# imu_mode:           wireless or wired (only needed for WL devices)
+# imu_mode:       wireless or wired (only needed for WL devices)
 # wired_port:     port address for device when wired
 # wireless_dng:   name of dongle associated to this WL device (must have configured dongle wireless table)
 # wireless_id:    logical id of WL device in associated dongle's wireless table
