@@ -3,36 +3,26 @@
 import rospy
 
 # import ros msgs
-import serial
 import ema.modules.imu as imu
 from sensor_msgs.msg import Imu
 from std_msgs.msg import Float64
 
-import serial
-import ema.modules.imu
-import ema.modules.stimulator
-import time
 import math
 import numpy
-import ema.modules.control
-import thread
-import sys
-import os
 
-xRange = 500
-filter_size = 5 ###
+filter_size = 5
 
 angle = []
-angle = [0]# for x in range(xRange)]
+angle = [0]
 
 filtered_angle = []
-filtered_angle = [0]# for x in range(xRange)]
+filtered_angle = [0]
 
 angSpeed = []
-angSpeed = [0]# for x in range(xRange)]
+angSpeed = [0]
 
 filtered_speed = []
-filtered_speed = [0]# for x in range(xRange)]
+filtered_speed = [0]
 
 def main():
     # init 'imu' node
@@ -59,67 +49,61 @@ def main():
         print "error:", calibrationError
         ang = []
         while(len(ang) < 3):
-            imu_manager.setEulerToYXZ('pedal') #IMUPedal.setEulerToYXZ()
-            imu_manager.calibrate('pedal') #IMUPedal.calibrate()
-            imu_manager.tare('pedal') #IMUPedal.tare()
-            ang = imu_manager.getEulerAngles('pedal') #IMUPedal.getEulerAngles()
-            #ang = ang.split(",")
-        calibrationError = ang[0] + ang[1] + ang[2]#float(ang[3]) + float(ang[4]) + float(ang[5])
+            imu_manager.setEulerToYXZ('pedal')
+            imu_manager.calibrate('pedal')
+            imu_manager.tare('pedal')
+            ang = imu_manager.getEulerAngles('pedal')
+        calibrationError = ang[0] + ang[1] + ang[2]
     print "Done"
 
-    # Asking for user input
-    try:
-        freq=int(raw_input("Input frequency (default 50): "))
-    except ValueError:
-        print "Adopting default value: 50"
-        freq = 50
-
-    try:
-        channels=int(raw_input("Input channels (default 3): "))
-    except ValueError:
-        print "Adopting default value: 3"
-        channels = 3
-
-    try:
-        current_str = raw_input("Input current (default 6,6): ")
-        current = [int(i) for i in (current_str.split(","))]
-    except ValueError:
-        print "Adopting default value: 6,6"
-        current = [6,6]
+    calibrationError = 10
+    while calibrationError > 0.1 :
+        print "error:", calibrationError
+        ang = []
+        while(len(ang) < 3):
+            imu_manager.setEulerToYXZ('remote')
+            imu_manager.calibrate('remote')
+            imu_manager.tare('remote')
+            ang = imu_manager.getEulerAngles('remote')
+        calibrationError = ang[0] + ang[1] + ang[2]
+    print "Done"
 
     # define loop rate (in hz)
-    rate = rospy.Rate(200)
+    rate = rospy.Rate(10)
 
     # node loop
     while not rospy.is_shutdown():
         # get some work done
 
         # Get angle position
-        ang = imu_manager.getEulerAngles('pedal') #IMUPedal.getEulerAngles()
-        #ang = ang.split(",")
-        if len(ang) == 3:#6:
-            ang = ang[1]#float(ang[4])
+        ang = imu_manager.getEulerAngles('pedal')
+
+        if len(ang) == 3:
+            ang = ang[1]
             if ang >= 0:
                 ang = (ang / math.pi) * 180
             else:
                 ang = 360 - ((-(ang) / math.pi) * 180)
             angle.append(ang)
 
-            # Filter the speed
+            # Filter the angle
             if counter >= filter_size:
                 filtered_angle.append(numpy.median(angle[-filter_size:]))
 
         # Get angular speed
         speed = imu_manager.getGyroData('pedal')
+
         if len(speed) == 3:
             speed = float(speed[1])
             speed = speed/(math.pi) * 180
             angSpeed.append(speed)
 
-        # Filter the speed
+            # Filter the speed
             if counter >= filter_size:
                 filtered_speed.append(numpy.median(angSpeed[-filter_size:]))
+
         # publish work
+
         ## send imu data
         imuMsg = Imu()
         imuMsg.header.stamp= rospy.Time.now()
@@ -194,8 +178,6 @@ def main():
         rate.sleep()
 
         counter = counter + 1
-
-    serialPortIMU.close()
 
 if __name__ == '__main__':
     try:
