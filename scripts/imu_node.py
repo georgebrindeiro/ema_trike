@@ -38,29 +38,7 @@ def main():
 
     # node loop
     while not rospy.is_shutdown():
-        # get some work done
-
-        # Get angle position
-        ang = imu_manager.getEulerAngles('pedal')
-
-        if len(ang) == 3:
-            ang = ang[1]
-            if ang >= 0:
-                ang = (ang / math.pi) * 180
-            else:
-                ang = 360 - ((-(ang) / math.pi) * 180)
-            angle.append(ang)
-
-        # Get angular speed
-        speed = imu_manager.getGyroData('pedal')
-
-        if len(speed) == 3:
-            speed = float(speed[1])
-            speed = speed/(math.pi) * 180
-            angSpeed.append(speed)
-
-        # publish work
-
+        
         ## send imu data
         imuMsg = Imu()
         imuMsg.header.stamp= rospy.Time.now()
