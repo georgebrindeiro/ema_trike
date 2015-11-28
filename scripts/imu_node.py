@@ -5,24 +5,14 @@ import rospy
 # import ros msgs
 import ema.modules.imu as imu
 from sensor_msgs.msg import Imu
-from std_msgs.msg import Float64
 
 import math
-import numpy
-
-filter_size = 5
 
 angle = []
 angle = [0]
 
-filtered_angle = []
-filtered_angle = [0]
-
 angSpeed = []
 angSpeed = [0]
-
-filtered_speed = []
-filtered_speed = [0]
 
 def main():
     # init 'imu' node
@@ -31,15 +21,11 @@ def main():
     # list published topics
     pub = rospy.Publisher('imu2', Imu, queue_size=10)
     pub3 = rospy.Publisher('imu3', Imu, queue_size=10)
-    pub_angle = rospy.Publisher('angle', Float64, queue_size=10)
-    pub_angSpeed = rospy.Publisher('angSpeed', Float64, queue_size=10)
 
     # config imu
 
     # fetch a group (dictionary) of parameters
     imu_manager = imu.IMU(rospy.get_param('/ema/imu'))
-
-    counter = 1
 
     print "Hello, EMA here!"
 
@@ -86,10 +72,6 @@ def main():
                 ang = 360 - ((-(ang) / math.pi) * 180)
             angle.append(ang)
 
-            # Filter the angle
-            if counter >= filter_size:
-                filtered_angle.append(numpy.median(angle[-filter_size:]))
-
         # Get angular speed
         speed = imu_manager.getGyroData('pedal')
 
@@ -97,10 +79,6 @@ def main():
             speed = float(speed[1])
             speed = speed/(math.pi) * 180
             angSpeed.append(speed)
-
-            # Filter the speed
-            if counter >= filter_size:
-                filtered_speed.append(numpy.median(angSpeed[-filter_size:]))
 
         # publish work
 
@@ -162,22 +140,10 @@ def main():
 
         pub3.publish(imuMsg3)
 
-        angleMsg = Float64()
-        angleMsg.data = filtered_angle[-1]
-
-        pub_angle.publish(angleMsg)
-
-        angSpeedMsg = Float64()
-        angSpeedMsg.data = filtered_speed[-1]
-
-        pub_angSpeed.publish(angSpeedMsg)
-
-        print "%d\t%d\t%.3f\t%.3f\t%.3f\t%.3f" % (len(angle),len(angSpeed),angle[-1],filtered_angle[-1],angSpeed[-1],filtered_speed[-1])
+        print "%d\t%d\t%.3f\t%.3f" % (len(angle),len(angSpeed),angle[-1],angSpeed[-1])
 
         # sleep until it's time to work again
         rate.sleep()
-
-        counter = counter + 1
 
 if __name__ == '__main__':
     try:
