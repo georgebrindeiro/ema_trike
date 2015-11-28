@@ -15,6 +15,8 @@ angSpeed = []
 angSpeed = [0]
 
 def main():
+    global imu_manager
+
     # init 'imu' node
     rospy.init_node('imu', anonymous=True)
 
@@ -29,30 +31,7 @@ def main():
 
     print "Hello, EMA here!"
 
-    print "Beginning calibration..."
-    calibrationError = 10
-    while calibrationError > 0.1 :
-        print "error:", calibrationError
-        ang = []
-        while(len(ang) < 3):
-            imu_manager.setEulerToYXZ('pedal')
-            imu_manager.calibrate('pedal')
-            imu_manager.tare('pedal')
-            ang = imu_manager.getEulerAngles('pedal')
-        calibrationError = ang[0] + ang[1] + ang[2]
-    print "Done"
-
-    calibrationError = 10
-    while calibrationError > 0.1 :
-        print "error:", calibrationError
-        ang = []
-        while(len(ang) < 3):
-            imu_manager.setEulerToYXZ('remote')
-            imu_manager.calibrate('remote')
-            imu_manager.tare('remote')
-            ang = imu_manager.getEulerAngles('remote')
-        calibrationError = ang[0] + ang[1] + ang[2]
-    print "Done"
+    autocalibrate()
 
     # define loop rate (in hz)
     rate = rospy.Rate(10)
@@ -144,6 +123,29 @@ def main():
 
         # sleep until it's time to work again
         rate.sleep()
+
+def autocalibrate():
+    global imu_manager
+
+    dev_names = imu_manager.config_dict['dev_names']
+    dev_types = imu_manager.config_dict['dev_type']
+
+    for name in dev_names:
+        dev_type = dev_types[name]
+
+        if dev_type == 'WL':
+            print "Calibrating", name
+            calibrationError = 10
+            while calibrationError > 0.1 :
+                ang = []
+                while(len(ang) < 3):
+                    imu_manager.setEulerToYXZ(name)
+                    imu_manager.calibrate(name)
+                    imu_manager.tare(name)
+                    ang = imu_manager.getEulerAngles(name)
+                calibrationError = ang[0] + ang[1] + ang[2]
+                print "Error:", calibrationError
+            print "Done"
 
 if __name__ == '__main__':
     try:
