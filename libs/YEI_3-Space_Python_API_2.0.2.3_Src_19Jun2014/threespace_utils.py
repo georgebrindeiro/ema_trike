@@ -1,7 +1,7 @@
 #!/usr/bin/env python2.7
 
 """ This module is a utility module used in the ThreeSpace API.
-    
+
     The ThreeSpace Utils module is a collection of functions, structures, and
     static variables to be use exclusivly with the ThreeSpace API module to find
     available ThreeSpace devices on the host system and information on them.
@@ -101,14 +101,14 @@ def tryPort(port_name, use_subprocess=False):
         if os.name == 'nt':
             startup_info = subprocess.STARTUPINFO()
             startup_info.dwFlags |= subprocess._subprocess.STARTF_USESHOWWINDOW
-        
+
         try:
             # We assume the directory resolved by __file__ will
             # get us the directory for try_port.exe
             last_slash_idx = file_path.rfind("\\")
             try_ports_path = (file_path[:last_slash_idx] + program_name)
             call_success = subprocess.call([try_ports_path, port_name], startupinfo=startup_info)
-        
+
         except Exception as ex:
             if global_file_path is None:
                 print(ex)
@@ -121,7 +121,7 @@ def tryPort(port_name, use_subprocess=False):
             except Exception as ex:
                 print(ex)
                 return None
-        
+
         if call_success != 0:
            return None
 
@@ -142,8 +142,8 @@ def checkSoftwareVersionFromPort(serial_port):
     compatibility = 0
     serial_port.write(bytearray((0xf7, 0xdf, 0xdf)))
     response = convertString(serial_port.read(9))
-    print response   
- 
+    #print response   
+
     if len(response) == 0:
         # Very Old firmware version
         raise Exception("Either device on( %s ) is not a 3-Space Sensor or the firmware is out of date for this API and recommend updating to latest firmware." % serial_port.name)
@@ -154,9 +154,9 @@ def checkSoftwareVersionFromPort(serial_port):
     else:
         # Hour-minute remainder
         serial_port.read(3)
-        
+
         sensor_firmware = time.strptime(response, "%d%b%Y")
-        
+
         for i in reversed(range(len(__version_firmware))):
             if sensor_firmware >= __version_firmware[i]:
                 compatibility = i
