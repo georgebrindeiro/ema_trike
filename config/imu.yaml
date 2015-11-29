@@ -1,5 +1,6 @@
 ## IMU config
 #
+# autocalibrate:  tare and calibrate all imus when initializing node
 # dev_names:      string identifier to find configs for each device (NOTE: list dongle devices first)
 # dev_type:       YEI device type (only DNG and WL supported for now)
 # imu_mode:       wireless or wired (only needed for WL devices)
@@ -7,12 +8,18 @@
 # wireless_dng:   name of dongle associated to this WL device (must have configured dongle wireless table)
 # wireless_id:    logical id of WL device in associated dongle's wireless table
 
+autocalibrate: true
 dev_names: ['pc', 'pedal', 'remote']
 dev_type: {'pc': 'DNG', 'pedal': 'WL', 'remote': 'WL'}
 imu_mode: {'pedal': 'wireless', 'remote': 'wireless'}
-wired_port: {'pc': '/dev/ttyACM0', 'pedal': '/dev/ttyACM1', 'remote': '/dev/ttyACM2'}
+wired_port: {'pc': '/dev/ttyACM0'}
 wireless_dng: {'pedal': 'pc', 'remote': 'pc'}
 wireless_id: {'pedal': 2, 'remote': 3}
+
+# dev_names: ['pedal', 'remote']
+# dev_type: {'pedal': 'WL', 'remote': 'WL'}
+# imu_mode: {'pedal': 'wired', 'remote': 'wired'}
+# wired_port: {'pedal': '/dev/ttyACM0', 'remote': '/dev/ttyACM1'}
 
 # dev_names: ['pedal']
 # dev_type: {'pedal': 'WL'}

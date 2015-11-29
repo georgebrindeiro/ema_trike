@@ -6,9 +6,6 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
-        - /Grid1
-        - /Imu1
-        - /Imu2
       Splitter Ratio: 0.5
     Tree Height: 191
   - Class: rviz/Selection
@@ -52,11 +49,11 @@ Visualization Manager:
       Reference Frame: <Fixed Frame>
       Value: true
     - Acceleration properties:
-        Acc. vector alpha: 1
-        Acc. vector color: 255; 0; 0
-        Acc. vector scale: 1
+        Acc. vector alpha: 0.7
+        Acc. vector color: 255; 255; 0
+        Acc. vector scale: 0.1
         Derotate acceleration: true
-        Enable acceleration: false
+        Enable acceleration: true
       Axes properties:
         Axes scale: 1
         Enable axes: true
@@ -73,11 +70,11 @@ Visualization Manager:
       Topic: /ema/pedal
       Value: true
     - Acceleration properties:
-        Acc. vector alpha: 1
-        Acc. vector color: 255; 0; 0
-        Acc. vector scale: 1
+        Acc. vector alpha: 0.7
+        Acc. vector color: 0; 255; 255
+        Acc. vector scale: 0.1
         Derotate acceleration: true
-        Enable acceleration: false
+        Enable acceleration: true
       Axes properties:
         Axes scale: 1
         Enable axes: true
@@ -117,7 +114,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 1.67016
+      Distance: 1.6103
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
@@ -129,10 +126,10 @@ Visualization Manager:
         Z: 0
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 1.5698
+      Pitch: -1.0548
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 1.5704
+      Yaw: 4.7154
     Saved: ~
 Window Geometry:
   Displays:
@@ -151,4 +148,4 @@ Window Geometry:
     collapsed: false
   Width: 1280
   X: 1356
-  Y: 514
+  Y: 14

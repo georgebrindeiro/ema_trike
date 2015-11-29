@@ -35,6 +35,11 @@ class IMU:
                     self.devices[name] = ts_api.TSWLSensor(logical_id=wireless_id, dongle=self.devices[wireless_dng])
                     self.wireless_imus.append(name)
 
+        if config_dict['autocalibrate'] == True:
+            self.autocalibrate()
+
+        self.setRightHandedAxis()
+
 ########################################
 # Calibration
 ########################################
@@ -139,6 +144,72 @@ class IMU:
         else:
             print 'getGyroData not defined for dev_type = ', dev_type
             return 0
+
+    def getAccelData(self, name): ## G: getCorrectedAccelerometerVector, need TSSensor (don't do for dongle)
+        dev_type = self.config_dict['dev_type'][name]
+
+        if dev_type == 'WL':
+            #print 'getAccelData: ', name
+            return self.devices[name].getCorrectedAccelerometerVector()
+
+        else:
+            print 'getAccelData not defined for dev_type = ', dev_type
+            return 0
+
+    def autocalibrate(self):
+        for name in self.imus:
+            print "Calibrating", name
+            calibrationError = 10
+            while calibrationError > 0.1 :
+                ang = []
+                while(len(ang) < 3):
+                    self.setEulerToYXZ(name)
+                    self.calibrate(name)
+                    self.tare(name)
+                    ang = self.getEulerAngles(name)
+                calibrationError = ang[0] + ang[1] + ang[2]
+                print "Error:", calibrationError
+            print "Done"
+
+    def setRightHandedAxis(self):
+        # axes definitions
+        # 0: X: R, Y: U, Z: F (left-handed system, standard operation)
+        # 1: X: R, Y: F, Z: U (right-handed system)
+        # 2: X: U, Y: R, Z: F (right-handed system)
+        # 3: X: F, Y: R, Z: U (left-handed system)
+        # 4: X: U, Y: F, Z: R (left-handed system)
+        # 5: X: F, Y: U, Z: R (right-handed system)
+        axes = 0
+        x_inverted = 0
+        y_inverted = 1
+        z_inverted = 0
+
+        axis_direction_byte = (x_inverted << 5) |(y_inverted << 4)  | (z_inverted << 3) | axes
+
+        for name in self.imus:
+            print "Changing", name, "to right handed axis"
+            print "axis_direction_byte:", '{:08b}'.format(axis_direction_byte)
+            self.devices[name].setAxisDirections(axis_direction_byte)
+
+    def setLeftHandedAxis(self):
+        # axes definitions
+        # 0: X: R, Y: U, Z: F (left-handed system, standard operation)
+        # 1: X: R, Y: F, Z: U (right-handed system)
+        # 2: X: U, Y: R, Z: F (right-handed system)
+        # 3: X: F, Y: R, Z: U (left-handed system)
+        # 4: X: U, Y: F, Z: R (left-handed system)
+        # 5: X: F, Y: U, Z: R (right-handed system)
+        axes = 0
+        x_inverted = 0
+        y_inverted = 0
+        z_inverted = 0
+
+        axis_direction_byte = (x_inverted << 5) |(y_inverted << 4)  | (z_inverted << 3) | axes
+
+        for name in self.imus:
+            print "Changing", name, "to left handed axis"
+            print "axis_direction_byte:", '{:08b}'.format(axis_direction_byte)
+            self.devices[name].setAxisDirections(axis_direction_byte)
 
 ########################################
 # Single Command
