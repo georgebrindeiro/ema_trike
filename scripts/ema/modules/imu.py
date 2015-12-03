@@ -1,5 +1,4 @@
 #IMU functions
-#import serial
 from ema.libs.yei import threespace_api as ts_api
 
 class IMU:
