@@ -160,15 +160,23 @@ class IMU:
         for name in self.imus:
             print "Calibrating", name
             calibrationError = 10
+            count = 0
             while calibrationError > 0.1 :
+                count = count + 1
                 ang = []
                 while(len(ang) < 3):
                     self.setEulerToYXZ(name)
                     self.calibrate(name)
                     self.tare(name)
                     ang = self.getEulerAngles(name)
+                oldError = calibrationError
                 calibrationError = ang[0] + ang[1] + ang[2]
-                print "Error:", calibrationError
+
+                if(oldError != calibrationError):
+                    print "Error:", calibrationError
+                else:
+                    print "Stopped calibrating",name,"due to error stabilization after",count,"attempts"
+                    break
             print "Done"
 
     def setRightHandedAxis(self):

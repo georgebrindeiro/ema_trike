@@ -7,8 +7,6 @@ import ema.modules.imu as imu
 from sensor_msgs.msg import Imu
 
 def main():
-    global imu_manager
-
     # init imu node
     rospy.init_node('imu', anonymous=True)
 
