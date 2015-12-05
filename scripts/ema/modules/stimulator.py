@@ -1,6 +1,7 @@
 #!/usr/bin/env python
+import binascii
 import serial
-import time
+import struct
 
 command_dict = {
     'channelListModeInitialization': {
@@ -41,6 +42,13 @@ command_dict = {
     }
 }
 
+reverse_command_dict = {
+    0: 'channelListModeInitialization',
+    1: 'channelListModeUpdate',
+    2: 'channelListModeStop',
+    3: 'singlePulseGeneration'
+}
+
 mode_dict = {
     'single': 0,
     'doublet': 1,
@@ -51,20 +59,48 @@ class Stimulator:
     def __init__(self, config_dict):
         self.config_dict = config_dict
 
-        self.channel_stim = config_dict['channel_stim']
-        self.channel_lf = config_dict['channel_lf']
-        self.n_factor = config_dict['n_factor']
+        try:
+            self.channel_stim = config_dict['channel_stim']
+        except KeyError:
+            self.channel_stim = []
+            print 'channel_stim not found in config_dict, defaulting to []'
+
+        try:
+            self.channel_lf = config_dict['channel_lf']
+        except KeyError:
+            self.channel_lf = []
+            print 'channel_lf not found in config_dict, defaulting to []'
+
+        try:
+            self.n_factor = config_dict['n_factor']
+        except KeyError:
+            self.n_factor = 0
+            print 'n_factor not found in config_dict, defaulting to 0'
 
         try:
             self.freq = config_dict['freq']
             self.ts1 = round((1/float(self.freq))*1000)
         except KeyError:
-            self.ts1 = config_dict['ts1']
+            print 'freq not found in config_dict, using ts1 for Main_Time'
+            try:
+                self.ts1 = config_dict['ts1']
+            except KeyError:
+                print 'ts1 not found in config_dict, defaulting to 20ms (50 Hz)'
+                self.ts1 = 20
 
-        self.ts2 = config_dict['ts2']
+        try:
+            self.ts2 = config_dict['ts2']
+        except KeyError:
+            print 'ts2 not found in config_dict, defaulting to 1.5'
+            self.ts2 = 1.5
+
+        try:
+            self.port = config_dict['port']
+        except KeyError:
+            print 'port not found in config_dict, defaulting to /dev/ttyUSB0'
+            self.port = '/dev/ttyUSB0'
 
         # Connect to stimulator
-        self.port = config_dict['port']
         self.serial_port = serial.Serial(port=self.port,
                                          baudrate=115200,
                                          bytesize=serial.EIGHTBITS,
@@ -82,10 +118,10 @@ class Stimulator:
         gt = int(round((self.ts2 - 1.5) / 0.5))            # grab from config: ts2
         mt = int(round((self.ts1 - 1.0) / 0.5))              # grab from config: ts1
 
-        print 'gt',gt
-        print 'mt',mt
-        print 'ts1',self.ts1
-        print 'ts2',self.ts2
+        # print 'gt',gt
+        # print 'mt',mt
+        # print 'ts1',self.ts1
+        # print 'ts2',self.ts2
 
         check = (nf + cs + clf + gt + mt) % 8
 
@@ -101,9 +137,6 @@ class Stimulator:
         }
 
         pkt = self._buildPacket(cmd,fields)
-
-        import binascii
-        print binascii.hexlify(pkt)
 
         return self._writeRead(pkt)
 
@@ -133,9 +166,6 @@ class Stimulator:
 
         pkt = self._buildPacket(cmd,fields)
 
-        import binascii
-        print binascii.hexlify(pkt)
-
         return self._writeRead(pkt)
 
     def ccl_stop(self):
@@ -149,9 +179,6 @@ class Stimulator:
         }
 
         pkt = self._buildPacket(cmd,fields)
-
-        import binascii
-        print binascii.hexlify(pkt)
 
         return self._writeRead(pkt)
 
@@ -176,7 +203,6 @@ class Stimulator:
 
         pkt = self._buildPacket(cmd,fields)
 
-        import binascii
         print binascii.hexlify(pkt)
 
         return self._writeRead(pkt)
@@ -205,9 +231,9 @@ class Stimulator:
                 bit_count += command['field_size'][field]
                 continue
 
-            print 'field:',field
-            print 'fv:','{:011b}'.format(fv)
-            print 'fs:',fs
+            # print 'field:',field
+            # print 'fv:','{:011b}'.format(fv)
+            # print 'fs:',fs
 
             # figure out where the field should be placed in byte
             shift = 7 - (bit_count + fs)
@@ -218,7 +244,7 @@ class Stimulator:
                 command_byte |= fv << shift
                 bit_count += fs
 
-                print 'command_byte','{:08b}'.format(command_byte)
+                # print 'command_byte','{:08b}'.format(command_byte)
 
                 # check if byte is full and we should start a new one
                 if bit_count == 7:
@@ -236,7 +262,7 @@ class Stimulator:
                 # insert fv in the right place in current command_byte
                 command_byte |= fv >> shift_right
 
-                print 'command_byte','{:08b}'.format(command_byte)
+                # print 'command_byte','{:08b}'.format(command_byte)
 
                 # append current command_byte to command_bytes
                 command_bytes.append(command_byte)
@@ -250,7 +276,7 @@ class Stimulator:
                 command_byte |= fv << shift_left
                 bit_count += fs_next
 
-                print 'command_byte','{:08b}'.format(command_byte)
+                # print 'command_byte','{:08b}'.format(command_byte)
 
                 # check if byte is full and we should start a new one
                 if bit_count == 7:
@@ -258,11 +284,15 @@ class Stimulator:
                     command_byte = 0b00000000
                     bit_count = 0
 
-        print 'final results:'
-        for i in range(len(command_bytes)):
-            print i,'{:08b}'.format(command_bytes[i])
+        # print 'final results:'
+        # for i in range(len(command_bytes)):
+        #     print i,'{:08b}'.format(command_bytes[i])
 
-        return bytearray(command_bytes)
+        pkt = bytearray(command_bytes)
+
+        # print binascii.hexlify(pkt)
+
+        return pkt
 
     def _bitset(self, number, bitlist):
         for bit in bitlist:
@@ -278,29 +308,17 @@ class Stimulator:
 
     def _writeRead(self, packet):
         self.serial_port.write(packet)
-        time.sleep(0.001)
 
-        ack = ""
-        i=1
-        while ack == "":
-            self.serial_port.flush()
-            data = self.serial_port.read(self.serial_port.inWaiting()) # le da porta bytearray
-            ack = data.decode()  # transforma bytearray em string
-            i += 1
-            if i > 700:
-                ack = 'No answer'
-                return ack
-        ack = data.decode()  # transforma bytearray em string
+        ack = struct.unpack('B',self.serial_port.read(1))[0]
 
-        return ack
+        # print 'ack', '{0:08b}'.format(ack)
 
-        # ack = int((self.serial_port.read(1)).decode())
-        #
-        # ident = ack >> 5
-        # error_code = ack & 1
-        # print 'ack',ident,error_code
-        #
-        # return {0: True, 1: False}[error_code]
+        ident = ack >> 6
+        error_code = ack & 1
+        # print 'ident', reverse_command_dict[ident]
+        # print 'error_code', error_code
+
+        return {0: False, 1: True}[error_code]
 
     def reconnect(self):
         self.serial_port.close()
