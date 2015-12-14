@@ -1,15 +1,15 @@
 <launch>
   <group ns="ema">
-  <rosparam command="load" file="$(find ema-trike)/config/trike.yaml" ns="trike" />
-  <rosparam command="load" file="$(find ema-trike)/config/imu.yaml" ns="imu" />
-  <rosparam command="load" file="$(find ema-trike)/config/stimulator.yaml" ns="stimulator" />
-  <rosparam command="load" file="$(find ema-trike)/config/control.yaml" ns="control" />
+  <rosparam command="load" file="$(find ema_trike)/config/trike.yaml" ns="trike" />
+  <rosparam command="load" file="$(find ema_trike)/config/imu.yaml" ns="imu" />
+  <rosparam command="load" file="$(find ema_trike)/config/stimulator.yaml" ns="stimulator" />
+  <rosparam command="load" file="$(find ema_trike)/config/control.yaml" ns="control" />
 
-  <node name="imu" pkg="ema-trike" type="imu_node.py" output="screen" />
-  <node name="stimulator" pkg="ema-trike" type="stimulator_node.py" output="screen" />
-  <!--<node name="control" pkg="ema-trike" type="control_node.py" output="screen" />-->
-  <!--<node name="control" pkg="ema-trike" type="trike_old.py" output="screen" />-->
+  <node name="imu" pkg="ema_trike" type="imu_node.py" output="screen" />
+  <node name="stimulator" pkg="ema_trike" type="stimulator_node.py" output="screen" />
+  <!--<node name="control" pkg="ema_trike" type="control_node.py" output="screen" />-->
+  <!--<node name="control" pkg="ema_trike" type="trike_old.py" output="screen" />-->
 
-  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find ema-trike)/config/rviz/imu.rviz" output="screen" />
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find ema_trike)/config/rviz/imu.rviz" output="screen" />
   </group>
 </launch>

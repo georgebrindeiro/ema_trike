@@ -1,0 +1,8 @@
+<launch>
+  <group ns="ema">
+  <rosparam command="load" file="$(find ema_trike)/config/imu.yaml" ns="imu" />
+
+  <node name="imu" pkg="ema_trike" type="imu_node.py" output="screen" />
+
+  </group>
+</launch>

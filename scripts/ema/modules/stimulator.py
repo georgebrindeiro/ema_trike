@@ -100,6 +100,16 @@ class Stimulator:
             print 'port not found in config_dict, defaulting to /dev/ttyUSB0'
             self.port = '/dev/ttyUSB0'
 
+        # Build ccl_settings and set them to default values
+        self.ccl_mode = {}
+        self.ccl_pulse_width = {}
+        self.ccl_pulse_current = {}
+
+        for c in self.channel_stim:
+            self.ccl_mode[c] = 'single'
+            self.ccl_pulse_width[c] = 0
+            self.ccl_pulse_current[c] = 0
+
         # Connect to stimulator
         self.serial_port = serial.Serial(port=self.port,
                                          baudrate=115200,
@@ -112,11 +122,11 @@ class Stimulator:
         cmd = 'channelListModeInitialization'
         ident = command_dict[cmd]['id']
 
-        nf = self.n_factor                                 # grab from config: n_factor
+        nf = self.n_factor                                       # grab from config: n_factor
         cs = self._bitset(0,[x - 1 for x in self.channel_stim])  # grab from config: channel_stim
         clf = self._bitset(0,[x - 1 for x in self.channel_lf])   # grab from config: channel_lf
-        gt = int(round((self.ts2 - 1.5) / 0.5))            # grab from config: ts2
-        mt = int(round((self.ts1 - 1.0) / 0.5))              # grab from config: ts1
+        gt = int(round((self.ts2 - 1.5) / 0.5))                  # grab from config: ts2
+        mt = int(round((self.ts1 - 1.0) / 0.5))                  # grab from config: ts1
 
         # print 'gt',gt
         # print 'mt',mt
@@ -203,7 +213,7 @@ class Stimulator:
 
         pkt = self._buildPacket(cmd,fields)
 
-        print binascii.hexlify(pkt)
+        # print binascii.hexlify(pkt)
 
         return self._writeRead(pkt)
 

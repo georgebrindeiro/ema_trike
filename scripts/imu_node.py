@@ -8,7 +8,7 @@ from sensor_msgs.msg import Imu
 
 def main():
     # init imu node
-    rospy.init_node('imu', anonymous=True)
+    rospy.init_node('imu', anonymous=False)
 
     # get imu config
     imu_manager = imu.IMU(rospy.get_param('/ema/imu'))
@@ -16,7 +16,7 @@ def main():
     # list published topics
     pub = {}
     for name in imu_manager.imus:
-        pub[name] = rospy.Publisher(name, Imu, queue_size=10)
+        pub[name] = rospy.Publisher('imu/' + name, Imu, queue_size=10)
 
     # define loop rate (in hz)
     rate = rospy.Rate(10)

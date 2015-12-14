@@ -67,7 +67,7 @@ Visualization Manager:
       Class: rviz_imu_plugin/Imu
       Enabled: true
       Name: Imu
-      Topic: /ema/pedal
+      Topic: /ema/imu/pedal
       Value: true
     - Acceleration properties:
         Acc. vector alpha: 0.7
@@ -88,7 +88,7 @@ Visualization Manager:
       Class: rviz_imu_plugin/Imu
       Enabled: true
       Name: Imu
-      Topic: /ema/remote
+      Topic: /ema/imu/remote
       Value: true
   Enabled: true
   Global Options:
