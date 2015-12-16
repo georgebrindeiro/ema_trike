@@ -11,7 +11,7 @@ def main():
     rospy.init_node('imu', anonymous=False)
 
     # get imu config
-    imu_manager = imu.IMU(rospy.get_param('/ema/imu'))
+    imu_manager = imu.IMU(rospy.get_param('/ema_trike/imu'))
 
     # list published topics
     pub = {}
