@@ -22,6 +22,18 @@ import thread
 import sys
 import os
 
+# Ports and addresses
+#portIMU = 'COM4'
+#portIMU = '/dev/ttyACM0'
+#portStimulator = '/dev/ttyUSB0'
+portIMU = '/dev/tty.usbmodemfd121'
+portStimulator = '/dev/tty.usbserial-HMQYVD6B'
+addressPedal = 0
+addressRemoteControl = 1
+
+# Reference speed
+speed_ref = 300 ###
+
 # Initialize variables
 xRange = 500
 angle = []
@@ -44,17 +56,6 @@ time_stamp = []
 filter_size = 20 ###
 gastrocnemius_max = 500
 femoral_max = 500
-speed_ref = 300 ###
-
-# Ports and addresses
-#portIMU = 'COM4'
-#portIMU = '/dev/ttyACM0'
-#portStimulator = '/dev/ttyUSB0'
-# portIMU = '/dev/tty.usbmodemfa131'
-portIMU = '/dev/tty.usbmodemfd121'
-portStimulator = '/dev/tty.usbserial-HMQYVD6B'
-addressPedal = 1
-addressRemoteControl = 2
 
 
 # Main function
