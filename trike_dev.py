@@ -26,13 +26,17 @@ import os
 #portIMU = 'COM4'
 #portIMU = '/dev/ttyACM0'
 #portStimulator = '/dev/ttyUSB0'
-portIMU = '/dev/tty.usbmodemfd121'
+# portIMU = '/dev/tty.usbmodemfd121'
+portIMU = imu.get_port()
 portStimulator = '/dev/tty.usbserial-HMQYVD6B'
-addressPedal = 0
+addressPedal = 2
 addressRemoteControl = 1
 
 # Reference speed
 speed_ref = 300 ###
+
+# Debug mode
+stimulation = False
 
 # Initialize variables
 xRange = 500
@@ -115,16 +119,19 @@ def main():
                 pulse_width = [stim_femoral,stim_gastrocnemius]
                 
                 # Electrical stimulator signal update
-                stim.update(channels, pulse_width, current)
+                if stimulation:
+                    stim.update(channels, pulse_width, current)
             
                 counter += 1   
         
         
     # Stop stimulator
-    stim.stop()
+    if stimulation:
+        stim.stop()
     
     # Close ports
-    serialPortStimulator.close()
+    if stimulation:
+        serialPortStimulator.close()
     serialPortIMU.close()
     
     
@@ -132,12 +139,14 @@ def main():
 try:
     # Open ports
     serialPortIMU = serial.Serial(portIMU, timeout=1, writeTimeout=1, baudrate=115200)
-    serialPortStimulator = serial.Serial(portStimulator, timeout=1, writeTimeout=1, baudrate=115200)
+    if stimulation:
+        serialPortStimulator = serial.Serial(portStimulator, timeout=1, writeTimeout=1, baudrate=115200)
     
     # Construct objects
     IMUPedal = imu.IMU(serialPortIMU,addressPedal)
     IMURemoteControl = imu.IMU(serialPortIMU,addressRemoteControl)
-    stim = stimulator.Stimulator(serialPortStimulator)
+    if stimulation:
+        stim = stimulator.Stimulator(serialPortStimulator)
     
     # Setting up
     print "Hello, EMA here!"
@@ -161,9 +170,12 @@ try:
     current = [int(i) for i in (current_str.split(","))]
     
     # Initialize stimulator
-    print "Initializing stimulator..."
-    stim.initialization(freq, channels)
-    print "Done"
+    if stimulation:
+        print "Initializing stimulator..."
+        stim.initialization(freq, channels)
+        print "Done"
+    else:
+        print "Stimulation is deactivated"
     
     # Ready to go. 
     print "Whenever you're ready, press button 1 (the left one)!"
