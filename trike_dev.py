@@ -40,90 +40,132 @@ stimulation = False
 
 # Initialize variables
 xRange = 500
-angle = []
+# angle = []
 angle = [0 for x in range(xRange)]
-angSpeed = []
+# angSpeed = []
 angSpeed = [0 for x in range(xRange)]
-filtered_speed = []
+# filtered_speed = []
 filtered_speed = [0 for x in range(xRange)]
-signal_femoral = []
+# signal_femoral = []
 signal_femoral = [0 for x in range(xRange)]
-signal_gastrocnemius = []
+# signal_gastrocnemius = []
 signal_gastrocnemius = [0 for x in range(xRange)]
-angSpeedRefHistory = []
+# angSpeedRefHistory = []
 angSpeedRefHistory = [0 for x in range(xRange)]
-controlSignal = []
+# controlSignal = []
 controlSignal = [0 for x in range(xRange)]
-errorHistory = []
+# errorHistory = []
 errorHistory = [0 for x in range(xRange)]
 time_stamp = []
 filter_size = 20 ###
 gastrocnemius_max = 500
 femoral_max = 500
+wait_time = 0.001
+running = False
+reading = False
+
+
+# Read angles
+def read_angles():
+    global reading
+    while running:
+        try:
+            # print 'reading'
+            # Get angle position
+            while reading:
+                pass
+            reading = True
+            ang = IMUPedal.getEulerAngles()
+            reading = False
+            ang = ang.split(",")
+            if len(ang) == 6:
+                ang = float(ang[4])
+                if ang >= 0:
+                    ang = (ang / math.pi) * 180
+                else:
+                    ang = 360 - ((-(ang) / math.pi) * 180)
+                angle.append(ang)
+            else:
+                print 'erro de leitura'
+            time.sleep(wait_time)
+        except:
+            print 'Erro ao ler angulo'
+    ##############################################
+
+
+def get_angular_speed():
+    global reading
+    counter = 1
+    while running:
+        try:
+            # Get angular speed
+            while reading:
+                pass
+            reading = True
+            speed = IMUPedal.getGyroData()
+            reading = False
+            speed = speed.split(",")
+            if len(speed) == 6:
+                speed = float(speed[4])
+                speed = speed / math.pi * 180
+                angSpeed.append(speed)
+                angSpeedRefHistory.append(speed_ref)
+                errorHistory.append(speed_ref - filtered_speed[-1])
+                # Filter the speed
+                if counter >= filter_size:
+                    filtered_speed.append(numpy.mean(angSpeed[-filter_size:]))
+            counter += 1
+            time.sleep(wait_time)
+        except:
+            print 'Erro ao ler velocidade angular'
+    ##############################################
+
+
+def read_buttons():
+    global running
+    try:
+        if IMURemoteControl.checkButtons() == 2:
+            running = False
+        time.sleep(wait_time)
+    except:
+        print 'Erro ao ler botoes'
 
 
 # Main function
 def main():
+    global running
     timeStart = time.clock()
-    counter = 1
-    while not (IMURemoteControl.checkButtons() == 2):
-        
-        # Get angle position
-        ang = IMUPedal.getEulerAngles()
-        ang = ang.split(",")
-        if len(ang) == 6:
-            ang = float(ang[4])
-            if ang >= 0:
-                ang = (ang / math.pi) * 180
-            else:
-                ang = 360 - ((-(ang) / math.pi) * 180)
-            angle.append(ang)
-        ##############################################
-            
-        # Get angular speed
-            speed = IMUPedal.getGyroData()
-            speed = speed.split(",")        
-            if len(speed) == 6:            
-                speed = float(speed[4])
-                speed = speed/(math.pi) * 180
-                angSpeed.append(speed)
-                angSpeedRefHistory.append(speed_ref)
-                errorHistory.append(speed_ref - filtered_speed[-1])
-                time_stamp.append(time.clock()-timeStart)    
-        ##############################################
-                
-        # Filter the speed
-                if counter >= filter_size:
-                    filtered_speed.append(numpy.mean(angSpeed[-filter_size:]))
-                    
-                # Calculate control signal
-                controlSignal.append(control.control(errorHistory))              
-                
-                # Calculate stimulation signal
-                signal_gastrocnemius.append((perfil.gastrocnemius(angle[-1], angSpeed[-1], speed_ref))*(controlSignal[-1]))
-                signal_femoral.append((perfil.femoral(angle[-1], angSpeed[-1], speed_ref))*(controlSignal[-1]))
-            
-                # Signal double safety saturation        
-                if signal_femoral[-1] > 1:
-                    signal_femoral[-1] = 1
-                elif signal_femoral[-1] < 0:
-                    signal_femoral[-1] = 0
-                if signal_gastrocnemius[-1] > 1:
-                    signal_gastrocnemius[-1] = 1
-                elif signal_gastrocnemius[-1] < 0:
-                    signal_gastrocnemius[-1] = 0
-            
-                # Electrical stimulation parameters settings    
-                stim_femoral = signal_femoral[-1]*femoral_max
-                stim_gastrocnemius = signal_gastrocnemius[-1]*gastrocnemius_max    
-                pulse_width = [stim_femoral,stim_gastrocnemius]
-                
-                # Electrical stimulator signal update
-                if stimulation:
-                    stim.update(channels, pulse_width, current)
-            
-                counter += 1   
-        
+
+    while running:
+        time_stamp.append(time.clock()-timeStart)
+
+        # Calculate control signal
+        controlSignal.append(control.control(errorHistory))
+
+        # Calculate stimulation signal
+        signal_gastrocnemius.append((perfil.gastrocnemius(angle[-1], angSpeed[-1], speed_ref))*(controlSignal[-1]))
+        signal_femoral.append((perfil.femoral(angle[-1], angSpeed[-1], speed_ref))*(controlSignal[-1]))
+
+        # Signal double safety saturation
+        if signal_femoral[-1] > 1:
+            signal_femoral[-1] = 1
+        elif signal_femoral[-1] < 0:
+            signal_femoral[-1] = 0
+        if signal_gastrocnemius[-1] > 1:
+            signal_gastrocnemius[-1] = 1
+        elif signal_gastrocnemius[-1] < 0:
+            signal_gastrocnemius[-1] = 0
+
+        # Electrical stimulation parameters settings
+        stim_femoral = signal_femoral[-1]*femoral_max
+        stim_gastrocnemius = signal_gastrocnemius[-1]*gastrocnemius_max
+        pulse_width = [stim_femoral,stim_gastrocnemius]
+
+        # Electrical stimulator signal update
+        if stimulation:
+            stim.update(channels, pulse_width, current)
+
+    running = False
         
     # Stop stimulator
     if stimulation:
@@ -138,13 +180,13 @@ def main():
         
 try:
     # Open ports
-    serialPortIMU = serial.Serial(portIMU, timeout=1, writeTimeout=1, baudrate=115200)
+    serialPortIMU = serial.Serial(portIMU, timeout=1, baudrate=115200)
     if stimulation:
         serialPortStimulator = serial.Serial(portStimulator, timeout=1, writeTimeout=1, baudrate=115200)
     
     # Construct objects
-    IMUPedal = imu.IMU(serialPortIMU,addressPedal)
-    IMURemoteControl = imu.IMU(serialPortIMU,addressRemoteControl)
+    IMUPedal = imu.IMU(serialPortIMU, addressPedal)
+    IMURemoteControl = imu.IMU(serialPortIMU, addressRemoteControl)
     if stimulation:
         stim = stimulator.Stimulator(serialPortStimulator)
     
@@ -154,7 +196,7 @@ try:
     calibrationError = 10
     while calibrationError > 0.1 :
         ang = []
-        while(len(ang) < 6):
+        while len(ang) < 6:
             IMUPedal.setEulerToYXZ()
             IMUPedal.calibrate()
             IMUPedal.tare()
@@ -164,10 +206,11 @@ try:
     print "Done"
     
     # Asking for user input
-    freq=int(raw_input("Input frequency: "))
-    channels=int(raw_input("Input channels: "))
-    current_str = raw_input("Input current: ")
-    current = [int(i) for i in (current_str.split(","))]
+    if stimulation:
+        freq=int(raw_input("Input frequency: "))
+        channels=int(raw_input("Input channels: "))
+        current_str = raw_input("Input current: ")
+        current = [int(i) for i in (current_str.split(","))]
     
     # Initialize stimulator
     if stimulation:
@@ -188,7 +231,11 @@ try:
     print "Here we go!"
     
     # Start main function
+    running = True
+    thread.start_new_thread(read_angles, ())
+    thread.start_new_thread(get_angular_speed, ())
     thread.start_new_thread(main, ())
+    # thread.start_new_thread(read_buttons, ())
 #    main()
 
     # Start real time plotter

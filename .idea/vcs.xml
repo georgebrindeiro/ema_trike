@@ -2,6 +2,6 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
-    <mapping directory="C:\Users\Wall-e\Documents\GitHub\ema-trike\Py_imu" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Py_imu" vcs="Git" />
   </component>
 </project>
