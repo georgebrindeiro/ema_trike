@@ -16,7 +16,8 @@ class RealTimePlotter:
         yAchse=pylab.array([0]*self.xRange)
         
         fig = pylab.figure(1, figsize=(13,10))
-        self.ax = fig.add_subplot(511)
+
+        self.ax = fig.add_subplot(411)
         self.ax.grid(True)
         self.ax.set_title("Real time Cycling Plot")
         self.ax.set_xlabel("")
@@ -24,7 +25,7 @@ class RealTimePlotter:
         self.ax.axis([0,self.xRange,-1.5,1.5])
         self.line1=self.ax.plot(xAchse,yAchse,'-')
         
-        self.ax2 = fig.add_subplot(512)
+        self.ax2 = fig.add_subplot(412)
         self.ax2.grid(True)
         self.ax2.set_title("")
         self.ax2.set_xlabel("")
@@ -33,7 +34,7 @@ class RealTimePlotter:
         self.line2=self.ax2.plot(xAchse,yAchse,'-')
         self.line3=self.ax2.plot(xAchse,yAchse,'-')
         
-        self.ax3 = fig.add_subplot(513)
+        self.ax3 = fig.add_subplot(413)
         self.ax3.grid(True)
         self.ax3.set_title("")
         self.ax3.set_xlabel("")
@@ -43,7 +44,7 @@ class RealTimePlotter:
         self.line5=self.ax3.plot(xAchse,yAchse,'-')
         self.line6=self.ax3.plot(xAchse,yAchse,'-')
         
-        self.ax4 = fig.add_subplot(514)
+        self.ax4 = fig.add_subplot(414)
         self.ax4.grid(True)
         self.ax4.set_title("")
         self.ax4.set_xlabel("")
@@ -51,13 +52,13 @@ class RealTimePlotter:
         self.ax4.axis([0,self.xRange,-1.5,1.5])
         self.line7=self.ax4.plot(xAchse,yAchse,'-')
         
-        self.ax5 = fig.add_subplot(515)
-        self.ax5.grid(True)
-        self.ax5.set_title("")
-        self.ax5.set_xlabel("Time")
-        self.ax5.set_ylabel("Error")
-        self.ax5.axis([0,self.xRange,-1.5,1.5])
-        self.line8=self.ax5.plot(xAchse,yAchse,'-')
+        # self.ax5 = fig.add_subplot(515)
+        # self.ax5.grid(True)
+        # self.ax5.set_title("")
+        # self.ax5.set_xlabel("Time")
+        # self.ax5.set_ylabel("Error")
+        # self.ax5.axis([0,self.xRange,-1.5,1.5])
+        # self.line8=self.ax5.plot(xAchse,yAchse,'-')
         
         self.manager = pylab.get_current_fig_manager()
         
@@ -80,13 +81,13 @@ class RealTimePlotter:
       self.line5[0].set_data(CurrentXAxis,pylab.array(angSpeed[-self.xRange:]))  
       self.line6[0].set_data(CurrentXAxis,pylab.array(angSpeedRefHistory[-self.xRange:])) 
       self.line7[0].set_data(CurrentXAxis,pylab.array(controlSignal[-self.xRange:])) 
-      self.line8[0].set_data(CurrentXAxis,pylab.array(errorHistory[-self.xRange:])) 
+      # self.line8[0].set_data(CurrentXAxis,pylab.array(errorHistory[-self.xRange:]))
       
       self.ax.axis([CurrentXAxis.min(),CurrentXAxis.max(),-5,365])
       self.ax2.axis([CurrentXAxis.min(),CurrentXAxis.max(),-0.2,1.2])
       self.ax3.axis([CurrentXAxis.min(),CurrentXAxis.max(),-5,1200])
       self.ax4.axis([CurrentXAxis.min(),CurrentXAxis.max(),-1.1,1.1])      
-      self.ax5.axis([CurrentXAxis.min(),CurrentXAxis.max(),-100,100])
+      # self.ax5.axis([CurrentXAxis.min(),CurrentXAxis.max(),-100,100])
       
       self.manager.canvas.draw()    
 
