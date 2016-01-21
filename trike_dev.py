@@ -34,7 +34,7 @@ addressPedal = 2
 addressRemoteControl = 1
 
 # Reference speed
-speed_ref = 300
+speed_ref = 100
 
 # Debug mode
 stimulation = False
