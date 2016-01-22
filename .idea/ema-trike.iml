@@ -4,7 +4,7 @@
     <content url="file://$MODULE_DIR$/../Py_imu" />
     <content url="file://$MODULE_DIR$/../Py_stimulator" />
     <content url="file://$MODULE_DIR$" />
-    <orderEntry type="inheritedJdk" />
+    <orderEntry type="jdk" jdkName="Python 2.7.6 (/usr/bin/python)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>

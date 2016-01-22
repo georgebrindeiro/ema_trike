@@ -22,26 +22,26 @@ def femoral(angle, ang_speed, speed_ref):  # femoral esquerdo
     # print ang_initial
     # Stimulate if it is in the stimulation zone
     if ang_final > ang_initial:
-        if ang_initial - ramp_angle < angle < ang_initial:
+        if (ang_initial - ramp_angle) < angle < ang_initial:
             print 'rampa subida 01'
             return 1 - ((ang_initial - angle) / ramp_angle)
         elif ang_initial <= angle <= ang_final:
             print 'um 01'
             return 1
-        elif ang_final < angle < ang_final + ramp_angle:
+        elif ang_final < angle < (ang_final + ramp_angle):
             print 'rampa descida 01'
             return 1 - ((angle - ang_final) / ramp_angle)
         else:
             print 'zero 01'
             return 0
     else:
-        if ang_initial - ramp_angle < angle < ang_initial:
+        if (ang_initial - ramp_angle) < angle < ang_initial:
             print 'rampa subida 02'
             return 1 - ((ang_initial - angle) / ramp_angle)
         elif ang_initial <= angle or angle <= ang_final:
             print 'um 02'
             return 1
-        elif ang_final < angle < ang_final + ramp_angle:
+        elif ang_final < angle < (ang_final + ramp_angle):
             print 'rampa descida 02'
             return 1 - ((angle - ang_final) / ramp_angle)
         else:
@@ -58,21 +58,21 @@ def gastrocnemius(angle, ang_speed, speed_ref):  # femoral direito
 
     # Stimulate if it is in the stimulation zone    
     if ang_final > ang_initial:
-        if ang_initial - ramp_angle < angle < ang_initial:
+        if (ang_initial - ramp_angle) < angle < ang_initial:
             return 1 - ((ang_initial - angle) / ramp_angle)
         elif ang_initial < angle < ang_final:
             return 1
-        elif ang_final < angle < ang_final + ramp_angle:
+        elif ang_final < angle < (ang_final + ramp_angle):
             return 1 - ((angle - ang_final) / ramp_angle)
         else:
             # print 'zero 03'
             return 0
     else:
-        if ang_initial - ramp_angle < angle < ang_initial:
+        if (ang_initial - ramp_angle) < angle < ang_initial:
             return 1 - ((ang_initial - angle) / ramp_angle)
         elif ang_initial < angle or angle < ang_final:
             return 1
-        elif ang_final < angle < ang_final + ramp_angle:
+        elif ang_final < angle < (ang_final + ramp_angle):
             return 1 - ((angle - ang_final) / ramp_angle)
         else:
             # print 'zero 04'

@@ -27,8 +27,8 @@ import os
 # portIMU = 'COM4'
 # portIMU = '/dev/ttyACM0'
 # portStimulator = '/dev/ttyUSB0'
-# portIMU = '/dev/tty.usbmodemfd121'
-portIMU = imu.get_port()
+portIMU = '/dev/tty.usbmodemFA131'
+# portIMU = imu.get_port()
 portStimulator = '/dev/tty.usbserial-HMQYVD6B'
 addressPedal = 2
 addressRemoteControl = 1
@@ -204,8 +204,10 @@ def read_sensors():
     if stimulation:
         serialPortStimulator.close()
     serialPortIMU.close()
+    time.sleep(wait_time)
 
 try:
+    print "Hello!"
     # Open ports
     serialPortIMU = serial.Serial(portIMU, timeout=1, baudrate=115200)
     if stimulation:
