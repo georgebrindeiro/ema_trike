@@ -9,7 +9,7 @@ def control(error):
     signal = 0
     try:    
         p = 1/float(1000)
-        i = 1/float(100000)
+        i = 1/float(10000)
         
         # If there is a change of signal, reset
 #        if ((error[-2] >= 0) and (error[-1] < 0)) or ((error[-2] < 0) and (error[-1] >= 0)):

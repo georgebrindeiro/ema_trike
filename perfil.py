@@ -15,65 +15,164 @@ def phase(ang):
 def femoral(angle, ang_speed, speed_ref):  # femoral esquerdo
 
     # Calculate initial and final angles based on angular speed    
-    ang_initial = 300 - (ang_speed / speed_ref) * 35
+    ang_initial = 300 - (float(ang_speed) / float(speed_ref)) * 35
     ang_final = ang_initial + 100
-    if ang_final > 360:
+    if ang_final > 180:
         ang_final -= 360
+    if ang_initial > 180:
+        ang_initial -= 360
+    if angle > 180:
+        angle -= 360
+    # if ang_final > 360:
+    #     ang_final -= 360
+    # if ang_final > (360 - ramp_angle):
+    #     ramp_angle_final = ang_final + ramp_angle - 360
+    # else:
+    #     ramp_angle_final = ang_final + ramp_angle
     # print ang_initial
     # Stimulate if it is in the stimulation zone
     if ang_final > ang_initial:
         if (ang_initial - ramp_angle) < angle < ang_initial:
-            print 'rampa subida 01'
+            # print '####### rampa subida 01. Data:'
+            # print "Angle: ", angle
+            # print "Initial angle: ", ang_initial
+            # print "Final angle: ", ang_final
+            # print "Speed: ", ang_speed
+            # print "Speed ref: ", speed_ref
+            # print " "
             return 1 - ((ang_initial - angle) / ramp_angle)
         elif ang_initial <= angle <= ang_final:
-            print 'um 01'
+            # print '####### um 01. Data:'
+            # print "Angle: ", angle
+            # print "Initial angle: ", ang_initial
+            # print "Final angle: ", ang_final
+            # print "Speed: ", ang_speed
+            # print "Speed ref: ", speed_ref
+            # print " "
             return 1
         elif ang_final < angle < (ang_final + ramp_angle):
-            print 'rampa descida 01'
+            # print '####### rampa descida 01. Data:'
+            # print "Angle: ", angle
+            # print "Initial angle: ", ang_initial
+            # print "Final angle: ", ang_final
+            # print "Speed: ", ang_speed
+            # print "Speed ref: ", speed_ref
+            # print " "
             return 1 - ((angle - ang_final) / ramp_angle)
         else:
-            print 'zero 01'
+            # print '####### zero 01. Data:'
+            # print "Angle: ", angle
+            # print "Initial angle: ", ang_initial
+            # print "Final angle: ", ang_final
+            # print "Speed: ", ang_speed
+            # print "Speed ref: ", speed_ref
+            # print " "
             return 0
     else:
+        # print "0000000000000000000000 nao era pra entrar aqui"
         if (ang_initial - ramp_angle) < angle < ang_initial:
-            print 'rampa subida 02'
+            # print '####### rampa subida 02. Data:'
+            # print "Angle: ", angle
+            # print "Initial angle: ", ang_initial
+            # print "Final angle: ", ang_final
+            # print "Speed: ", ang_speed
+            # print "Speed ref: ", speed_ref
+            # print " "
             return 1 - ((ang_initial - angle) / ramp_angle)
         elif ang_initial <= angle or angle <= ang_final:
-            print 'um 02'
+            # print '######## um 02. Data:'
+            # print "Angle: ", angle
+            # print "Initial angle: ", ang_initial
+            # print "Final angle: ", ang_final
+            # print "Speed: ", ang_speed
+            # print "Speed ref: ", speed_ref
+            # print " "
             return 1
         elif ang_final < angle < (ang_final + ramp_angle):
-            print 'rampa descida 02'
+            # print '####### rampa descida 02. Data:'
+            # print "Angle: ", angle
+            # print "Initial angle: ", ang_initial
+            # print "Final angle: ", ang_final
+            # print "Speed: ", ang_speed
+            # print "Speed ref: ", speed_ref
+            # print " "
             return 1 - ((angle - ang_final) / ramp_angle)
         else:
-            print 'zero 02'
+            # print '####### zero 02. Data:'
+            # print "Angle: ", angle
+            # print "Initial angle: ", ang_initial
+            # print "Final angle: ", ang_final
+            # print "Speed: ", ang_speed
+            # print "Speed ref: ", speed_ref
+            # print " "
             return 0
 
 
 def gastrocnemius(angle, ang_speed, speed_ref):  # femoral direito
     # Calculate initial and final angles based on angular speed       
-    ang_initial = 120 - (ang_speed / speed_ref) * 35
+    ang_initial = 120 - (float(ang_speed) / float(speed_ref)) * 35
     ang_final = ang_initial + 100
-    if ang_final > 360:
-        ang_final -= 360
+    # if ang_final > 360:
+    #     ang_final -= 360
+    # if ang_final > 180:
+    #     ang_final -= 360
+    # if ang_initial > 180:
+    #     ang_initial -= 360
+    # if angle > 180:
+    #     angle -= 360
 
     # Stimulate if it is in the stimulation zone    
     if ang_final > ang_initial:
+
         if (ang_initial - ramp_angle) < angle < ang_initial:
+            # print 'subida'
+            # print "Angle: ", angle
+            # print "Initial angle: ", ang_initial
+            # print "Final angle: ", ang_final
+            # print "Speed: ", ang_speed
+            # print "Speed ref: ", speed_ref
+            # print " "
             return 1 - ((ang_initial - angle) / ramp_angle)
         elif ang_initial < angle < ang_final:
+            # print 'um'
+            # print "Angle: ", angle
+            # print "Initial angle: ", ang_initial
+            # print "Final angle: ", ang_final
+            # print "Speed: ", ang_speed
+            # print "Speed ref: ", speed_ref
+            # print " "
             return 1
         elif ang_final < angle < (ang_final + ramp_angle):
+            # print 'descida'
+            # print "Angle: ", angle
+            # print "Initial angle: ", ang_initial
+            # print "Final angle: ", ang_final
+            # print "Speed: ", ang_speed
+            # print "Speed ref: ", speed_ref
+            # print " "
             return 1 - ((angle - ang_final) / ramp_angle)
         else:
+            # print 'zero'
+            # print "Angle: ", angle
+            # print "Initial angle: ", ang_initial
+            # print "Final angle: ", ang_final
+            # print "Speed: ", ang_speed
+            # print "Speed ref: ", speed_ref
+            # print " "
             # print 'zero 03'
             return 0
     else:
+        # print 'XXXXXXXXXXXXXXXXXX nao era pra entrar aqui'
         if (ang_initial - ramp_angle) < angle < ang_initial:
+
             return 1 - ((ang_initial - angle) / ramp_angle)
         elif ang_initial < angle or angle < ang_final:
+
             return 1
         elif ang_final < angle < (ang_final + ramp_angle):
+
             return 1 - ((angle - ang_final) / ramp_angle)
         else:
             # print 'zero 04'
+
             return 0

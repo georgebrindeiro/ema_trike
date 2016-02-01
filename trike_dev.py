@@ -27,7 +27,7 @@ import os
 # portIMU = 'COM4'
 # portIMU = '/dev/ttyACM0'
 # portStimulator = '/dev/ttyUSB0'
-portIMU = '/dev/tty.usbmodemFA131'
+portIMU = '/dev/tty.usbmodemFD121'
 # portIMU = imu.get_port()
 portStimulator = '/dev/tty.usbserial-HMQYVD6B'
 addressPedal = 2
@@ -36,11 +36,19 @@ addressRemoteControl = 1
 # Reference speed
 speed_ref = 100
 
+# Frequency
+freq = 50
+period = 1.0/freq
+print period
+
 # Debug mode
 stimulation = False
 
+# Run with filtered seed
+run_with_filtered_speed = True
+
 # Initialize variables
-xRange = 500
+xRange = freq * 10
 # angle = []
 angle = [0 for x in range(xRange)]
 # angSpeed = []
@@ -65,10 +73,10 @@ controlSignal = [0 for x in range(xRange)]
 # noinspection PyRedeclaration
 errorHistory = [0 for x in range(xRange)]
 time_stamp = []
-filter_size = 20
+filter_size = 5
 gastrocnemius_max = 500
 femoral_max = 500
-wait_time = 0.001
+wait_time = 0.000
 running = False
 reading = False
 counter = 1
@@ -111,23 +119,39 @@ def get_angular_speed():
         # Get angular speed
         # while reading:
         #     pass
-        reading = True
-        speed = IMUPedal.getGyroData()
-        reading = False
-        speed = speed.split(",")
-        if len(speed) == 6:
-            speed = float(speed[4])
-            speed = speed / math.pi * 180
-            angSpeed.append(int(speed))
-            angSpeedRefHistory.append(speed_ref)
-            errorHistory.append(speed_ref - filtered_speed[-1])
-            # Filter the speed
-            # print counter
+        speed_test = -1
+        while speed_test < 0:
+            reading = True
+            speed = IMUPedal.getGyroData()
+            reading = False
+            # bkp_speed = speed
+            speed = speed.split(",")
+            if len(speed) == 6:
+                speed = float(speed[4])
+                speed = speed / math.pi * 180
+                speed_test = speed
+            else:
+                print "Wrong response for angular speed"
+        if run_with_filtered_speed:
             if counter >= filter_size:
                 # print 'append'
-                filtered_speed.append(int(numpy.mean(angSpeed[-filter_size:])))
+                angSpeed.append(int(round(speed)))
+                angSpeed[-1] = int(round(numpy.mean(angSpeed[-filter_size:])))
+                filtered_speed.append(angSpeed[-1])
+            else:
+                angSpeed.append(int(round(speed)))
         else:
-            print "Wrong response for angular speed"
+            angSpeed.append(int(round(speed)))
+            if counter >= filter_size:
+                # print 'append'
+                filtered_speed.append(int(round(numpy.mean(angSpeed[-filter_size:]))))
+
+        angSpeedRefHistory.append(speed_ref)
+        errorHistory.append(speed_ref - filtered_speed[-1])
+        # Filter the speed
+        # print counter
+
+
         counter += 1
         time.sleep(wait_time)
     except ValueError:
@@ -153,39 +177,47 @@ def read_buttons():
 # Main function
 def main():
     global running, controlSignal, signal_femoral, signal_gastrocnemius
+    t0 = time.clock()
+    t1 = -1
+    while running:
+        # Get time
+        t_diff = time.clock() - t1
+        if t_diff < period:
+            time.sleep(period-t_diff-0.004)
+            # continue
+        t1 = time.clock()
+        time_stamp.append(time.clock() - t0)
 
-    # while running:
-    time_stamp.append(time.clock() - time_start)
-    # print time_stamp[-1]
-    # print len(time_stamp)
-    # Calculate control signal
-    controlSignal.append(control.control(errorHistory))
-    # print len(controlSignal)
+        # get other data
 
-    # Calculate stimulation signal
-    signal_gastrocnemius.append((perfil.gastrocnemius(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
-    signal_femoral.append((perfil.femoral(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
 
-    # Signal double safety saturation
-    if signal_femoral[-1] > 1:
-        signal_femoral[-1] = 1
-    elif signal_femoral[-1] < 0:
-        signal_femoral[-1] = 0
-    if signal_gastrocnemius[-1] > 1:
-        signal_gastrocnemius[-1] = 1
-    elif signal_gastrocnemius[-1] < 0:
-        signal_gastrocnemius[-1] = 0
+        # Calculate control signal
+        controlSignal.append(control.control(errorHistory))
 
-    # Electrical stimulation parameters settings
-    stim_femoral = signal_femoral[-1] * femoral_max
-    stim_gastrocnemius = signal_gastrocnemius[-1] * gastrocnemius_max
-    pulse_width = [stim_femoral, stim_gastrocnemius]
+        # Calculate stimulation signal
+        signal_gastrocnemius.append((perfil.gastrocnemius(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
+        signal_femoral.append((perfil.femoral(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
 
-    # Electrical stimulator signal update
-    if stimulation:
-        stim.update(channels, pulse_width, current)
+        # Signal double safety saturation
+        if signal_femoral[-1] > 1:
+            signal_femoral[-1] = 1
+        elif signal_femoral[-1] < 0:
+            signal_femoral[-1] = 0
+        if signal_gastrocnemius[-1] > 1:
+            signal_gastrocnemius[-1] = 1
+        elif signal_gastrocnemius[-1] < 0:
+            signal_gastrocnemius[-1] = 0
 
-    # running = False
+        # Electrical stimulation parameters settings
+        stim_femoral = signal_femoral[-1] * femoral_max
+        stim_gastrocnemius = signal_gastrocnemius[-1] * gastrocnemius_max
+        pulse_width = [stim_femoral, stim_gastrocnemius]
+
+        # Electrical stimulator signal update
+        if stimulation:
+            stim.update(channels, pulse_width, current)
+
+        # running = False
 
 
 def read_sensors():
@@ -193,7 +225,7 @@ def read_sensors():
         read_angles()
         get_angular_speed()
         read_buttons()
-        main()
+        # main()
         # print len(angle)
 
     # Stop stimulator
@@ -208,6 +240,7 @@ def read_sensors():
 
 try:
     print "Hello!"
+
     # Open ports
     serialPortIMU = serial.Serial(portIMU, timeout=1, baudrate=115200)
     if stimulation:
@@ -264,7 +297,7 @@ try:
     thread.start_new_thread(read_sensors, ())
     # thread.start_new_thread(read_angles, ())
     # thread.start_new_thread(get_angular_speed, ())
-    # thread.start_new_thread(main, ())
+    thread.start_new_thread(main, ())
     # thread.start_new_thread(read_buttons, ())
     #    main()
 
@@ -278,6 +311,9 @@ try:
             f.write(str(s) + '\n')
     with open("data_filteredAngSpeed", 'w') as f:
         for s in filtered_speed:
+            f.write(str(s) + '\n')
+    with open("data_usedSpeed", "w") as f:
+        for s in angSpeed:
             f.write(str(s) + '\n')
     with open("data_time", 'w') as f:
         for s in time_stamp:
