@@ -30,8 +30,8 @@ import os
 portIMU = '/dev/tty.usbmodemFD121'
 # portIMU = imu.get_port()
 portStimulator = '/dev/tty.usbserial-HMQYVD6B'
-addressPedal = 2
-addressRemoteControl = 1
+addressPedal = 3
+addressRemoteControl = 4
 
 # Reference speed
 speed_ref = 100
@@ -48,30 +48,32 @@ stimulation = False
 run_with_filtered_speed = True
 
 # Initialize variables
-xRange = freq * 10
-# angle = []
+xRange = freq * 20
 angle = [0 for x in range(xRange)]
-# angSpeed = []
+# noinspection PyRedeclaration
+shown_angle = [0 for x in range(xRange)]
 # noinspection PyRedeclaration
 angSpeed = [0 for x in range(xRange)]
-# filtered_speed = []
+# noinspection PyRedeclaration
+shown_speed = [0 for x in range(xRange)]
 # noinspection PyRedeclaration
 filtered_speed = [0 for x in range(xRange)]
-# signal_femoral = []
 # noinspection PyRedeclaration
 signal_femoral = [0 for x in range(xRange)]
-# signal_gastrocnemius = []
 # noinspection PyRedeclaration
 signal_gastrocnemius = [0 for x in range(xRange)]
-# angSpeedRefHistory = []
 # noinspection PyRedeclaration
 angSpeedRefHistory = [0 for x in range(xRange)]
-# controlSignal = []
+# noinspection PyRedeclaration
+shown_ref_speed = [0 for x in range(xRange)]
 # noinspection PyRedeclaration
 controlSignal = [0 for x in range(xRange)]
-# errorHistory = []
+# noinspection PyRedeclaration
+shown_control_signal = [0 for x in range(xRange)]
 # noinspection PyRedeclaration
 errorHistory = [0 for x in range(xRange)]
+# noinspection PyRedeclaration
+shown_error = [0 for x in range(xRange)]
 time_stamp = []
 filter_size = 5
 gastrocnemius_max = 500
@@ -189,10 +191,14 @@ def main():
         time_stamp.append(time.clock() - t0)
 
         # get other data
-
+        shown_angle.append(angle[-1])
+        shown_control_signal.append(controlSignal[-1])
+        shown_error.append(errorHistory[-1])
+        shown_ref_speed.append(angSpeedRefHistory[-1])
+        shown_speed.append(angSpeed[-1])
 
         # Calculate control signal
-        controlSignal.append(control.control(errorHistory))
+        controlSignal.append(control.control(shown_error[xRange:]))
 
         # Calculate stimulation signal
         signal_gastrocnemius.append((perfil.gastrocnemius(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
@@ -302,8 +308,10 @@ try:
     #    main()
 
     # Start real time plotter
-    realTimePlotter.RealTimePlotter(angle, signal_femoral, signal_gastrocnemius, filtered_speed, angSpeed,
-                                    controlSignal, angSpeedRefHistory, errorHistory, xRange)
+    # realTimePlotter.RealTimePlotter(angle, signal_femoral, signal_gastrocnemius, angSpeed,
+    #                                 controlSignal, angSpeedRefHistory, errorHistory, xRange)
+    realTimePlotter.RealTimePlotter(shown_angle, signal_femoral, signal_gastrocnemius, shown_speed,
+                                    shown_control_signal, shown_ref_speed, shown_error, xRange, time_stamp)
 
     # Save the data
     with open("data_angle", 'w') as f:
