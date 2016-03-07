@@ -4,7 +4,7 @@ Created on Sat May 23 13:41:18 2015
 
 @author: Wall-e
 """
-ramp_angle = 30.0
+ramp_angle = 60.0
 
 
 def phase(ang):
@@ -15,8 +15,8 @@ def phase(ang):
 def femoral(angle, ang_speed, speed_ref):  # femoral esquerdo
 
     # Calculate initial and final angles based on angular speed    
-    ang_initial = 300 - (float(ang_speed) / float(speed_ref)) * 35
-    ang_final = ang_initial + 100
+    ang_initial = 280 - (float(ang_speed) / float(speed_ref)) * 35
+    ang_final = ang_initial + 140
     if ang_final > 180:
         ang_final -= 360
     if ang_initial > 180:
@@ -110,8 +110,8 @@ def femoral(angle, ang_speed, speed_ref):  # femoral esquerdo
 
 def gastrocnemius(angle, ang_speed, speed_ref):  # femoral direito
     # Calculate initial and final angles based on angular speed       
-    ang_initial = 120 - (float(ang_speed) / float(speed_ref)) * 35
-    ang_final = ang_initial + 100
+    ang_initial = 100 - (float(ang_speed) / float(speed_ref)) * 35
+    ang_final = ang_initial + 140
     # if ang_final > 360:
     #     ang_final -= 360
     # if ang_final > 180:

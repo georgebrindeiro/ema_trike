@@ -27,22 +27,22 @@ import os
 # portIMU = 'COM4'
 # portIMU = '/dev/ttyACM0'
 # portStimulator = '/dev/ttyUSB0'
-portIMU = '/dev/tty.usbmodemFD121'
+portIMU = '/dev/tty.usbmodemFA131'
 # portIMU = imu.get_port()
 portStimulator = '/dev/tty.usbserial-HMQYVD6B'
-addressPedal = 3
-addressRemoteControl = 4
+addressPedal = 5
+addressRemoteControl = 2
 
 # Reference speed
-speed_ref = 100
+speed_ref = 200
 
 # Frequency
-freq = 50
+freq = 25
 period = 1.0/freq
 print period
 
 # Debug mode
-stimulation = False
+stimulation = True
 
 # Run with filtered seed
 run_with_filtered_speed = True
