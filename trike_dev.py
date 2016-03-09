@@ -27,14 +27,16 @@ import os
 # portIMU = 'COM4'
 # portIMU = '/dev/ttyACM0'
 # portStimulator = '/dev/ttyUSB0'
-portIMU = '/dev/tty.usbmodemFA131'
-# portIMU = imu.get_port()
+# portIMU = '/dev/tty.usbmodemFA131'
+portIMU = imu.get_port()
 portStimulator = '/dev/tty.usbserial-HMQYVD6B'
 addressPedal = 5
-addressRemoteControl = 2
+addressRemoteControl = 4
 
 # Reference speed
-speed_ref = 200
+speed_ref = 250
+fast_speed = 300
+time_on_speed = 3000
 
 # Frequency
 freq = 25
@@ -42,7 +44,10 @@ period = 1.0/freq
 print period
 
 # Debug mode
-stimulation = True
+stimulation = False
+
+# Light mode
+ramps = True
 
 # Run with filtered seed
 run_with_filtered_speed = True
@@ -66,6 +71,28 @@ signal_gastrocnemius = [0 for x in range(xRange)]
 angSpeedRefHistory = [0 for x in range(xRange)]
 # noinspection PyRedeclaration
 shown_ref_speed = [0 for x in range(xRange)]
+# noinspection PyRedeclaration
+actual_ref_speed = [0 for x in range(xRange)]
+if ramps:
+    for x in range(speed_ref):
+        actual_ref_speed.append(x+1)
+    for x in range(time_on_speed):
+        actual_ref_speed.append(speed_ref)
+    for x in range(fast_speed - speed_ref):
+        actual_ref_speed.append(speed_ref+x)
+    for x in range(time_on_speed):
+        actual_ref_speed.append(fast_speed)
+    for x in range(fast_speed - speed_ref):
+        actual_ref_speed.append(fast_speed-1-x)
+    for x in range(time_on_speed):
+        actual_ref_speed.append(speed_ref)
+    for x in range(speed_ref-1):
+        actual_ref_speed.append(speed_ref-1-x)
+    for x in range(1000):
+        actual_ref_speed.append(1)
+else:
+    for x in range(4000):
+        actual_ref_speed.append(speed_ref)
 # noinspection PyRedeclaration
 controlSignal = [0 for x in range(xRange)]
 # noinspection PyRedeclaration
@@ -179,6 +206,7 @@ def read_buttons():
 # Main function
 def main():
     global running, controlSignal, signal_femoral, signal_gastrocnemius
+    this_instant = 501
     t0 = time.clock()
     t1 = -1
     while running:
@@ -193,16 +221,20 @@ def main():
         # get other data
         shown_angle.append(angle[-1])
         shown_control_signal.append(controlSignal[-1])
-        shown_error.append(errorHistory[-1])
-        shown_ref_speed.append(angSpeedRefHistory[-1])
+        # shown_error.append(errorHistory[-1])
+        # shown_ref_speed.append(angSpeedRefHistory[-1])
+        shown_error.append(actual_ref_speed[this_instant] - filtered_speed[-1])
+        shown_ref_speed.append(actual_ref_speed[this_instant])
         shown_speed.append(angSpeed[-1])
 
         # Calculate control signal
         controlSignal.append(control.control(shown_error[xRange:]))
 
         # Calculate stimulation signal
-        signal_gastrocnemius.append((perfil.gastrocnemius(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
-        signal_femoral.append((perfil.femoral(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
+        # signal_gastrocnemius.append((perfil.gastrocnemius(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
+        # signal_femoral.append((perfil.femoral(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
+        signal_gastrocnemius.append((perfil.gastrocnemius(angle[-1], angSpeed[-1], shown_ref_speed[-1])) * (controlSignal[-1]))
+        signal_femoral.append((perfil.femoral(angle[-1], angSpeed[-1], shown_ref_speed[-1])) * (controlSignal[-1]))
 
         # Signal double safety saturation
         if signal_femoral[-1] > 1:
@@ -224,7 +256,7 @@ def main():
             stim.update(channels, pulse_width, current)
 
         # running = False
-
+        this_instant += 1
 
 def read_sensors():
     while running:
