@@ -5,6 +5,7 @@ import ema.modules.control as control
 
 # import ros msgs
 from sensor_msgs.msg import Imu
+from std_msgs.msg import Float64
 from ema_common_msgs.msg import Stimulator
 
 # import utilities
@@ -19,7 +20,6 @@ speed_err = [0,0]
 time = [0,0]
 pw_left = [0,0]
 pw_right = [0,0]
-
 
 def callback(data):
     # get timestamp
@@ -53,7 +53,10 @@ def main():
     sub = rospy.Subscriber('imu/pedal', Imu, callback = callback)
     
     # list published topics
-    pub = rospy.Publisher('stimulator/ccl_update', Stimulator, queue_size=10)
+    pub = {}
+    pub['control'] = rospy.Publisher('stimulator/ccl_update', Stimulator, queue_size=10)
+    pub['angle'] = rospy.Publisher('control/angle', Float64, queue_size=10)
+    pub['speed'] = rospy.Publisher('control/speed', Float64, queue_size=10)
     
     # define loop rate (in hz)
     rate = rospy.Rate(10)
@@ -64,6 +67,12 @@ def main():
     stimMsg.mode = ['single', 'single']
     stimMsg.pulse_current = [6, 6]
     
+    # build basic angle message
+    angleMsg = Float64()
+    
+    # build basic speed message
+    speedMsg = Float64()
+    
     # node loop
     while not rospy.is_shutdown():
         # calculate control signal
@@ -71,7 +80,15 @@ def main():
         
         # send stimulator update
         stimMsg.pulse_width = [pw_left[-1], pw_right[-1]]
-        pub.publish(stimMsg)
+        pub['control'].publish(stimMsg)
+        
+        # send angle update
+        angleMsg.data = angle[-1]
+        pub['angle'].publish(angleMsg)
+        
+        # send speed update
+        speedMsg.data = speed[-1]
+        pub['speed'].publish(speedMsg)
         
         # store control signal for plotting
         pw_left.append(pwl)
