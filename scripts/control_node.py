@@ -102,7 +102,7 @@ def main():
     pub['speed'] = rospy.Publisher('control/speed', Float64, queue_size=10)
     
     # define loop rate (in hz)
-    rate = rospy.Rate(10)
+    rate = rospy.Rate(50)
     
     # build basic stimulator message
     stimMsg = Stimulator()

@@ -1,4 +1,4 @@
-  <launch>
+<launch>
   <group ns="camera">
     <node pkg="libuvc_camera" type="camera_node" name="mycam">
       <!-- Parameters used to find the camera -->
@@ -25,4 +25,9 @@
       <remap from="/camera/image" to="/camera/image_raw"/>
     </node>
   </group>
+  
+  <!-- launch utils -->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find ema_trike)/config/rviz/imu.rviz" output="log" respawn="true" respawn_delay="5"/>
+  <node name="rqt_graph" pkg="rqt_graph" type="rqt_graph" output="log" respawn="true" respawn_delay="5"/>
+  <node name="rqt_plot" pkg="rqt_plot" type="rqt_plot" output="log" respawn="true" respawn_delay="5"/>
 </launch>
