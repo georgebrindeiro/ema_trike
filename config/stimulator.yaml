@@ -12,6 +12,6 @@ port: /dev/ttyUSB0
 channel_stim: [1, 2]
 channel_lf: []
 n_factor: 0
-#freq: 50
-ts1: 15
+freq: 50
+#ts1: 15
 ts2: 5
