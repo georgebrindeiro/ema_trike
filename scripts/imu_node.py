@@ -5,6 +5,7 @@ import rospy
 # import ros msgs
 import ema.modules.imu as imu
 from sensor_msgs.msg import Imu
+from std_msgs.msg import Int8
 
 def main():
     # init imu node
@@ -17,6 +18,7 @@ def main():
     pub = {}
     for name in imu_manager.imus:
         pub[name] = rospy.Publisher('imu/' + name, Imu, queue_size=10)
+        pub[name + '_buttons'] = rospy.Publisher('imu/' + name + '_buttons', Int8, queue_size=10)
 
     # define loop rate (in hz)
     rate = rospy.Rate(10)
@@ -54,6 +56,10 @@ def main():
                 imuMsg.linear_acceleration.z = -linear_acceleration[2]
 
                 pub[name].publish(imuMsg)
+                
+                buttons = imu_manager.checkButtons(name)
+                
+                pub[name + '_buttons'].publish(buttons)
         except TypeError:
             print 'TypeError occured!'
 

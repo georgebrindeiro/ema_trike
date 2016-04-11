@@ -6,6 +6,7 @@ import ema.modules.control as control
 # import ros msgs
 from sensor_msgs.msg import Imu
 from std_msgs.msg import Float64
+from std_msgs.msg import Int8
 from ema_common_msgs.msg import Stimulator
 
 # import utilities
@@ -13,6 +14,16 @@ from math import pi
 from tf import transformations
 
 # global variables
+global on_off
+global angle
+global speed
+global speed_ref
+global speed_err
+global time
+global pw_left
+global pw_right
+
+on_off = False
 angle = [0,0]
 speed = [0,0]
 speed_ref = 300
@@ -21,7 +32,7 @@ time = [0,0]
 pw_left = [0,0]
 pw_right = [0,0]
 
-def callback(data):
+def pedal_callback(data):
     # get timestamp
     time.append(data.header.stamp)
 
@@ -42,6 +53,16 @@ def callback(data):
     # print latest
     #print time[-1], angle[-1], speed[-1], speed_err[-1]
 
+def remote_callback(data):
+    global on_off
+    
+    if data == Int8(1):
+        on_off = True
+        rospy.loginfo("Turned on controller")
+    elif data == Int8(2):
+        on_off = False
+        rospy.loginfo("Turned off controller")
+
 def main():
     # init control node
     controller = control.Control(rospy.init_node('control', anonymous=False))
@@ -50,7 +71,9 @@ def main():
     config_dict = rospy.get_param('/ema_trike/control')
     
     # list subscribed topics
-    sub = rospy.Subscriber('imu/pedal', Imu, callback = callback)
+    sub = {}
+    sub['pedal'] = rospy.Subscriber('imu/pedal', Imu, callback = pedal_callback)
+    sub['remote'] = rospy.Subscriber('imu/remote_buttons', Int8, callback = remote_callback)
     
     # list published topics
     pub = {}
@@ -76,10 +99,13 @@ def main():
     # node loop
     while not rospy.is_shutdown():
         # calculate control signal
-        pwl, pwr = controller.calculate(angle[-1], speed[-1], speed_ref, speed_err)
+        if on_off == True:
+            pwl, pwr = controller.calculate(angle[-1], speed[-1], speed_ref, speed_err)
+        else:
+            pwl, pwr = [0, 0]
         
         # send stimulator update
-        stimMsg.pulse_width = [pw_left[-1], pw_right[-1]]
+        stimMsg.pulse_width = [pwl, pwr]
         pub['control'].publish(stimMsg)
         
         # send angle update

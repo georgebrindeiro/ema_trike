@@ -11,12 +11,12 @@
 autocalibrate: true
 
 ## Config 1: IMU 2 and 3 wireless ##
-# dev_names: ['pc', 'pedal', 'remote']
-# dev_type: {'pc': 'DNG', 'pedal': 'WL', 'remote': 'WL'}
-# imu_mode: {'pedal': 'wireless', 'remote': 'wireless'}
-# wired_port: {'pc': '/dev/ttyACM0'}
-# wireless_dng: {'pedal': 'pc', 'remote': 'pc'}
-# wireless_id: {'pedal': 2, 'remote': 3}
+dev_names: ['pc', 'pedal', 'remote']
+dev_type: {'pc': 'DNG', 'pedal': 'WL', 'remote': 'WL'}
+imu_mode: {'pedal': 'wireless', 'remote': 'wireless'}
+wired_port: {'pc': '/dev/ttyACM0'}
+wireless_dng: {'pedal': 'pc', 'remote': 'pc'}
+wireless_id: {'pedal': 2, 'remote': 3}
 
 ## Config 2: IMU 2 and 3 wired ##
 # dev_names: ['pedal', 'remote']
@@ -31,9 +31,9 @@ autocalibrate: true
 # wired_port: {'pedal': '/dev/ttyACM0'}
 
 ## Config 4: IMU 2 wireless ##
-dev_names: ['pc', 'pedal']
-dev_type: {'pc': 'DNG', 'pedal': 'WL'}
-imu_mode: {'pedal': 'wireless'}
-wired_port: {'pc': '/dev/ttyACM0'}
-wireless_dng: {'pedal': 'pc'}
-wireless_id: {'pedal': 2}
+# dev_names: ['pc', 'pedal']
+# dev_type: {'pc': 'DNG', 'pedal': 'WL'}
+# imu_mode: {'pedal': 'wireless'}
+# wired_port: {'pc': '/dev/ttyACM0'}
+# wireless_dng: {'pedal': 'pc'}
+# wireless_id: {'pedal': 2}
