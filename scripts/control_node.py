@@ -54,16 +54,36 @@ def pedal_callback(data):
     #print time[-1], angle[-1], speed[-1], speed_err[-1]
 
 def remote_callback(data):
+    global stimMsg
+    
     global on_off
     
     if data == Int8(1):
-        on_off = True
-        rospy.loginfo("Turned on controller")
+        if on_off == False:
+            on_off = True
+        
+        stimMsg.pulse_current[0] += 1
+        stimMsg.pulse_current[1] += 1
+        rospy.loginfo("Stimulator current is now %d", stimMsg.pulse_current[0])
     elif data == Int8(2):
+        if on_off == True:
+            stimMsg.pulse_current[0] -= 1
+            stimMsg.pulse_current[1] -= 1
+        
+        if stimMsg.pulse_current[0] < 6:
+            on_off = False
+            rospy.loginfo("Turned off controller")
+        else:
+            rospy.loginfo("Stimulator current is now %d", stimMsg.pulse_current[0])
+    elif data == Int8(3):
         on_off = False
+        stimMsg.pulse_current[0] = 5
+        stimMsg.pulse_current[1] = 5
         rospy.loginfo("Turned off controller")
 
 def main():
+    global stimMsg
+    
     # init control node
     controller = control.Control(rospy.init_node('control', anonymous=False))
     
@@ -88,7 +108,7 @@ def main():
     stimMsg = Stimulator()
     stimMsg.channel = [1, 2]
     stimMsg.mode = ['single', 'single']
-    stimMsg.pulse_current = [6, 6]
+    stimMsg.pulse_current = [5, 5]
     
     # build basic angle message
     angleMsg = Float64()
