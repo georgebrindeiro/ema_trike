@@ -30,12 +30,13 @@ def main():
             timestamp = rospy.Time.now()
             frame_id = 'base_link'
 
-            ## send imu data
-            imuMsg = Imu()
-            imuMsg.header.stamp = timestamp
-            imuMsg.header.frame_id = frame_id
-
             if imu_manager.streaming == False:
+                ## messages are shared by all imus
+                imuMsg = Imu()
+                imuMsg.header.stamp = timestamp
+                imuMsg.header.frame_id = frame_id
+                buttons = Int8()
+                
                 for name in imu_manager.imus:
                     orientation = imu_manager.getQuaternion(name)
 
@@ -63,25 +64,57 @@ def main():
                     pub[name + '_buttons'].publish(buttons)
             else:
                 for name in imu_manager.imus:
+                    ## one message per imu
+                    imuMsg = Imu()
+                    imuMsg.header.stamp = timestamp
+                    imuMsg.header.frame_id = frame_id
+                    buttons = Int8()
+                    
                     streaming_data = imu_manager.getStreamingData(name)
+                    idx = 0
                     
-                    imuMsg.orientation.x = streaming_data[0]
-                    imuMsg.orientation.y = streaming_data[1]
-                    imuMsg.orientation.z = streaming_data[2]
-                    imuMsg.orientation.w = streaming_data[3]
+                    for slot in imu_manager.streaming_slots[name]:
+                        #print name, slot
+                        
+                        if slot == 'getTaredOrientationAsQuaternion':
+                                                        
+                            imuMsg.orientation.x = streaming_data[idx]
+                            imuMsg.orientation.y = streaming_data[idx+1]
+                            imuMsg.orientation.z = streaming_data[idx+2]
+                            imuMsg.orientation.w = streaming_data[idx+3]
+                            
+                            idx = idx + 4
+                            
+                        elif slot == 'getNormalizedGyroRate':
                     
-                    imuMsg.angular_velocity.x = streaming_data[4]
-                    imuMsg.angular_velocity.y = streaming_data[5]
-                    imuMsg.angular_velocity.z = streaming_data[6]
+                            imuMsg.angular_velocity.x = streaming_data[idx]
+                            imuMsg.angular_velocity.y = streaming_data[idx+1]
+                            imuMsg.angular_velocity.z = streaming_data[idx+2]
+                            
+                            idx = idx + 3
+                            
+                        elif slot == 'getCorrectedAccelerometerVector':
+                            
+                            imuMsg.linear_acceleration.x = -streaming_data[idx]
+                            imuMsg.linear_acceleration.y = -streaming_data[idx+1]
+                            imuMsg.linear_acceleration.z = -streaming_data[idx+2]
+                            
+                            idx = idx + 3
+                            
+                            print type(streaming_data)
+                            
+                        elif slot == 'getButtonState':
 
-                    imuMsg.linear_acceleration.x = -streaming_data[7]
-                    imuMsg.linear_acceleration.y = -streaming_data[8]
-                    imuMsg.linear_acceleration.z = -streaming_data[9]
+                            if type(streaming_data) == 'tuple':
+                                buttons = streaming_data[idx]
+                            
+                                idx = idx + 1
+                            else:
+                                # imu is only streaming button state, result is not a tuple
+                                buttons = streaming_data
 
+                    # publish streamed data
                     pub[name].publish(imuMsg)
-                    
-                    buttons = streaming_data[10]
-                    
                     pub[name + '_buttons'].publish(buttons)
         except TypeError:
             print 'TypeError occured!'

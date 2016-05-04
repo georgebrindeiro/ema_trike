@@ -40,24 +40,36 @@ class IMU:
             
         if config_dict['streaming'] == True:
             self.streaming = True
-            streaming_interval = config_dict['streaming_interval']
-            streaming_duration = config_dict['streaming_duration']
-            streaming_delay = config_dict['streaming_delay']
+            self.streaming_interval = config_dict['streaming_interval']
+            self.streaming_duration = config_dict['streaming_duration']
+            self.streaming_delay = config_dict['streaming_delay']
+            self.streaming_slots = config_dict['streaming_slots']
             
             for name in self.imus:
-                if streaming_duration == 'unlimited':
-                    streaming_duration = 0xFFFFFFFF
+                if self.streaming_duration == 'unlimited':
+                    self.streaming_duration = 0xFFFFFFFF
                     
                 # Set IMU streams to the appropriate timing
-                self.devices[name].setStreamingTiming(interval=streaming_interval,
-                                                      duration=streaming_duration,
-                                                      delay=streaming_delay)
+                self.devices[name].setStreamingTiming(interval=self.streaming_interval,
+                                                      duration=self.streaming_duration,
+                                                      delay=self.streaming_delay)
                 
                 # Set IMU slots to getQuaternion, getGyroData, getAccelData and getButtonState
-                self.devices[name].setStreamingSlots(slot0='getTaredOrientationAsQuaternion',
-                                                     slot1='getNormalizedGyroRate',
-                                                     slot2='getCorrectedAccelerometerVector',
-                                                     slot3='getButtonState')
+                padded_slots = list(self.streaming_slots[name])
+                for i in range(0,8):
+                    try:
+                        padded_slots[i]
+                    except IndexError:
+                        padded_slots.append('null')
+                        
+                self.devices[name].setStreamingSlots(slot0=padded_slots[0],
+                                                     slot1=padded_slots[1],
+                                                     slot2=padded_slots[2],
+                                                     slot3=padded_slots[3],
+                                                     slot4=padded_slots[4],
+                                                     slot5=padded_slots[5],
+                                                     slot6=padded_slots[6],
+                                                     slot7=padded_slots[7])
                 
                 # Start streaming
                 self.devices[name].startStreaming()

@@ -9,6 +9,7 @@
 # streaming_duration: length of the streaming session (NOTE: 'unlimited' is 0xFFFFFFFF, see manual)
 # streaming_interval: how often data will be output (0 = every filter loop, other values must be > 1000)
 # wired_port:         port address for device when wired
+# streaming_slots:	  defines what information each device is streaming
 # wireless_dng:       name of dongle associated to this WL device (must have configured dongle wireless table)
 # wireless_id:        logical id of WL device in associated dongle's wireless table
 
@@ -47,16 +48,17 @@ autocalibrate: true
 # wireless_id: {'pedal': 2}
 
 ## Config 5: IMU 0 and 1 wireless streaming ##
-# dev_names: ['pc', 'pedal', 'remote']
-# dev_type: {'pc': 'DNG', 'pedal': 'WL', 'remote': 'WL'}
-# imu_mode: {'pedal': 'wireless', 'remote': 'wireless'}
-# streaming: true
-# streaming_interval: 0
-# streaming_duration: 'unlimited'
-# streaming_delay: 0
-# wired_port: {'pc': '/dev/ttyACM0'}
-# wireless_dng: {'pedal': 'pc', 'remote': 'pc'}
-# wireless_id: {'pedal': 0, 'remote': 1}
+dev_names: ['pc', 'pedal', 'remote']
+dev_type: {'pc': 'DNG', 'pedal': 'WL', 'remote': 'WL'}
+imu_mode: {'pedal': 'wireless', 'remote': 'wireless'}
+streaming: true
+streaming_interval: 0
+streaming_duration: 'unlimited'
+streaming_delay: 0
+streaming_slots: {'pedal': ['getTaredOrientationAsQuaternion', 'getNormalizedGyroRate'], 'remote': ['getButtonState']}
+wired_port: {'pc': '/dev/ttyACM0'}
+wireless_dng: {'pedal': 'pc', 'remote': 'pc'}
+wireless_id: {'pedal': 0, 'remote': 1}
 
 ## Config 6: IMU 0 wireless streaming ##
 # dev_names: ['pc', 'pedal']
@@ -66,18 +68,20 @@ autocalibrate: true
 # streaming_interval: 0
 # streaming_duration: 'unlimited'
 # streaming_delay: 0
+# streaming_slots: {'pedal': ['getTaredOrientationAsQuaternion', 'getNormalizedGyroRate'], 'remote': ['getButtonState']}
 # wired_port: {'pc': '/dev/ttyACM0'}
 # wireless_dng: {'pedal': 'pc'}
 # wireless_id: {'pedal': 0}
 
 ## Config 7: IMU 2 and 3 wireless streaming ##
-dev_names: ['pc', 'pedal', 'remote']
-dev_type: {'pc': 'DNG', 'pedal': 'WL', 'remote': 'WL'}
-imu_mode: {'pedal': 'wireless', 'remote': 'wireless'}
-streaming: true
-streaming_interval: 0
-streaming_duration: 'unlimited'
-streaming_delay: 0
-wired_port: {'pc': '/dev/ttyACM0'}
-wireless_dng: {'pedal': 'pc', 'remote': 'pc'}
-wireless_id: {'pedal': 2, 'remote': 3}
+# dev_names: ['pc', 'pedal', 'remote']
+# dev_type: {'pc': 'DNG', 'pedal': 'WL', 'remote': 'WL'}
+# imu_mode: {'pedal': 'wireless', 'remote': 'wireless'}
+# streaming: true
+# streaming_interval: 0
+# streaming_duration: 'unlimited'
+# streaming_delay: 0
+# streaming_slots: {'pedal': ['getTaredOrientationAsQuaternion', 'getNormalizedGyroRate'], 'remote': ['getButtonState']}
+# wired_port: {'pc': '/dev/ttyACM0'}
+# wireless_dng: {'pedal': 'pc', 'remote': 'pc'}
+# wireless_id: {'pedal': 2, 'remote': 3}
