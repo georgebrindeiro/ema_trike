@@ -4,6 +4,7 @@ from ema.libs.yei import threespace_api as ts_api
 class IMU:
     def __init__(self, config_dict):
         self.config_dict = config_dict
+        self.streaming = False
         self.devices = {}
         self.dongles = []
         self.imus = []
@@ -36,6 +37,30 @@ class IMU:
 
         if config_dict['autocalibrate'] == True:
             self.autocalibrate()
+            
+        if config_dict['streaming'] == True:
+            self.streaming = True
+            streaming_interval = config_dict['streaming_interval']
+            streaming_duration = config_dict['streaming_duration']
+            streaming_delay = config_dict['streaming_delay']
+            
+            for name in self.imus:
+                if streaming_duration == 'unlimited':
+                    streaming_duration = 0xFFFFFFFF
+                    
+                # Set IMU streams to the appropriate timing
+                self.devices[name].setStreamingTiming(interval=streaming_interval,
+                                                      duration=streaming_duration,
+                                                      delay=streaming_delay)
+                
+                # Set IMU slots to getQuaternion, getGyroData, getAccelData and getButtonState
+                self.devices[name].setStreamingSlots(slot0='getTaredOrientationAsQuaternion',
+                                                     slot1='getNormalizedGyroRate',
+                                                     slot2='getCorrectedAccelerometerVector',
+                                                     slot3='getButtonState')
+                
+                # Start streaming
+                self.devices[name].startStreaming()
 
         self.setRightHandedAxis()
 
@@ -154,6 +179,25 @@ class IMU:
         else:
             print 'getAccelData not defined for dev_type = ', dev_type
             return 0
+
+    def getStreamingData(self, name): ## G: getStreamingBatch, need TSSensor (don't do for dongle)
+        dev_type = self.config_dict['dev_type'][name]
+
+        if dev_type == 'WL':
+            #print 'getStreamingBatch: ', name
+            return self.devices[name].getStreamingBatch()
+
+        else:
+            print 'getStreamingBatch not defined for dev_type = ', dev_type
+            return 0
+    
+    def shutdown(self):
+        if self.streaming == True:
+            for name in self.imus:
+                print 'shutting down'
+            
+                # Stop streaming
+                self.devices[name].stopStreaming()
 
     def autocalibrate(self):
         for name in self.imus:

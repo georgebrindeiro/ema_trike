@@ -1,39 +1,83 @@
 ## IMU config
 #
-# autocalibrate:  tare and calibrate all imus when initializing node
-# dev_names:      string identifier to find configs for each device (NOTE: list dongle devices first)
-# dev_type:       YEI device type (only DNG and WL supported for now)
-# imu_mode:       wireless or wired (only needed for WL devices)
-# wired_port:     port address for device when wired
-# wireless_dng:   name of dongle associated to this WL device (must have configured dongle wireless table)
-# wireless_id:    logical id of WL device in associated dongle's wireless table
+# autocalibrate:      tare and calibrate all imus when initializing node
+# dev_names:          string identifier to find configs for each device (NOTE: list dongle devices first)
+# dev_type:           YEI device type (only DNG and WL supported for now)
+# imu_mode:           wireless or wired (only needed for WL devices)
+# streaming:          switch on streaming mode (faster), all following parameters in us
+# streaming_delay:    amount of time the sensor will wait before outputting the first packet of streaming data
+# streaming_duration: length of the streaming session (NOTE: 'unlimited' is 0xFFFFFFFF, see manual)
+# streaming_interval: how often data will be output (0 = every filter loop, other values must be > 1000)
+# wired_port:         port address for device when wired
+# wireless_dng:       name of dongle associated to this WL device (must have configured dongle wireless table)
+# wireless_id:        logical id of WL device in associated dongle's wireless table
 
 autocalibrate: true
 
 ## Config 1: IMU 2 and 3 wireless ##
-dev_names: ['pc', 'pedal', 'remote']
-dev_type: {'pc': 'DNG', 'pedal': 'WL', 'remote': 'WL'}
-imu_mode: {'pedal': 'wireless', 'remote': 'wireless'}
-wired_port: {'pc': '/dev/ttyACM0'}
-wireless_dng: {'pedal': 'pc', 'remote': 'pc'}
-wireless_id: {'pedal': 2, 'remote': 3}
+# dev_names: ['pc', 'pedal', 'remote']
+# dev_type: {'pc': 'DNG', 'pedal': 'WL', 'remote': 'WL'}
+# imu_mode: {'pedal': 'wireless', 'remote': 'wireless'}
+# streaming: false
+# wired_port: {'pc': '/dev/ttyACM0'}
+# wireless_dng: {'pedal': 'pc', 'remote': 'pc'}
+# wireless_id: {'pedal': 2, 'remote': 3}
 
 ## Config 2: IMU 2 and 3 wired ##
 # dev_names: ['pedal', 'remote']
 # dev_type: {'pedal': 'WL', 'remote': 'WL'}
 # imu_mode: {'pedal': 'wired', 'remote': 'wired'}
+# streaming: false
 # wired_port: {'pedal': '/dev/ttyACM0', 'remote': '/dev/ttyACM1'}
 
 ## Config 3: IMU 2 wired ##
 # dev_names: ['pedal']
 # dev_type: {'pedal': 'WL'}
 # imu_mode: {'pedal': 'wired'}
+# streaming: false
 # wired_port: {'pedal': '/dev/ttyACM0'}
 
 ## Config 4: IMU 2 wireless ##
 # dev_names: ['pc', 'pedal']
 # dev_type: {'pc': 'DNG', 'pedal': 'WL'}
 # imu_mode: {'pedal': 'wireless'}
+# streaming: false
 # wired_port: {'pc': '/dev/ttyACM0'}
 # wireless_dng: {'pedal': 'pc'}
 # wireless_id: {'pedal': 2}
+
+## Config 5: IMU 0 and 1 wireless streaming ##
+# dev_names: ['pc', 'pedal', 'remote']
+# dev_type: {'pc': 'DNG', 'pedal': 'WL', 'remote': 'WL'}
+# imu_mode: {'pedal': 'wireless', 'remote': 'wireless'}
+# streaming: true
+# streaming_interval: 0
+# streaming_duration: 'unlimited'
+# streaming_delay: 0
+# wired_port: {'pc': '/dev/ttyACM0'}
+# wireless_dng: {'pedal': 'pc', 'remote': 'pc'}
+# wireless_id: {'pedal': 0, 'remote': 1}
+
+## Config 6: IMU 0 wireless streaming ##
+# dev_names: ['pc', 'pedal']
+# dev_type: {'pc': 'DNG', 'pedal': 'WL'}
+# imu_mode: {'pedal': 'wireless'}
+# streaming: true
+# streaming_interval: 0
+# streaming_duration: 'unlimited'
+# streaming_delay: 0
+# wired_port: {'pc': '/dev/ttyACM0'}
+# wireless_dng: {'pedal': 'pc'}
+# wireless_id: {'pedal': 0}
+
+## Config 7: IMU 2 and 3 wireless streaming ##
+dev_names: ['pc', 'pedal', 'remote']
+dev_type: {'pc': 'DNG', 'pedal': 'WL', 'remote': 'WL'}
+imu_mode: {'pedal': 'wireless', 'remote': 'wireless'}
+streaming: true
+streaming_interval: 0
+streaming_duration: 'unlimited'
+streaming_delay: 0
+wired_port: {'pc': '/dev/ttyACM0'}
+wireless_dng: {'pedal': 'pc', 'remote': 'pc'}
+wireless_id: {'pedal': 2, 'remote': 3}
