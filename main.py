@@ -72,13 +72,18 @@ def get_angular_speed():
         if len(speed) == 6:
             speed = float(speed[4])
             speed = speed / math.pi * 180
-            print speed
+            # print speed
             # Filter speed
+            angSpeed.append(int(round(speed)))
             if counter >= filter_size:
-                angSpeed.append(int(round(numpy.mean(angSpeed[-filter_size:]))))
+                angSpeed[-1] = int(round(numpy.mean(angSpeed[-filter_size:])))
+                # print 'append'
+                # print angSpeed[-1]
             else:
-                angSpeed.append(int(round(speed)))
-            print angSpeed[-1]
+                pass
+            # print counter
+            # print speed
+            # print angSpeed[-1]
         else:
             print "Angular speed data in wrong format"
 
@@ -94,6 +99,7 @@ def read_buttons():
     try:
         if IMURemoteControl.checkButtons() == 2:
             running = False
+            stim.stop()
     except ValueError:
         print 'Buttons reading error'
 
@@ -105,7 +111,7 @@ def read_sensors():
         get_angular_speed()
         read_buttons()
         time.sleep(0.001)
-        print angSpeed[-1]
+        # print angSpeed[-1]
 
 
 # Main function
@@ -115,55 +121,60 @@ def main():
     t0 = time.time()
     t1 = -1
     while running:
-        # Control frequency
-        t_diff = time.time() - t1
-        if t_diff < period:
-            time.sleep(period - t_diff - 0.004)
-        t1 = time.time()
-        time_stamp.append(time.time() - t0)
+        try:
+            # Control frequency
+            t_diff = time.time() - t1
+            if t_diff < period:
+                if not (period - t_diff - 0.004) < 0:
+                    time.sleep(period - t_diff - 0.004)
+            t1 = time.time()
+            time_stamp.append(time.time() - t0)
 
-        # Get data from sensors
-        control_angle.append(angle[-1])
-        control_speed.append(angSpeed[-1])
+            # Get data from sensors
+            control_angle.append(angle[-1])
+            control_speed.append(angSpeed[-1])
 
-        # Calculate error
-        control_error.append(actual_ref_speed[this_instant] - angSpeed[-1])
-        # print len(angSpeed)
+            # Calculate error
+            control_error.append(actual_ref_speed[this_instant] - angSpeed[-1])
+            # print len(angSpeed)
 
-        # Calculate control signal
-        controlSignal.append(control.control(control_error[xRange:]))
+            # Calculate control signal
+            controlSignal.append(control.control(control_error[xRange:]))
 
-        # Calculate stimulation signal
-        signal_channel[0].append(
-            (perfil.left_quad(angle[-1], angSpeed[-1], actual_ref_speed[this_instant])) * (controlSignal[-1]))
-        signal_channel[1].append(
-            (perfil.right_quad(angle[-1], angSpeed[-1], actual_ref_speed[this_instant])) * (controlSignal[-1]))
-        signal_channel[2].append(
-            (perfil.left_hams(angle[-1], angSpeed[-1], actual_ref_speed[this_instant])) * (controlSignal[-1]))
-        signal_channel[3].append(
-            (perfil.right_hams(angle[-1], angSpeed[-1], actual_ref_speed[this_instant])) * (controlSignal[-1]))
-        signal_channel[4].append(
-            (perfil.left_gluteus(angle[-1], angSpeed[-1], actual_ref_speed[this_instant])) * (controlSignal[-1]))
-        signal_channel[5].append(
-            (perfil.right_gluteus(angle[-1], angSpeed[-1], actual_ref_speed[this_instant])) * (controlSignal[-1]))
+            # Calculate stimulation signal
+            signal_channel[0].append(
+                (perfil.left_quad(angle[-1], angSpeed[-1], actual_ref_speed[this_instant])) * (controlSignal[-1]))
+            signal_channel[1].append(
+                (perfil.left_hams(angle[-1], angSpeed[-1], actual_ref_speed[this_instant])) * (controlSignal[-1]))
+            signal_channel[2].append(
+                (perfil.left_gluteus(angle[-1], angSpeed[-1], actual_ref_speed[this_instant])) * (controlSignal[-1]))
+            signal_channel[3].append(
+                (perfil.right_quad(angle[-1], angSpeed[-1], actual_ref_speed[this_instant])) * (controlSignal[-1]))
+            signal_channel[4].append(
+                (perfil.right_hams(angle[-1], angSpeed[-1], actual_ref_speed[this_instant])) * (controlSignal[-1]))
+            signal_channel[5].append(
+                (perfil.right_gluteus(angle[-1], angSpeed[-1], actual_ref_speed[this_instant])) * (controlSignal[-1]))
 
-        # Signal double safety saturation
-        # Electrical stimulation parameters settings
-        for i in range(number_of_channels):
-            if signal_channel[i][-1] > 1:
-                signal_channel[i][-1] = 1
-            elif signal_channel[i][-1] < 0:
-                signal_channel[i][-1] = 0
-            channel_stim[i] = signal_channel[i][-1] * channel_max[i]
+            # Signal double safety saturation
+            # Electrical stimulation parameters settings
+            for i in range(number_of_channels):
+                if signal_channel[i][-1] > 1:
+                    signal_channel[i][-1] = 1
+                elif signal_channel[i][-1] < 0:
+                    signal_channel[i][-1] = 0
+                channel_stim[i] = signal_channel[i][-1] * channel_max[i]
 
-        pulse_width = channel_stim
+            pulse_width = channel_stim
 
-        # Electrical stimulator signal update
-        if stimulation:
-            stim.update(channels, pulse_width, current)
+            # Electrical stimulator signal update
+            if stimulation:
+                stim.update(channels, pulse_width, current)
 
-        # running = False
-        this_instant += 1
+            # running = False
+            this_instant += 1
+        except ValueError:
+            stim.stop()
+            running=False
 
 
 ##########################################################################
@@ -182,7 +193,7 @@ freq = 25
 period = 1.0 / freq
 
 # Debug mode, for when there's no stimulation
-stimulation = False
+stimulation = True
 
 # Experiment mode
 ramps = False
@@ -191,7 +202,7 @@ fast_speed = 250
 time_on_speed = 300
 
 # Number of channels
-number_of_channels = 8
+number_of_channels = 6
 
 # Max pulse width
 channel_max = [0 for x in range(number_of_channels)]
@@ -212,7 +223,7 @@ portIMU = get_port('imu')  # Works on Mac. Should also work on Windows.
 if stimulation:
     portStimulator = get_port('stimulator')  # Works only on Mac.
     # portStimulator = 'COM4'
-print portIMU
+# print portIMU
 
 ##########################################################################
 ##########################################################################
@@ -301,6 +312,7 @@ try:
         else:
             print 'reopenning port'
             serialPortIMU.close()
+            time.sleep(0.1)
             serialPortIMU = serial.Serial(portIMU, timeout=1, baudrate=115200)
         print calibrationError
     print "Done"
@@ -381,6 +393,22 @@ try:
         for s in signal_channel[1]:
             f.write(str(s * channel_max[1]) + '\n')
         f.close()
+    with open(os.path.join(folder, 'data_channel_3'), 'w') as f:
+        for s in signal_channel[2]:
+            f.write(str(s * channel_max[1]) + '\n')
+        f.close()
+    with open(os.path.join(folder, 'data_channel_4'), 'w') as f:
+        for s in signal_channel[3]:
+            f.write(str(s * channel_max[1]) + '\n')
+        f.close()
+    with open(os.path.join(folder, 'data_channel_5'), 'w') as f:
+        for s in signal_channel[4]:
+            f.write(str(s * channel_max[1]) + '\n')
+        f.close()
+    with open(os.path.join(folder, 'data_channel_6'), 'w') as f:
+        for s in signal_channel[5]:
+            f.write(str(s * channel_max[1]) + '\n')
+        f.close()
     with open(os.path.join(folder, 'data_control'), 'w') as f:
         for s in controlSignal:
             f.write(str(s * 1) + '\n')
@@ -390,6 +418,18 @@ try:
             f.write(str(s * 1) + '\n')
     with open(os.path.join(folder, 'data_reference'), 'w') as f:
         for s in actual_ref_speed:
+            f.write(str(s * 1) + '\n')
+        f.close()
+    with open(os.path.join(folder, 'data_parameters'), 'w') as f:
+        f.write('Stimulation on: ' + str(stimulation * 1) + '\n')
+        f.write('Speed reference: ' + str(speed_ref * 1) + '\n')
+        f.write('Desired frequency: ' + str(freq * 1) + '\n')
+        f.write('Ramps on reference: ' + str(ramps * 1) + '\n')
+        f.write('Fast speed: ' + str(fast_speed * 1) + '\n')
+        f.write('Time on speed; ' + str(time_on_speed * 1) + '\n')
+        f.write('Filter size: ' + str(filter_size * 1) + '\n')
+        f.write('Max pulse width in each channel: ' + '\n')
+        for s in channel_max:
             f.write(str(s * 1) + '\n')
         f.close()
 

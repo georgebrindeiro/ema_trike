@@ -13,7 +13,7 @@ left_quad_start_ang = 300
 left_quad_range = 100
 
 # Left gluteus
-left_gluteus_start_ang = 0
+left_gluteus_start_ang = 30
 left_gluteus_range = 70
 
 # Left hamstrings
