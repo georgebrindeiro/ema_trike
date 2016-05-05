@@ -183,13 +183,18 @@ def readData(port):
     #     if i > 700:
     #         dados = 'No answer'
     #         break
-    while port.inWaiting() == 0:
-        #print "Waiting for response"
-        pass
+    try:
+        port.flush()
+        while port.inWaiting() == 0:
+            #print "Waiting for response"
+            pass
 
-    data = port.read(port.inWaiting()) # le da porta bytearray
-    return data
-    #return dados
+        data = port.read(port.inWaiting()) # le da porta bytearray
+        return data
+        #return dados
+    except ValueError:
+        print 'Error reading data from the serial port'
+
 
 class Quaternion:
     def __init__(self, x, y, z, w):

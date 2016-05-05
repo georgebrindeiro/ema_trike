@@ -4,239 +4,131 @@ Created on Sat May 23 13:41:18 2015
 
 @author: Wall-e
 """
+############################################################
+######################### Left leg #########################
+############################################################
 
-####################################
-####################################
-# not used right now
-def phase(ang):
-    angLocal = round(ang)
-    return angLocal/5
-#    if (ang > 342) | (ang < 18):
-#        return 0
-#    elif ang < 54:
-#        return 1
-#    elif ang < 90:
-#        return 2
-#    elif ang < 126:
-#        return 3
-#    elif ang < 162:
-#        return 4
-#    elif ang < 198:
-#        return 5
-#    elif ang < 234:
-#        return 6
-#    elif ang < 270:
-#        return 7
-#    elif ang < 306:
-#        return 8
-#    elif ang <= 342:
-#        return 9
-#    return    
-####################################
-####################################
-def femoral(angle, angSpeed, speed_ref): ### femoral esquerdo
-    
-    # Calculate initial and final angles based on angular speed    
-    angInitial = 300-(angSpeed/speed_ref)*35
-    angFinal = angInitial + 100
-    if angFinal > 360:
-        angFinal -= 360
-#        print angInitial
+# Left quadriceps
+left_quad_start_ang = 300
+left_quad_range = 100
+
+# Left gluteus
+left_gluteus_start_ang = 0
+left_gluteus_range = 70
+
+# Left hamstrings
+left_hams_start_ang = 90
+left_hams_range = 100
+
+############################################################
+######################## Right leg #########################
+############################################################
+# The right leg os the opposite of the left leg
+
+# Right quadriceps
+right_quad_start_ang = left_quad_start_ang - 180
+right_quad_range = left_quad_range
+
+# Right gluteus
+# Make sure the angles are not negative nor greater than 360
+if left_gluteus_start_ang > 180:
+    right_gluteus_start_ang = left_gluteus_start_ang - 180
+else:
+    right_gluteus_start_ang = left_gluteus_start_ang + 180
+right_gluteus_range = left_gluteus_range
+
+# Right hamstrings
+right_hams_start_ang = left_hams_start_ang + 180
+right_hams_range = left_hams_range
+
+
+############################################################
+############################################################
+# How much the wheel must spin when in reference speed
+correction_factor = 35
+
+
+############################################################
+############################################################
+def left_quad(angle, ang_speed, speed_ref):
+    # Calculate initial and final angles based on angular speed
+    start_ang = left_quad_start_ang - (ang_speed / speed_ref) * correction_factor
+    end_ang = start_ang + left_quad_range
+    if end_ang > 360:
+        end_ang -= 360
     # Stimulate if it is in the stimulation zone    
-    if ((angle > angInitial) and (angle < angFinal)) or ((angFinal < angInitial) and ((angle < angFinal) or (angle > angInitial))):
+    if ((angle > start_ang) and (angle < end_ang)) or (
+                (end_ang < start_ang) and ((angle < end_ang) or (angle > start_ang))):
         return 1
     else:
         return 0
-#    out = 0
-#    if phase == 0:
-#        out = float(20)/30
-#    elif phase == 1:
-#        out = float(8)/30
-#    elif phase == 2:
-#        out = float(0)/30
-#    elif phase == 3:
-#        out = float(0)/30
-#    elif phase == 4:
-#        out = float(0)/30
-#    elif phase == 5:
-#        out = float(0)/30
-#    elif phase == 6:
-#        out = float(0)/30
-#    elif phase == 7:
-#        out = float(0)/30
-#    elif phase == 8:
-#        out = float(30)/30
-#    elif phase == 9:
-#        out = float(30)/30
-#    return out  
-####################################
-####################################
-def gastrocnemius(angle, angSpeed, speed_ref): ##### femoral direito
-    # Calculate initial and final angles based on angular speed       
-    angInitial = 120-(angSpeed/speed_ref)*35
-    angFinal = angInitial + 100
-    if angFinal > 360:
-        angFinal -= 360
+
+
+def right_quad(angle, ang_speed, speed_ref):
+    # Calculate initial and final angles based on angular speed
+    start_ang = right_quad_start_ang - (ang_speed / speed_ref) * correction_factor
+    end_ang = start_ang + right_quad_range
+    if end_ang > 360:
+        end_ang -= 360
 
     # Stimulate if it is in the stimulation zone    
-    if (angle > angInitial) and (angle < angFinal):
+    if (angle > start_ang) and (angle < end_ang):
         return 1
     else:
         return 0
-#    out = 0
-##    if phase == 0:
-##        out = float(15)/30
-##    elif phase == 1:
-##        out = float(5)/30
-##    elif phase == 2:
-##        out = float(5)/30
-##    elif phase == 3:
-##        out = float(5)/30
-##    elif phase == 4:
-##        out = float(4)/30
-##    elif phase == 5:
-##        out = float(5)/30
-##    elif phase == 6:
-##        out = float(7)/30
-##    elif phase == 7:
-##        out = float(10)/30
-##    elif phase == 8:
-##        out = float(20)/30
-##    elif phase == 9:
-##        out = float(25)/30
-#    if phase <= 4:
-#        phase += 5
-#    else:
-#        phase -= 5
-#        
-#    if phase == 0:
-#        out = float(20)/30
-#    elif phase == 1:
-#        out = float(8)/30
-#    elif phase == 2:
-#        out = float(0)/30
-#    elif phase == 3:
-#        out = float(0)/30
-#    elif phase == 4:
-#        out = float(0)/30
-#    elif phase == 5:
-#        out = float(0)/30
-#    elif phase == 6:
-#        out = float(0)/30
-#    elif phase == 7:
-#        out = float(0)/30
-#    elif phase == 8:
-#        out = float(30)/30
-#    elif phase == 9:
-#        out = float(30)/30
-#    return out    
-####################################
-####################################
-def gluteos_e(phase):  ## gluteos esquerdos
-    out = 0
-    if phase == 0:
-        out = float(25)/30
-    elif phase == 1:
-        out = float(20)/30
-    elif phase == 2:
-        out = float(5)/30
-    elif phase == 3:
-        out = float(0)/30
-    elif phase == 4:
-        out = float(0)/30
-    elif phase == 5:
-        out = float(0)/30
-    elif phase == 6:
-        out = float(0)/30
-    elif phase == 7:
-        out = float(0)/30
-    elif phase == 8:
-        out = float(5)/30
-    elif phase == 9:
-        out = float(20)/30
-    return out  
-####################################
-####################################
-def gluteos_d(phase):  ## gluteos direitos
-    out = 0
-    if phase <= 4:
-        phase += 5
+
+
+def left_gluteus(angle, ang_speed, speed_ref):
+    # Calculate initial and final angles based on angular speed
+    start_ang = left_gluteus_start_ang - (ang_speed / speed_ref) * correction_factor
+    end_ang = start_ang + left_gluteus_range
+    if end_ang > 360:
+        end_ang -= 360
+    # Stimulate if it is in the stimulation zone
+    if ((angle > start_ang) and (angle < end_ang)) or (
+                (end_ang < start_ang) and ((angle < end_ang) or (angle > start_ang))):
+        return 1
     else:
-        phase -= 5
-    if phase == 0:
-        out = float(25)/30
-    elif phase == 1:
-        out = float(20)/30
-    elif phase == 2:
-        out = float(5)/30
-    elif phase == 3:
-        out = float(0)/30
-    elif phase == 4:
-        out = float(0)/30
-    elif phase == 5:
-        out = float(0)/30
-    elif phase == 6:
-        out = float(0)/30
-    elif phase == 7:
-        out = float(0)/30
-    elif phase == 8:
-        out = float(5)/30
-    elif phase == 9:
-        out = float(20)/30
-    return out  
-####################################
-####################################
-def hamstring_e(phase):  ## hamstring esquerdos
-    out = 0
-    if phase == 0:
-        out = float(0)/30
-    elif phase == 1:
-        out = float(10)/30
-    elif phase == 2:
-        out = float(25)/30
-    elif phase == 3:
-        out = float(25)/30
-    elif phase == 4:
-        out = float(10)/30
-    elif phase == 5:
-        out = float(0)/30
-    elif phase == 6:
-        out = float(0)/30
-    elif phase == 7:
-        out = float(0)/30
-    elif phase == 8:
-        out = float(0)/30
-    elif phase == 9:
-        out = float(0)/30
-    return out  
-####################################
-####################################
-def hamstring_d(phase):  ## hamstring direito
-    out = 0
-    if phase <= 4:
-        phase += 5
+        return 0
+
+
+def right_gluteus(angle, ang_speed, speed_ref):
+    # Calculate initial and final angles based on angular speed
+    start_ang = right_gluteus_start_ang - (ang_speed / speed_ref) * correction_factor
+    end_ang = start_ang + right_gluteus_range
+    if end_ang > 360:
+        end_ang -= 360
+
+    # Stimulate if it is in the stimulation zone
+    if (angle > start_ang) and (angle < end_ang):
+        return 1
     else:
-        phase -= 5    
-    if phase == 0:
-        out = float(0)/30
-    elif phase == 1:
-        out = float(10)/30
-    elif phase == 2:
-        out = float(25)/30
-    elif phase == 3:
-        out = float(25)/30
-    elif phase == 4:
-        out = float(10)/30
-    elif phase == 5:
-        out = float(0)/30
-    elif phase == 6:
-        out = float(0)/30
-    elif phase == 7:
-        out = float(0)/30
-    elif phase == 8:
-        out = float(0)/30
-    elif phase == 9:
-        out = float(0)/30
-    return out  
-####################################
-####################################
+        return 0
+
+
+def left_hams(angle, ang_speed, speed_ref):
+    # Calculate initial and final angles based on angular speed
+    start_ang = left_hams_start_ang - (ang_speed / speed_ref) * correction_factor
+    end_ang = start_ang + left_hams_range
+    if end_ang > 360:
+        end_ang -= 360
+
+    # Stimulate if it is in the stimulation zone
+    if (angle > start_ang) and (angle < end_ang):
+        return 1
+    else:
+        return 0
+
+
+def right_hams(angle, ang_speed, speed_ref):
+    # Calculate initial and final angles based on angular speed
+    start_ang = right_hams_start_ang - (ang_speed / speed_ref) * correction_factor
+    end_ang = start_ang + right_hams_range
+    if end_ang > 360:
+        end_ang -= 360
+    # Stimulate if it is in the stimulation zone
+    if ((angle > start_ang) and (angle < end_ang)) or (
+                (end_ang < start_ang) and ((angle < end_ang) or (angle > start_ang))):
+        return 1
+    else:
+        return 0
