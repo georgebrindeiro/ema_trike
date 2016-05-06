@@ -373,6 +373,10 @@ try:
         for s in angle:
             f.write(str(s) + '\n')
         f.close()
+    with open(os.path.join(folder, 'data_control_angle'), 'w') as f:
+        for s in control_angle:
+            f.write(str(s) + '\n')
+        f.close()
     with open(os.path.join(folder, 'data_ControlSpeed'), 'w') as f:
         for s in control_speed:
             f.write(str(s) + '\n')
