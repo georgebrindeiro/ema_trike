@@ -48,17 +48,17 @@ autocalibrate: true
 # wireless_id: {'pedal': 2}
 
 ## Config 5: IMU 0 and 1 wireless streaming ##
-dev_names: ['pc', 'pedal', 'remote']
-dev_type: {'pc': 'DNG', 'pedal': 'WL', 'remote': 'WL'}
-imu_mode: {'pedal': 'wireless', 'remote': 'wireless'}
-streaming: true
-streaming_interval: 0
-streaming_duration: 'unlimited'
-streaming_delay: 0
-streaming_slots: {'pedal': ['getTaredOrientationAsQuaternion', 'getNormalizedGyroRate'], 'remote': ['getButtonState']}
-wired_port: {'pc': '/dev/ttyACM0'}
-wireless_dng: {'pedal': 'pc', 'remote': 'pc'}
-wireless_id: {'pedal': 0, 'remote': 1}
+# dev_names: ['pc', 'pedal', 'remote']
+# dev_type: {'pc': 'DNG', 'pedal': 'WL', 'remote': 'WL'}
+# imu_mode: {'pedal': 'wireless', 'remote': 'wireless'}
+# streaming: true
+# streaming_interval: 0
+# streaming_duration: 'unlimited'
+# streaming_delay: 0
+# streaming_slots: {'pedal': ['getTaredOrientationAsQuaternion', 'getNormalizedGyroRate'], 'remote': ['getButtonState']}
+# wired_port: {'pc': '/dev/ttyACM0'}
+# wireless_dng: {'pedal': 'pc', 'remote': 'pc'}
+# wireless_id: {'pedal': 0, 'remote': 1}
 
 ## Config 6: IMU 0 wireless streaming ##
 # dev_names: ['pc', 'pedal']
@@ -85,3 +85,16 @@ wireless_id: {'pedal': 0, 'remote': 1}
 # wired_port: {'pc': '/dev/ttyACM0'}
 # wireless_dng: {'pedal': 'pc', 'remote': 'pc'}
 # wireless_id: {'pedal': 2, 'remote': 3}
+
+## Config 8: IMU 0,1,2,5 wireless streaming ##
+dev_names: ['pc', 'a', 'b', 'c', 'd']
+dev_type: {'pc': 'DNG', 'a': 'WL', 'b': 'WL', 'c': 'WL', 'd': 'WL'}
+imu_mode: {'a': 'wireless', 'b': 'wireless', 'c': 'wireless', 'd': 'wireless'}
+streaming: true
+streaming_interval: 0
+streaming_duration: 'unlimited'
+streaming_delay: 0
+streaming_slots: {'a': ['getTaredOrientationAsQuaternion', 'getNormalizedGyroRate'], 'b': ['getButtonState'], 'c': ['getButtonState'], 'd': ['getButtonState']}
+wired_port: {'pc': '/dev/ttyACM0'}
+wireless_dng: {'a': 'pc', 'b': 'pc', 'c': 'pc', 'd': 'pc'}
+wireless_id: {'a': 0, 'b': 1, 'c': 2, 'd': 5}
