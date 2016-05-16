@@ -63,59 +63,96 @@ def main():
                     
                     pub[name + '_buttons'].publish(buttons)
             else:
-                for name in imu_manager.imus:
-                    ## one message per imu
-                    imuMsg = Imu()
-                    imuMsg.header.stamp = timestamp
-                    imuMsg.header.frame_id = frame_id
-                    buttons = Int8()
-                    
-                    streaming_data = imu_manager.getStreamingData(name)
-                    idx = 0
-                    
-                    for slot in imu_manager.streaming_slots[name]:
-                        #print name, slot
+                if imu_manager.broadcast == False:
+                    for name in imu_manager.imus:
+                        ## one message per imu
+                        imuMsg = Imu()
+                        imuMsg.header.stamp = timestamp
+                        imuMsg.header.frame_id = frame_id
+                        buttons = Int8()
                         
-                        if slot == 'getTaredOrientationAsQuaternion':
-                                                        
-                            imuMsg.orientation.x = streaming_data[idx]
-                            imuMsg.orientation.y = streaming_data[idx+1]
-                            imuMsg.orientation.z = streaming_data[idx+2]
-                            imuMsg.orientation.w = streaming_data[idx+3]
+                        streaming_data = imu_manager.getStreamingData(name)
+                        idx = 0
+                        
+                        for slot in imu_manager.streaming_slots[name]:
+                            #print name, slot
                             
-                            idx = idx + 4
-                            
-                        elif slot == 'getNormalizedGyroRate':
-                    
-                            imuMsg.angular_velocity.x = streaming_data[idx]
-                            imuMsg.angular_velocity.y = streaming_data[idx+1]
-                            imuMsg.angular_velocity.z = streaming_data[idx+2]
-                            
-                            idx = idx + 3
-                            
-                        elif slot == 'getCorrectedAccelerometerVector':
-                            
-                            imuMsg.linear_acceleration.x = -streaming_data[idx]
-                            imuMsg.linear_acceleration.y = -streaming_data[idx+1]
-                            imuMsg.linear_acceleration.z = -streaming_data[idx+2]
-                            
-                            idx = idx + 3
-                            
-                            print type(streaming_data)
-                            
-                        elif slot == 'getButtonState':
+                            if slot == 'getTaredOrientationAsQuaternion':
+                                                            
+                                imuMsg.orientation.x = streaming_data[idx]
+                                imuMsg.orientation.y = streaming_data[idx+1]
+                                imuMsg.orientation.z = streaming_data[idx+2]
+                                imuMsg.orientation.w = streaming_data[idx+3]
+                                
+                                idx = idx + 4
+                                
+                            elif slot == 'getNormalizedGyroRate':
+                        
+                                imuMsg.angular_velocity.x = streaming_data[idx]
+                                imuMsg.angular_velocity.y = streaming_data[idx+1]
+                                imuMsg.angular_velocity.z = streaming_data[idx+2]
+                                
+                                idx = idx + 3
+                                
+                            elif slot == 'getCorrectedAccelerometerVector':
+                                
+                                imuMsg.linear_acceleration.x = -streaming_data[idx]
+                                imuMsg.linear_acceleration.y = -streaming_data[idx+1]
+                                imuMsg.linear_acceleration.z = -streaming_data[idx+2]
+                                
+                                idx = idx + 3
+                                
+                                print type(streaming_data)
+                                
+                            elif slot == 'getButtonState':
 
-                            if type(streaming_data) == 'tuple':
-                                buttons = streaming_data[idx]
-                            
-                                idx = idx + 1
-                            else:
-                                # imu is only streaming button state, result is not a tuple
-                                buttons = streaming_data
+                                if type(streaming_data) == 'tuple':
+                                    buttons = streaming_data[idx]
+                                
+                                    idx = idx + 1
+                                else:
+                                    # imu is only streaming button state, result is not a tuple
+                                    buttons = streaming_data
 
-                    # publish streamed data
-                    pub[name].publish(imuMsg)
-                    pub[name + '_buttons'].publish(buttons)
+                        # publish streamed data
+                        pub[name].publish(imuMsg)
+                        pub[name + '_buttons'].publish(buttons)
+                else:
+                    for name in imu_manager.imus:
+                        ## one message per imu
+                        imuMsg = Imu()
+                        imuMsg.header.stamp = timestamp
+                        imuMsg.header.frame_id = frame_id
+                        buttons = Int8()
+                        
+                        streaming_data = imu_manager.devices[name].getStreamingBatch()
+                        
+                        idx = 0
+                        
+                        imuMsg.orientation.x = streaming_data[idx]
+                        imuMsg.orientation.y = streaming_data[idx+1]
+                        imuMsg.orientation.z = streaming_data[idx+2]
+                        imuMsg.orientation.w = streaming_data[idx+3]
+                            
+                        idx = idx + 4
+                            
+                        imuMsg.angular_velocity.x = streaming_data[idx]
+                        imuMsg.angular_velocity.y = streaming_data[idx+1]
+                        imuMsg.angular_velocity.z = streaming_data[idx+2]
+                            
+                        idx = idx + 3
+                            
+                        imuMsg.linear_acceleration.x = -streaming_data[idx]
+                        imuMsg.linear_acceleration.y = -streaming_data[idx+1]
+                        imuMsg.linear_acceleration.z = -streaming_data[idx+2]
+                        
+                        idx = idx + 3
+                            
+                        buttons = streaming_data[idx]
+
+                        # publish streamed data
+                        pub[name].publish(imuMsg)
+                        pub[name + '_buttons'].publish(buttons)
         except TypeError:
             print 'TypeError occured!'
 

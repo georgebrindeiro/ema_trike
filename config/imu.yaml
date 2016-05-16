@@ -87,14 +87,24 @@ autocalibrate: true
 # wireless_id: {'pedal': 2, 'remote': 3}
 
 ## Config 8: IMU 0,1,2,5 wireless streaming ##
-dev_names: ['pc', 'a', 'b', 'c', 'd']
-dev_type: {'pc': 'DNG', 'a': 'WL', 'b': 'WL', 'c': 'WL', 'd': 'WL'}
-imu_mode: {'a': 'wireless', 'b': 'wireless', 'c': 'wireless', 'd': 'wireless'}
+# dev_names: ['pc', 'a', 'b', 'c', 'd']
+# dev_type: {'pc': 'DNG', 'a': 'WL', 'b': 'WL', 'c': 'WL', 'd': 'WL'}
+# imu_mode: {'a': 'wireless', 'b': 'wireless', 'c': 'wireless', 'd': 'wireless'}
+# streaming: true
+# streaming_interval: 0
+# streaming_duration: 'unlimited'
+# streaming_delay: 0
+# streaming_slots: {'a': ['getTaredOrientationAsQuaternion', 'getNormalizedGyroRate'], 'b': ['getButtonState'], 'c': ['getButtonState'], 'd': ['getButtonState']}
+# wired_port: {'pc': '/dev/ttyACM0'}
+# wireless_dng: {'a': 'pc', 'b': 'pc', 'c': 'pc', 'd': 'pc'}
+# wireless_id: {'a': 0, 'b': 1, 'c': 2, 'd': 5}
+
+## Config 9: IMU broadcaster ##
+dev_names: ['pc']
+dev_type: {'pc': 'DNG'}
+broadcast: true
 streaming: true
 streaming_interval: 0
 streaming_duration: 'unlimited'
 streaming_delay: 0
-streaming_slots: {'a': ['getTaredOrientationAsQuaternion', 'getNormalizedGyroRate'], 'b': ['getButtonState'], 'c': ['getButtonState'], 'd': ['getButtonState']}
 wired_port: {'pc': '/dev/ttyACM0'}
-wireless_dng: {'a': 'pc', 'b': 'pc', 'c': 'pc', 'd': 'pc'}
-wireless_id: {'a': 0, 'b': 1, 'c': 2, 'd': 5}
