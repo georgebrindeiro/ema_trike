@@ -4,6 +4,7 @@
 # dev_names:          string identifier to find configs for each device (NOTE: list dongle devices first)
 # dev_type:           YEI device type (only DNG and WL supported for now)
 # imu_mode:           wireless or wired (only needed for WL devices)
+# broadcast:          switch on broadcast mode, to get data from all connected IMUs
 # streaming:          switch on streaming mode (faster), all following parameters in us
 # streaming_delay:    amount of time the sensor will wait before outputting the first packet of streaming data
 # streaming_duration: length of the streaming session (NOTE: 'unlimited' is 0xFFFFFFFF, see manual)
@@ -19,6 +20,7 @@ autocalibrate: true
 # dev_names: ['pc', 'pedal', 'remote']
 # dev_type: {'pc': 'DNG', 'pedal': 'WL', 'remote': 'WL'}
 # imu_mode: {'pedal': 'wireless', 'remote': 'wireless'}
+# broadcast: false
 # streaming: false
 # wired_port: {'pc': '/dev/ttyACM0'}
 # wireless_dng: {'pedal': 'pc', 'remote': 'pc'}
@@ -28,6 +30,7 @@ autocalibrate: true
 # dev_names: ['pedal', 'remote']
 # dev_type: {'pedal': 'WL', 'remote': 'WL'}
 # imu_mode: {'pedal': 'wired', 'remote': 'wired'}
+# broadcast: false
 # streaming: false
 # wired_port: {'pedal': '/dev/ttyACM0', 'remote': '/dev/ttyACM1'}
 
@@ -35,6 +38,7 @@ autocalibrate: true
 # dev_names: ['pedal']
 # dev_type: {'pedal': 'WL'}
 # imu_mode: {'pedal': 'wired'}
+# broadcast: false
 # streaming: false
 # wired_port: {'pedal': '/dev/ttyACM0'}
 
@@ -42,6 +46,7 @@ autocalibrate: true
 # dev_names: ['pc', 'pedal']
 # dev_type: {'pc': 'DNG', 'pedal': 'WL'}
 # imu_mode: {'pedal': 'wireless'}
+# broadcast: false
 # streaming: false
 # wired_port: {'pc': '/dev/ttyACM0'}
 # wireless_dng: {'pedal': 'pc'}
@@ -51,6 +56,7 @@ autocalibrate: true
 # dev_names: ['pc', 'pedal', 'remote']
 # dev_type: {'pc': 'DNG', 'pedal': 'WL', 'remote': 'WL'}
 # imu_mode: {'pedal': 'wireless', 'remote': 'wireless'}
+# broadcast: false
 # streaming: true
 # streaming_interval: 0
 # streaming_duration: 'unlimited'
@@ -64,6 +70,7 @@ autocalibrate: true
 # dev_names: ['pc', 'pedal']
 # dev_type: {'pc': 'DNG', 'pedal': 'WL'}
 # imu_mode: {'pedal': 'wireless'}
+# broadcast: false
 # streaming: true
 # streaming_interval: 0
 # streaming_duration: 'unlimited'
@@ -77,6 +84,7 @@ autocalibrate: true
 # dev_names: ['pc', 'pedal', 'remote']
 # dev_type: {'pc': 'DNG', 'pedal': 'WL', 'remote': 'WL'}
 # imu_mode: {'pedal': 'wireless', 'remote': 'wireless'}
+# broadcast: false
 # streaming: true
 # streaming_interval: 0
 # streaming_duration: 'unlimited'
@@ -90,6 +98,7 @@ autocalibrate: true
 # dev_names: ['pc', 'a', 'b', 'c', 'd']
 # dev_type: {'pc': 'DNG', 'a': 'WL', 'b': 'WL', 'c': 'WL', 'd': 'WL'}
 # imu_mode: {'a': 'wireless', 'b': 'wireless', 'c': 'wireless', 'd': 'wireless'}
+# broadcast: false
 # streaming: true
 # streaming_interval: 0
 # streaming_duration: 'unlimited'
@@ -100,11 +109,25 @@ autocalibrate: true
 # wireless_id: {'a': 0, 'b': 1, 'c': 2, 'd': 5}
 
 ## Config 9: IMU broadcaster ##
-dev_names: ['pc']
-dev_type: {'pc': 'DNG'}
-broadcast: true
+# dev_names: ['pc']
+# dev_type: {'pc': 'DNG'}
+# broadcast: true
+# streaming: true
+# streaming_interval: 0
+# streaming_duration: 'unlimited'
+# streaming_delay: 0
+# wired_port: {'pc': '/dev/ttyACM0'}
+
+## Config 10: IMU 1 as pedal, IMU 0 and 5 as buttons
+dev_names: ['pc', 'pedal', 'left_remote', 'right_remote']
+dev_type: {'pc': 'DNG', 'pedal': 'WL', 'left_remote': 'WL', 'right_remote': 'WL'}
+imu_mode: {'pedal': 'wireless', 'left_remote': 'wireless', 'right_remote': 'wireless'}
+broadcast: false
 streaming: true
 streaming_interval: 0
 streaming_duration: 'unlimited'
 streaming_delay: 0
+streaming_slots: {'pedal': ['getTaredOrientationAsQuaternion', 'getNormalizedGyroRate'], 'left_remote': ['getButtonState'], 'right_remote': ['getButtonState']}
 wired_port: {'pc': '/dev/ttyACM0'}
+wireless_dng: {'pedal': 'pc', 'left_remote': 'pc', 'right_remote': 'pc'}
+wireless_id: {'pedal': 1, 'left_remote': 0, 'right_remote': 5}
