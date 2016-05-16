@@ -1,0 +1,12 @@
+<launch>
+  <group ns="ema_trike">
+
+    <node name="imu" pkg="ema_trike" type="fast_imu_node.py" output="screen" />
+
+  </group>
+
+  <!-- launch utils -->
+  <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find ema_trike)/config/rviz/imu.rviz" output="log" respawn="true" respawn_delay="5"/>
+  <node name="rqt_graph" pkg="rqt_graph" type="rqt_graph" output="log" respawn="true" respawn_delay="5"/>
+  <node name="rqt_plot" pkg="rqt_plot" type="rqt_plot" output="log" respawn="true" respawn_delay="5"/> -->
+</launch>
