@@ -9,21 +9,21 @@ Created on Sat May 23 13:41:18 2015
 ############################################################
 
 # Left quadriceps
-left_quad_start_ang = 300
-left_quad_range = 100
+left_quad_start_ang = 270
+left_quad_range = 130
 
 # Left gluteus
-left_gluteus_start_ang = 30
-left_gluteus_range = 70
+left_gluteus_start_ang = 50
+left_gluteus_range = 80
 
 # Left hamstrings
-left_hams_start_ang = 90
+left_hams_start_ang = 135
 left_hams_range = 100
 
 ############################################################
 ######################## Right leg #########################
 ############################################################
-# The right leg os the opposite of the left leg
+# The right leg is the opposite of the left leg
 
 # Right quadriceps
 right_quad_start_ang = left_quad_start_ang - 180

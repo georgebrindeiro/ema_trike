@@ -114,10 +114,19 @@ def read_sensors():
         # print angSpeed[-1]
 
 
+def check_angles(ang1, ang2):
+    good_angle = False
+    safety_range = 50
+    if abs(ang1 - ang2) < safety_range:
+        good_angle = True
+    elif abs(ang1 - ang2) > (360 - safety_range):
+        good_angle = True
+    return good_angle
+
 # Main function
 def main():
     global running, controlSignal, signal_channel
-    this_instant = 501
+    this_instant = xRange+1
     t0 = time.time()
     t1 = -1
     while running:
@@ -130,8 +139,19 @@ def main():
             t1 = time.time()
             time_stamp.append(time.time() - t0)
 
+            # Check if angles are good
+            ang1 = angle[-1]
+            ang2 = angle[-2]
+            if not check_angles(ang1, ang2):
+                print "Bad angles. Aborting."
+                print ang1
+                print ang2
+                stim.stop()
+                running = False
+                break
+
             # Get data from sensors
-            control_angle.append(angle[-1])
+            control_angle.append(ang1)
             control_speed.append(angSpeed[-1])
 
             # Calculate error
@@ -142,6 +162,7 @@ def main():
             controlSignal.append(control.control(control_error[xRange:]))
 
             # Calculate stimulation signal
+            # print actual_ref_speed[this_instant]
             signal_channel[0].append(
                 (perfil.left_quad(angle[-1], angSpeed[-1], actual_ref_speed[this_instant])) * (controlSignal[-1]))
             signal_channel[1].append(
@@ -168,6 +189,7 @@ def main():
 
             # Electrical stimulator signal update
             if stimulation:
+                # print pulse_width
                 stim.update(channels, pulse_width, current)
 
             # running = False
@@ -182,14 +204,12 @@ def main():
 ##########################################################################
 
 # IMU addresses
-addressPedal = 0
-addressRemoteControl = 1
+addressPedal = 2
+addressRemoteControl = 3
 
-# Reference speed
-speed_ref = 150
 
 # Desired control frequency
-freq = 25
+freq = 50
 period = 1.0 / freq
 
 # Debug mode, for when there's no stimulation
@@ -197,8 +217,8 @@ stimulation = True
 
 # Experiment mode
 ramps = False
-speed_ref = 150  # Slow speed
-fast_speed = 250
+speed_ref = 300  # Slow speed
+fast_speed = 300
 time_on_speed = 300
 
 # Number of channels
@@ -258,9 +278,12 @@ if ramps:
         actual_ref_speed.append(speed_ref - 1 - x)
     for x in range(1000):
         actual_ref_speed.append(1)
+    # print actual_ref_speed
 else:
+    print 'Ramps off'
     for x in range(4000):
         actual_ref_speed.append(speed_ref)
+    # print actual_ref_speed
 channel_stim = [0 for x in range(number_of_channels)]
 controlSignal = [0 for x in range(xRange)]
 errorHistory = [0 for x in range(xRange)]
@@ -320,9 +343,9 @@ try:
     # Asking for user input
     channels = 0
     if stimulation:
-        freq = int(raw_input("Input frequency: "))
-        channels = int(raw_input("Input channels: "))
-        current_str = raw_input("Input current: ")
+        freq = 50 # int(raw_input("Input frequency: "))
+        channels = 119 #int(raw_input("Input channels: "))
+        current_str = '44,34,54,44,34,54' #raw_input("Input current: ")
         current = [int(i) for i in (current_str.split(","))]
 
     # Initialize stimulator
