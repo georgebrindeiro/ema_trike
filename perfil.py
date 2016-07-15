@@ -18,7 +18,7 @@ left_gluteus_range = 80
 
 # Left hamstrings
 left_hams_start_ang = 135
-left_hams_range = 100
+left_hams_range = 80
 
 ############################################################
 ######################## Right leg #########################

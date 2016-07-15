@@ -345,7 +345,7 @@ try:
     if stimulation:
         freq = 50 # int(raw_input("Input frequency: "))
         channels = 119 #int(raw_input("Input channels: "))
-        current_str = '44,34,54,44,34,54' #raw_input("Input current: ")
+        current_str = '60,32,58,60,32,58' #raw_input("Input current: ")
         current = [int(i) for i in (current_str.split(","))]
 
     # Initialize stimulator
