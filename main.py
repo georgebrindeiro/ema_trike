@@ -155,7 +155,10 @@ def main():
             control_speed.append(angSpeed[-1])
 
             # Calculate error
-            control_error.append(actual_ref_speed[this_instant] - angSpeed[-1])
+            if ramps:
+                control_error.append(actual_ref_speed[this_instant] - angSpeed[-1])
+            else:
+                control_error.append(speed_ref - angSpeed[-1])
             # print len(angSpeed)
 
             # Calculate control signal
@@ -163,18 +166,32 @@ def main():
 
             # Calculate stimulation signal
             # print actual_ref_speed[this_instant]
-            signal_channel[0].append(
-                (perfil.left_quad(angle[-1], angSpeed[-1], actual_ref_speed[this_instant])) * (controlSignal[-1]))
-            signal_channel[1].append(
-                (perfil.left_hams(angle[-1], angSpeed[-1], actual_ref_speed[this_instant])) * (controlSignal[-1]))
-            signal_channel[2].append(
-                (perfil.left_gluteus(angle[-1], angSpeed[-1], actual_ref_speed[this_instant])) * (controlSignal[-1]))
-            signal_channel[3].append(
-                (perfil.right_quad(angle[-1], angSpeed[-1], actual_ref_speed[this_instant])) * (controlSignal[-1]))
-            signal_channel[4].append(
-                (perfil.right_hams(angle[-1], angSpeed[-1], actual_ref_speed[this_instant])) * (controlSignal[-1]))
-            signal_channel[5].append(
-                (perfil.right_gluteus(angle[-1], angSpeed[-1], actual_ref_speed[this_instant])) * (controlSignal[-1]))
+            if ramps:
+                signal_channel[0].append(
+                    (perfil.left_quad(angle[-1], angSpeed[-1], actual_ref_speed[this_instant])) * (controlSignal[-1]))
+                signal_channel[1].append(
+                    (perfil.left_hams(angle[-1], angSpeed[-1], actual_ref_speed[this_instant])) * (controlSignal[-1]))
+                signal_channel[2].append(
+                    (perfil.left_gluteus(angle[-1], angSpeed[-1], actual_ref_speed[this_instant])) * (controlSignal[-1]))
+                signal_channel[3].append(
+                    (perfil.right_quad(angle[-1], angSpeed[-1], actual_ref_speed[this_instant])) * (controlSignal[-1]))
+                signal_channel[4].append(
+                    (perfil.right_hams(angle[-1], angSpeed[-1], actual_ref_speed[this_instant])) * (controlSignal[-1]))
+                signal_channel[5].append(
+                    (perfil.right_gluteus(angle[-1], angSpeed[-1], actual_ref_speed[this_instant])) * (controlSignal[-1]))
+            else:
+                signal_channel[0].append(
+                    (perfil.left_quad(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
+                signal_channel[1].append(
+                    (perfil.left_hams(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
+                signal_channel[2].append(
+                    (perfil.left_gluteus(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
+                signal_channel[3].append(
+                    (perfil.right_quad(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
+                signal_channel[4].append(
+                    (perfil.right_hams(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
+                signal_channel[5].append(
+                    (perfil.right_gluteus(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
 
             # Signal double safety saturation
             # Electrical stimulation parameters settings
@@ -346,6 +363,7 @@ try:
         freq = 50 # int(raw_input("Input frequency: "))
         channels = 119 #int(raw_input("Input channels: "))
         current_str = '60,32,58,60,32,58' #raw_input("Input current: ")
+        # current_str = '45,24,44,45,24,44' #raw_input("Input current: ")
         current = [int(i) for i in (current_str.split(","))]
 
     # Initialize stimulator

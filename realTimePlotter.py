@@ -90,7 +90,7 @@ class RealTimePlotter:
 
         self.ax.axis([CurrentXAxis.min(), CurrentXAxis.max(), -5, 365])
         self.ax2.axis([CurrentXAxis.min(), CurrentXAxis.max(), -0.2, 1.2])
-        self.ax3.axis([CurrentXAxis.min(), CurrentXAxis.max(), -5, 1200])
+        self.ax3.axis([CurrentXAxis.min(), CurrentXAxis.max(), -5, 450])
         self.ax4.axis([CurrentXAxis.min(), CurrentXAxis.max(), -1.1, 1.1])
         self.ax5.axis([CurrentXAxis.min(), CurrentXAxis.max(), -100, 100])
 
