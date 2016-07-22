@@ -12,7 +12,7 @@ class IMU:
 ########################################
         
     def calibrate(self):
-        msg = ">" + str(self.address) + ",165\n".encode()
+        msg = (">" + str(self.address) + ",165\n").encode()
         try:                
             if self.serial_port is not None:
                 self.serial_port.write(msg) # e escreve na porta
@@ -30,7 +30,7 @@ class IMU:
 ########################################
         
     def setEulerToYXZ(self):
-        msg = ">" + str(self.address) + ",16,1\n".encode()
+        msg = (">" + str(self.address) + ",16,1\n").encode()
         try:                
             if self.serial_port is not None:
                 self.serial_port.write(msg) # e escreve na porta
@@ -47,7 +47,7 @@ class IMU:
 ########################################
         
     def tare(self):
-        msg = ">" + str(self.address) + ",96\n".encode()
+        msg = (">" + str(self.address) + ",96\n").encode()
         try:                
             if self.serial_port is not None:
                 self.serial_port.write(msg) # e escreve na porta
@@ -69,9 +69,9 @@ class IMU:
         
         try:  
             if self.serial_port is not None:
-                self.serial_port.write((">" + str(self.address) + ",250\n".encode())) #Get button state) # e escreve na porta
+                self.serial_port.write(((">" + str(self.address) + ",250\n").encode())) #Get button state) # e escreve na porta
                 dados = readData(self.serial_port)
-                botao = dados.split(",")
+                botao = dados.decode("utf-8").split(",")
                 if len(botao) == 4:               
                     botao = botao[3]
                     if (int(botao) == 1):                                    
@@ -91,12 +91,12 @@ class IMU:
 ########################################
 
     def getEulerAngles(self):
-        msg = ">" + str(self.address) + ",1\n".encode()        
+        msg = (">" + str(self.address) + ",1\n").encode()
         try:                
             if self.serial_port is not None:
                 self.serial_port.write(msg) # e escreve na porta
                 dados = readData(self.serial_port)
-                return dados            
+                return dados.decode("utf-8")
             else:
                 return 'Port error'               
         except ValueError:
@@ -130,7 +130,7 @@ class IMU:
             else:
                 return 'Port error'
         except ValueError:
-            print ValueError.message
+            print(ValueError.message)
             return 'Error'
             
 ########################################
@@ -138,12 +138,12 @@ class IMU:
 ########################################
 
     def getGyroData(self):
-        msg = ">" + str(self.address) + ",33\n".encode()        
+        msg = (">" + str(self.address) + ",33\n").encode()
         try:                
             if self.serial_port is not None:
                 self.serial_port.write(msg) # e escreve na porta
                 dados = readData(self.serial_port)
-                return dados            
+                return dados.decode("utf-8")
             else:
                 return 'Port error'               
         except ValueError:
@@ -161,7 +161,7 @@ class IMU:
                 dados = readData(self.serial_port)
                 dados = dados.split(",")
                 if int(dados[0]) == 0:
-                    return dados
+                    return dados.decode("utf-8")
                 else:
                     return "No answer"
             else:
@@ -193,7 +193,7 @@ def readData(port):
         return data
         #return dados
     except ValueError:
-        print 'Error reading data from the serial port'
+        print('Error reading data from the serial port')
 
 
 class Quaternion:

@@ -20,7 +20,7 @@ import subprocess
 import collections
 import serial
 import multiprocessing
-import multiprocessing.forking
+from multiprocessing import *
 import time
 
 ### Globals ###
