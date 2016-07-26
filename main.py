@@ -56,7 +56,10 @@ def read_angles():
                 ang = (ang / math.pi) * 180
             else:
                 ang = 360 - ((-ang / math.pi) * 180)
-            angle.append(ang)
+            if ang == 0:
+                angle.append(angle[-1])
+            else:
+                angle.append(ang)
         else:
             print "Angular position data in wrong format"
     except ValueError:
@@ -94,14 +97,14 @@ def get_angular_speed():
         print 'Angular speed reading error'
 
 
-def read_buttons():
-    global running
-    try:
-        if IMURemoteControl.checkButtons() == 2:
-            running = False
-            stim.stop()
-    except ValueError:
-        print 'Buttons reading error'
+# def read_buttons():
+#     global running
+#     try:
+#         if IMURemoteControl.checkButtons() == 2:
+#             running = False
+#             stim.stop()
+#     except ValueError:
+#         print 'Buttons reading error'
 
 
 def read_sensors():
@@ -109,7 +112,7 @@ def read_sensors():
     while running:
         read_angles()
         get_angular_speed()
-        read_buttons()
+        # read_buttons()
         time.sleep(0.001)
         # print angSpeed[-1]
 
@@ -141,14 +144,14 @@ def main():
 
             # Check if angles are good
             ang1 = angle[-1]
-            ang2 = angle[-2]
-            if not check_angles(ang1, ang2):
-                print "Bad angles. Aborting."
-                print ang1
-                print ang2
-                stim.stop()
-                running = False
-                break
+            # ang2 = angle[-2]
+            # if not check_angles(ang1, ang2):
+            #     print "Bad angles. Aborting."
+            #     print ang1
+            #     print ang2
+            #     stim.stop()
+            #     running = False
+            #     break
 
             # Get data from sensors
             control_angle.append(ang1)
@@ -234,7 +237,7 @@ stimulation = True
 
 # Experiment mode
 ramps = False
-speed_ref = 300  # Slow speed
+speed_ref = 250  # Slow speed
 fast_speed = 300
 time_on_speed = 300
 
@@ -329,7 +332,7 @@ try:
 
     # Construct objects
     IMUPedal = imu.IMU(serialPortIMU, addressPedal)
-    IMURemoteControl = imu.IMU(serialPortIMU, addressRemoteControl)
+    # IMURemoteControl = imu.IMU(serialPortIMU, addressRemoteControl)
     stim = 0
     if stimulation:
         stim = stimulator.Stimulator(serialPortStimulator)
@@ -362,8 +365,10 @@ try:
     if stimulation:
         freq = 50 # int(raw_input("Input frequency: "))
         channels = 119 #int(raw_input("Input channels: "))
+        # current_str = '50,32,58,50,32,58' #raw_input("Input current: ")
         current_str = '60,32,58,60,32,58' #raw_input("Input current: ")
         # current_str = '45,24,44,45,24,44' #raw_input("Input current: ")
+        # current_str = '30,16,29,30,16,29' #raw_input("Input current: ")
         current = [int(i) for i in (current_str.split(","))]
 
     # Initialize stimulator
@@ -378,14 +383,17 @@ try:
     print "Whenever you're ready, press button 1 (the left one)!"
 
     # Wait until the user presses the 'Start' button
-    while not (IMURemoteControl.checkButtons() == 1):
-        pass
+    # while not (IMURemoteControl.checkButtons() == 1):
+    #     pass
+
+    raw_input('Press ENTER to start')
 
     # Keep on until the user presses the "Stop" button
     print "Here we go!"
 
     # Start main function
     running = True
+
     thread.start_new_thread(read_sensors, ())
     thread.start_new_thread(main, ())
     # thread.start_new_thread(plot, ())
