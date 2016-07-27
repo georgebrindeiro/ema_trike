@@ -46,21 +46,26 @@ def get_port(device):
 
 
 def read_angles():
-    try:
-        # Get angle position
-        ang = IMUPedal.getEulerAngles()
-        ang = ang.split(",")
-        if len(ang) == 6:
-            ang = float(ang[4])
-            if ang >= 0:
-                ang = (ang / math.pi) * 180
+    while True:
+        try:
+            # Get angle position
+            ang = IMUPedal.getEulerAngles()
+            ang = ang.split(",")
+            if len(ang) == 6:
+                ang = float(ang[4])
+                if ang >= 0:
+                    ang = (ang / math.pi) * 180
+                else:
+                    ang = 360 - ((-ang / math.pi) * 180)
+                if ang == 0:
+                    continue
+                else:
+                    angle.append(ang)
+                    break
             else:
-                ang = 360 - ((-ang / math.pi) * 180)
-            angle.append(ang)
-        else:
-            print "Angular position data in wrong format"
-    except ValueError:
-        print 'Angle reading error'
+                print "Angular position data in wrong format"
+        except ValueError:
+            print 'Angle reading error'
 
 
 def get_angular_speed():
@@ -147,8 +152,9 @@ def main():
                 print ang1
                 print ang2
                 stim.stop()
-                running = False
-                break
+                # running = False
+                # break
+                continue
 
             # Get data from sensors
             control_angle.append(ang1)
@@ -258,7 +264,8 @@ filter_size = 5
 # portIMU = '/dev/ttyACM0'  # Linux
 portIMU = get_port('imu')  # Works on Mac. Should also work on Windows.
 if stimulation:
-    portStimulator = get_port('stimulator')  # Works only on Mac.
+    # portStimulator = get_port('stimulator')  # Works only on Mac.
+    portStimulator = '/dev/tty.usbserial-HMCX9Q6D'
     # portStimulator = 'COM4'
 # print portIMU
 
@@ -362,8 +369,8 @@ try:
     if stimulation:
         freq = 50 # int(raw_input("Input frequency: "))
         channels = 119 #int(raw_input("Input channels: "))
-        current_str = '60,32,58,60,32,58' #raw_input("Input current: ")
-        # current_str = '45,24,44,45,24,44' #raw_input("Input current: ")
+        # current_str = '60,32,58,60,32,58' #raw_input("Input current: ")
+        current_str = '45,24,44,45,24,44' #raw_input("Input current: ")
         current = [int(i) for i in (current_str.split(","))]
 
     # Initialize stimulator
