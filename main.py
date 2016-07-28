@@ -94,14 +94,14 @@ def get_angular_speed():
         print 'Angular speed reading error'
 
 
-def read_buttons():
-    global running
-    try:
-        if IMURemoteControl.checkButtons() == 2:
-            running = False
-            stim.stop()
-    except ValueError:
-        print 'Buttons reading error'
+# def read_buttons():
+#     global running
+#     try:
+#         if IMURemoteControl.checkButtons() == 2:
+#             running = False
+#             stim.stop()
+#     except ValueError:
+#         print 'Buttons reading error'
 
 
 def read_sensors():
