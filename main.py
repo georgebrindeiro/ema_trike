@@ -258,8 +258,8 @@ filter_size = 5
 # portIMU = '/dev/ttyACM0'  # Linux
 portIMU = get_port('imu')  # Works on Mac. Should also work on Windows.
 if stimulation:
-    # portStimulator = get_port('stimulator')  # Works only on Mac.
-    portStimulator = '/dev/tty.usbserial-HMCX9Q6D' #get_port('stimulator')  # Works only on Mac.
+    portStimulator = get_port('stimulator')  # Works only on Mac.
+    # portStimulator = '/dev/tty.usbserial-HMCX9Q6D' #get_port('stimulator')  # Works only on Mac.
     # portStimulator = 'COM4'
 # print portIMU
 
@@ -384,14 +384,15 @@ try:
     # while not (IMURemoteControl.checkButtons() == 1):
     #     pass
 
+    running = True
+    thread.start_new_thread(read_sensors, ())
+
     raw_input('Press ENTER to start')
 
     # Keep on until the user presses the "Stop" button
     print "Here we go!"
 
     # Start main function
-    running = True
-    thread.start_new_thread(read_sensors, ())
     thread.start_new_thread(main, ())
     # thread.start_new_thread(plot, ())
     graph = realTimePlotter.RealTimePlotter(control_angle, signal_channel[0], signal_channel[1], angSpeed, angSpeed,
