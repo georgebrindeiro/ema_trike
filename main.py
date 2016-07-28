@@ -17,16 +17,16 @@ import imu
 import stimulator
 import perfil
 import time
-import math
+# import math
 import numpy
 import realTimePlotter
 import control
 import threading
 import sys
 import os
-import threespace_api as ts_api
-import glob
-from PyQt5 import QtGui, QtCore
+# import threespace_api as ts_api
+# import glob
+# from PyQt5 import QtGui, QtCore
 from PyQt5.QtWidgets import QDialog, QApplication
 from EMATrike import Ui_Form
 import serial.tools.list_ports as serialtools
@@ -41,9 +41,11 @@ def read_angles():
         if len(ang) == 6:
             ang = float(ang[4])
             if ang >= 0:
-                ang = (ang / math.pi) * 180
+                # ang = (ang / math.pi) * 180
+                ang = (ang / 3.14) * 180
             else:
-                ang = 360 - ((-ang / math.pi) * 180)
+                # ang = 360 - ((-ang / math.pi) * 180)
+                ang = 360 - ((-ang / 3.14) * 180)
             angle.append(ang)
         else:
             print("Angular position data in wrong format")
@@ -59,7 +61,8 @@ def get_angular_speed():
         speed = speed.split(",")
         if len(speed) == 6:
             speed = float(speed[4])
-            speed = speed / math.pi * 180
+            # speed = speed / math.pi * 180
+            speed = speed / 3.14 * 180
             # print speed
             # Filter speed
             angSpeed.append(int(round(speed)))
@@ -387,8 +390,8 @@ def start():
         # Ready to go.
         print("Whenever you're ready, press button 1 (the left one)!")
 
-        t_plot = threading.Thread(target=plot)
-        t_plot.start()
+        # t_plot = threading.Thread(target=plot)
+        # t_plot.start()
 
         # plot()
 
@@ -415,7 +418,7 @@ def start():
         #     pass
         main()
         # graph.stop_timer()
-
+        # plot()
         # Start real time plotter
         # realTimePlotter.RealTimePlotter(shown_angle, signal_femoral, signal_gastrocnemius, shown_speed,
         #                                 shown_control_signal, shown_ref_speed, shown_error, xRange, time_stamp)
@@ -641,8 +644,14 @@ ports_devices = []
 ports_IMU_index = 0
 ports_stimulator_index = 0
 for p in ports:
-    ports_descriptions.append(p.description)
+    # ports_descriptions.append(p.description)
+    ports_descriptions.append(p.device)
     ports_devices.append(p.device)
 
-t_gui = threading.Thread(target=start_gui)
-t_gui.start()
+# t_plot = threading.Thread(target=plot)
+# t_plot.start()
+
+# t_gui = threading.Thread(target=start_gui)
+# t_gui.start()
+start_gui()
+
