@@ -9,8 +9,8 @@ Created on Sat May 23 13:41:18 2015
 ############################################################
 
 # Left quadriceps
-left_quad_start_ang = 250
-left_quad_range = 75
+left_quad_start_ang = 270
+left_quad_range = 90
 
 # Left gluteus
 left_gluteus_start_ang = 20
@@ -41,6 +41,24 @@ right_gluteus_range = left_gluteus_range
 right_hams_start_ang = left_hams_start_ang + 180
 right_hams_range = left_hams_range
 
+def update_right_leg():
+    global right_quad_start_ang, right_quad_range, right_hams_start_ang, right_hams_range, right_gluteus_start_ang, right_gluteus_range
+    # Right quadriceps
+    right_quad_start_ang = left_quad_start_ang - 180
+    right_quad_range = left_quad_range
+
+    # Right gluteus
+    # Make sure the angles are not negative nor greater than 360
+    if left_gluteus_start_ang > 180:
+        right_gluteus_start_ang = left_gluteus_start_ang - 180
+    else:
+        right_gluteus_start_ang = left_gluteus_start_ang + 180
+    right_gluteus_range = left_gluteus_range
+
+    # Right hamstrings
+    right_hams_start_ang = left_hams_start_ang + 180
+    right_hams_range = left_hams_range
+
 
 ############################################################
 ############################################################
@@ -51,6 +69,7 @@ correction_factor = 35
 ############################################################
 ############################################################
 def left_quad(angle, ang_speed, speed_ref):
+
     # Calculate initial and final angles based on angular speed
     start_ang = left_quad_start_ang - (ang_speed / speed_ref) * correction_factor
     end_ang = start_ang + left_quad_range
@@ -65,6 +84,7 @@ def left_quad(angle, ang_speed, speed_ref):
 
 
 def right_quad(angle, ang_speed, speed_ref):
+    update_right_leg()
     # Calculate initial and final angles based on angular speed
     start_ang = right_quad_start_ang - (ang_speed / speed_ref) * correction_factor
     end_ang = start_ang + right_quad_range
@@ -93,6 +113,7 @@ def left_gluteus(angle, ang_speed, speed_ref):
 
 
 def right_gluteus(angle, ang_speed, speed_ref):
+    update_right_leg()
     # Calculate initial and final angles based on angular speed
     start_ang = right_gluteus_start_ang - (ang_speed / speed_ref) * correction_factor
     end_ang = start_ang + right_gluteus_range
@@ -121,6 +142,7 @@ def left_hams(angle, ang_speed, speed_ref):
 
 
 def right_hams(angle, ang_speed, speed_ref):
+    update_right_leg()
     # Calculate initial and final angles based on angular speed
     start_ang = right_hams_start_ang - (ang_speed / speed_ref) * correction_factor
     end_ang = start_ang + right_hams_range

@@ -135,11 +135,11 @@ def main():
     while running:
         try:
             # Control frequency
-            t_diff = time.time() - t1
-            if t_diff < period:
-                if not (period - t_diff - 0.004) < 0:
-                    time.sleep(period - t_diff - 0.004)
-            t1 = time.time()
+            # t_diff = time.time() - t1
+            # if t_diff < period:
+            #     if not (period - t_diff - 0.004) < 0:
+            #         time.sleep(period - t_diff - 0.004)
+            # t1 = time.time()
             time_stamp.append(time.time() - t0)
 
             # Check if angles are good
@@ -224,12 +224,12 @@ def main():
 ##########################################################################
 
 # IMU addresses
-addressPedal = 2
+addressPedal = 1
 addressRemoteControl = 3
 
 
 # Desired control frequency
-freq = 50
+freq = 100
 period = 1.0 / freq
 
 # Debug mode, for when there's no stimulation
@@ -237,7 +237,7 @@ stimulation = True
 
 # Experiment mode
 ramps = False
-speed_ref = 250  # Slow speed
+speed_ref = 300  # Slow speed
 fast_speed = 300
 time_on_speed = 300
 
@@ -261,7 +261,7 @@ filter_size = 5
 # portIMU = '/dev/ttyACM0'  # Linux
 portIMU = get_port('imu')  # Works on Mac. Should also work on Windows.
 if stimulation:
-    portStimulator = get_port('stimulator')  # Works only on Mac.
+    portStimulator = '/dev/tty.usbserial-HMCX9Q6D' #get_port('stimulator')  # Works only on Mac.
     # portStimulator = 'COM4'
 # print portIMU
 
