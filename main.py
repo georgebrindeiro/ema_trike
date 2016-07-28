@@ -46,26 +46,21 @@ def get_port(device):
 
 
 def read_angles():
-    while True:
-        try:
-            # Get angle position
-            ang = IMUPedal.getEulerAngles()
-            ang = ang.split(",")
-            if len(ang) == 6:
-                ang = float(ang[4])
-                if ang >= 0:
-                    ang = (ang / math.pi) * 180
-                else:
-                    ang = 360 - ((-ang / math.pi) * 180)
-                if ang == 0:
-                    continue
-                else:
-                    angle.append(ang)
-                    break
+    try:
+        # Get angle position
+        ang = IMUPedal.getEulerAngles()
+        ang = ang.split(",")
+        if len(ang) == 6:
+            ang = float(ang[4])
+            if ang >= 0:
+                ang = (ang / math.pi) * 180
             else:
-                print "Angular position data in wrong format"
-        except ValueError:
-            print 'Angle reading error'
+                ang = 360 - ((-ang / math.pi) * 180)
+            angle.append(ang)
+        else:
+            print "Angular position data in wrong format"
+    except ValueError:
+        print 'Angle reading error'
 
 
 def get_angular_speed():
@@ -114,7 +109,7 @@ def read_sensors():
     while running:
         read_angles()
         get_angular_speed()
-        read_buttons()
+        # read_buttons()
         time.sleep(0.001)
         # print angSpeed[-1]
 
@@ -137,11 +132,11 @@ def main():
     while running:
         try:
             # Control frequency
-            t_diff = time.time() - t1
-            if t_diff < period:
-                if not (period - t_diff - 0.004) < 0:
-                    time.sleep(period - t_diff - 0.004)
-            t1 = time.time()
+            # t_diff = time.time() - t1
+            # if t_diff < period:
+            #     if not (period - t_diff - 0.004) < 0:
+            #         time.sleep(period - t_diff - 0.004)
+            # t1 = time.time()
             time_stamp.append(time.time() - t0)
 
             # Check if angles are good
@@ -152,9 +147,8 @@ def main():
                 print ang1
                 print ang2
                 stim.stop()
-                # running = False
-                # break
-                continue
+                running = False
+                break
 
             # Get data from sensors
             control_angle.append(ang1)
@@ -227,12 +221,12 @@ def main():
 ##########################################################################
 
 # IMU addresses
-addressPedal = 2
+addressPedal = 1
 addressRemoteControl = 3
 
 
 # Desired control frequency
-freq = 50
+freq = 100
 period = 1.0 / freq
 
 # Debug mode, for when there's no stimulation
@@ -265,7 +259,7 @@ filter_size = 5
 portIMU = get_port('imu')  # Works on Mac. Should also work on Windows.
 if stimulation:
     # portStimulator = get_port('stimulator')  # Works only on Mac.
-    portStimulator = '/dev/tty.usbserial-HMCX9Q6D'
+    portStimulator = '/dev/tty.usbserial-HMCX9Q6D' #get_port('stimulator')  # Works only on Mac.
     # portStimulator = 'COM4'
 # print portIMU
 
@@ -336,7 +330,7 @@ try:
 
     # Construct objects
     IMUPedal = imu.IMU(serialPortIMU, addressPedal)
-    IMURemoteControl = imu.IMU(serialPortIMU, addressRemoteControl)
+    # IMURemoteControl = imu.IMU(serialPortIMU, addressRemoteControl)
     stim = 0
     if stimulation:
         stim = stimulator.Stimulator(serialPortStimulator)
@@ -369,8 +363,10 @@ try:
     if stimulation:
         freq = 50 # int(raw_input("Input frequency: "))
         channels = 119 #int(raw_input("Input channels: "))
-        # current_str = '60,32,58,60,32,58' #raw_input("Input current: ")
-        current_str = '45,24,44,45,24,44' #raw_input("Input current: ")
+        # current_str = '50,32,58,50,32,58' #raw_input("Input current: ")
+        current_str = '60,32,58,60,32,58' #raw_input("Input current: ")
+        # current_str = '45,24,44,45,24,44' #raw_input("Input current: ")
+        # current_str = '30,16,29,30,16,29' #raw_input("Input current: ")
         current = [int(i) for i in (current_str.split(","))]
 
     # Initialize stimulator
@@ -385,8 +381,10 @@ try:
     print "Whenever you're ready, press button 1 (the left one)!"
 
     # Wait until the user presses the 'Start' button
-    while not (IMURemoteControl.checkButtons() == 1):
-        pass
+    # while not (IMURemoteControl.checkButtons() == 1):
+    #     pass
+
+    raw_input('Press ENTER to start')
 
     # Keep on until the user presses the "Stop" button
     print "Here we go!"
