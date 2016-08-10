@@ -28,28 +28,50 @@ class ForceSensor:
                 self.forcesensors.append(name)
                 
                 self.devices[name] = {'wireless_dng': config_dict['wireless_dng'][name],
-                                      'wireless_id': config_dict['wireless_id'][name]}
+                                      'wireless_id': config_dict['wireless_id'][name],
+                                      'calibration': config_dict['calibration'][name],
+                                      'bias': 0}
+                
+                self.debias(name)
+
+    def debias(self,name):
+        n = 3
+        measurements = 0.0
+        
+        for i in range(0,n):
+            f = self.getForce(name)
+            measurements = measurements + f[1]
+        
+        bias = measurements/n
+        self.devices[name]['bias'] = bias
+        
+        # print name, " bias = ", bias
 
     def getForce(self, name):
         # print "getting ", name
         
-        wireless_dng = self.devices[self.devices[name]['wireless_dng']]
+        wireless_dng = self.devices[self.devices[name]['wireless_dng']] # we need the actual Serial object, not the dng name
         wireless_id = self.devices[name]['wireless_id']
+        calibration = self.devices[name]['calibration']
+        bias = self.devices[name]['bias']
         
-        force = wireless_dng.readline()
+        msg = wireless_dng.readline()
         msg_id = ""
         
         while msg_id != wireless_id:
-            while len(force) == 0:
+            while len(msg) == 0:
                 # print "len(force) == 0"
-                force = wireless_dng.readline()
+                msg = wireless_dng.readline()
                 
-            msg_id = force[0]
+            msg_id = msg[0]
         
             if msg_id == wireless_id:
                 break
             else:
                 # print "msg_id != %s (%s), reading again" % (wireless_id, msg_id)
-                force = wireless_dng.readline()
+                msg = wireless_dng.readline()
         
-        return [0.0,float(force[1:]),0.0]
+        force = int(msg[1:])*calibration - bias
+        # print name, " = " , "{0:.3f}".format(force)
+        
+        return [0.0,force,0.0]
