@@ -129,6 +129,7 @@ def main():
     this_instant = xRange+1
     t0 = time.time()
     t1 = -1
+    safety = 0
     while running:
         try:
             # Control frequency
@@ -142,13 +143,21 @@ def main():
             # Check if angles are good
             ang1 = angle[-1]
             ang2 = angle[-2]
-            if not check_angles(ang1, ang2):
-                print "Bad angles. Aborting."
-                print ang1
-                print ang2
-                stim.stop()
-                running = False
-                break
+            if (ang1 == 0 or ang2 == 0) and safety < 3:
+                safety = safety + 1
+                print("safety +")
+            else:
+                if not check_angles(ang1, ang2):
+                    print "Bad angles. Aborting."
+                    print ang1
+                    print ang2
+                    stim.stop()
+                    running = False
+                    break
+                else:
+                    if not safety == 0:
+                        print("safety zero")
+                        safety = 0
 
             # Get data from sensors
             control_angle.append(ang1)
@@ -233,8 +242,8 @@ period = 1.0 / freq
 stimulation = True
 
 # Experiment mode
-ramps = True
-speed_ref = 150  # Slow speed
+ramps = False
+speed_ref = 300  # Slow speed
 fast_speed = 250
 time_on_speed = 3000
 
@@ -368,8 +377,10 @@ try:
         # current_str = '62,40,60,62,40,60' #raw_input("Input current: ")
         # current_str = '45,24,44,45,24,44' #raw_input("Input current: ")
         # current_str = '30,16,29,30,16,29' #raw_input("Input current: ")
-        current_str = '30,0,0,30,0,0' #raw_input("Input current: ")
-        current = [int(i) for i in (current_str.split(","))]
+        # current_str = '40,1,1,40,1,1' #raw_input("Input current: ")
+        current_str = '50,32,50,50,32,50' #raw_input("Input current: ")
+        current = [int(i) for i in
+                   (current_str.split(","))]
 
     # Initialize stimulator
     if stimulation:
