@@ -10,7 +10,7 @@ Created on Sat May 23 13:41:18 2015
 
 # Left quadriceps
 left_quad_start_ang = 270
-left_quad_range = 90
+left_quad_range = 80
 
 # Left gluteus
 left_gluteus_start_ang = 20

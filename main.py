@@ -233,10 +233,10 @@ period = 1.0 / freq
 stimulation = True
 
 # Experiment mode
-ramps = False
-speed_ref = 300  # Slow speed
-fast_speed = 300
-time_on_speed = 300
+ramps = True
+speed_ref = 150  # Slow speed
+fast_speed = 250
+time_on_speed = 3000
 
 # Number of channels
 number_of_channels = 6
@@ -364,9 +364,11 @@ try:
         freq = 50 # int(raw_input("Input frequency: "))
         channels = 119 #int(raw_input("Input channels: "))
         # current_str = '50,32,58,50,32,58' #raw_input("Input current: ")
-        current_str = '60,32,58,60,32,58' #raw_input("Input current: ")
+        # current_str = '60,32,58,60,32,58' #raw_input("Input current: ")
+        # current_str = '62,40,60,62,40,60' #raw_input("Input current: ")
         # current_str = '45,24,44,45,24,44' #raw_input("Input current: ")
         # current_str = '30,16,29,30,16,29' #raw_input("Input current: ")
+        current_str = '30,0,0,30,0,0' #raw_input("Input current: ")
         current = [int(i) for i in (current_str.split(","))]
 
     # Initialize stimulator
@@ -400,10 +402,14 @@ try:
     # while running:
     #     pass
     #    main()
-
+    # raw_input('Press ENTER to stop')
+    # stim.stop()
+    # running = False
     # Start real time plotter
     # realTimePlotter.RealTimePlotter(shown_angle, signal_femoral, signal_gastrocnemius, shown_speed,
     #                                 shown_control_signal, shown_ref_speed, shown_error, xRange, time_stamp)
+    stim.stop()
+    running = False
 
     # Save the data
     t = time.localtime()
