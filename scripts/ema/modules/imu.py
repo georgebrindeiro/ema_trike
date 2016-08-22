@@ -77,7 +77,8 @@ class IMU:
                                                          slot7=padded_slots[7])
                     
                     # Start streaming
-                    self.devices[name].startStreaming()
+                    # G: for some reason, startStreaming was a bad idea. without it, we get to 67Hz
+                    #self.devices[name].startStreaming()
             else:
                 self.broadcast = True
                 

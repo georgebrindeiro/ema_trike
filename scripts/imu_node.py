@@ -21,7 +21,7 @@ def main():
         pub[name + '_buttons'] = rospy.Publisher('imu/' + name + '_buttons', Int8, queue_size=10)
 
     # define loop rate (in hz)
-    rate = rospy.Rate(50)
+    rate = rospy.Rate(1000)
 
     # node loop
     while not rospy.is_shutdown():
