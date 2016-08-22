@@ -133,11 +133,11 @@ def main():
     while running:
         try:
             # Control frequency
-            # t_diff = time.time() - t1
-            # if t_diff < period:
-            #     if not (period - t_diff - 0.004) < 0:
-            #         time.sleep(period - t_diff - 0.004)
-            # t1 = time.time()
+            t_diff = time.time() - t1
+            if t_diff < period:
+                if not (period - t_diff - 0.004) < 0:
+                    time.sleep(period - t_diff - 0.004)
+            t1 = time.time()
             time_stamp.append(time.time() - t0)
 
             # Check if angles are good
@@ -235,8 +235,8 @@ addressRemoteControl = 3
 
 
 # Desired control frequency
-freq = 100
-period = 1.0 / freq
+control_freq = 100
+period = 1.0 / control_freq
 
 # Debug mode, for when there's no stimulation
 stimulation = True
@@ -245,7 +245,7 @@ stimulation = True
 ramps = False
 speed_ref = 300  # Slow speed
 fast_speed = 250
-time_on_speed = 3000
+time_on_speed = 300
 
 # Number of channels
 number_of_channels = 6
@@ -277,7 +277,7 @@ if stimulation:
 ##########################################################################
 
 # Initialize variables
-xRange = freq * 20
+xRange = control_freq * 20
 angle = [0 for x in range(xRange)]
 control_angle = [0 for x in range(xRange)]
 angSpeed = [0 for x in range(xRange)]
@@ -370,15 +370,21 @@ try:
     # Asking for user input
     channels = 0
     if stimulation:
-        freq = 50 # int(raw_input("Input frequency: "))
-        channels = 119 #int(raw_input("Input channels: "))
-        # current_str = '50,32,58,50,32,58' #raw_input("Input current: ")
-        # current_str = '60,32,58,60,32,58' #raw_input("Input current: ")
-        # current_str = '62,40,60,62,40,60' #raw_input("Input current: ")
-        # current_str = '45,24,44,45,24,44' #raw_input("Input current: ")
-        # current_str = '30,16,29,30,16,29' #raw_input("Input current: ")
-        # current_str = '40,1,1,40,1,1' #raw_input("Input current: ")
-        current_str = '50,32,50,50,32,50' #raw_input("Input current: ")
+        freq = 30
+        # int(raw_input("Input frequency: "))
+        channels = 119
+        #int(raw_input("Input channels: "))
+        # current_str = '50,32,58,50,32,58'
+        # current_str = '60,32,58,60,32,58'
+        # current_str = '68,38,62,68,38,62' #40hz
+        current_str = '74,44,68,74,44,68' #30hz
+        # current_str = '62,40,60,62,40,60'
+        # current_str = '45,24,44,45,24,44'
+        # current_str = '30,16,29,30,16,29'
+        # current_str = '40,1,1,40,1,1'
+        # current_str = '50,32,50,50,32,50'
+        # current_str = '46,2,2,46,2,2'
+        #raw_input("Input current: ")
         current = [int(i) for i in
                    (current_str.split(","))]
 
@@ -420,7 +426,6 @@ try:
     # realTimePlotter.RealTimePlotter(shown_angle, signal_femoral, signal_gastrocnemius, shown_speed,
     #                                 shown_control_signal, shown_ref_speed, shown_error, xRange, time_stamp)
     stim.stop()
-    running = False
 
     # Save the data
     t = time.localtime()
@@ -491,7 +496,7 @@ try:
     with open(os.path.join(folder, 'data_parameters'), 'w') as f:
         f.write('Stimulation on: ' + str(stimulation * 1) + '\n')
         f.write('Speed reference: ' + str(speed_ref * 1) + '\n')
-        f.write('Desired frequency: ' + str(freq * 1) + '\n')
+        f.write('Desired frequency: ' + str(control_freq * 1) + '\n')
         f.write('Ramps on reference: ' + str(ramps * 1) + '\n')
         f.write('Fast speed: ' + str(fast_speed * 1) + '\n')
         f.write('Time on speed; ' + str(time_on_speed * 1) + '\n')
