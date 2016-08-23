@@ -22,6 +22,7 @@ import sys
 import os
 import threespace_api as ts_api
 import glob
+import struct
 
 
 def get_port(device):
@@ -45,67 +46,9 @@ def get_port(device):
     return port
 
 
-def read_angles():
-    try:
-        # Get angle position
-        ang = IMUPedal.getEulerAngles()
-        ang = ang.split(",")
-        if len(ang) == 6:
-            ang = float(ang[4])
-            if ang >= 0:
-                ang = (ang / math.pi) * 180
-            else:
-                ang = 360 - ((-ang / math.pi) * 180)
-            angle.append(ang)
-        else:
-            print "Angular position data in wrong format"
-    except ValueError:
-        print 'Angle reading error'
-
-
-def get_angular_speed():
-    global counter, angSpeed
-    try:
-        # Get angular speed
-        speed = IMUPedal.getGyroData()
-        speed = speed.split(",")
-        if len(speed) == 6:
-            speed = float(speed[4])
-            speed = speed / math.pi * 180
-            # print speed
-            # Filter speed
-            angSpeed.append(int(round(speed)))
-            if counter >= filter_size:
-                angSpeed[-1] = int(round(numpy.mean(angSpeed[-filter_size:])))
-                # print 'append'
-                # print angSpeed[-1]
-            else:
-                pass
-            # print counter
-            # print speed
-            # print angSpeed[-1]
-        else:
-            print "Angular speed data in wrong format"
-
-        angSpeedRefHistory.append(speed_ref)
-        errorHistory.append(speed_ref - angSpeed[-1])
-        counter += 1
-    except ValueError:
-        print 'Angular speed reading error'
-
-
-# def read_buttons():
-#     global running
-#     try:
-#         if IMURemoteControl.checkButtons() == 2:
-#             running = False
-#             stim.stop()
-#     except ValueError:
-#         print 'Buttons reading error'
-
-
 def read_sensors():
     global angSpeed
+    global counter, angSpeed
     serial_port = serial.Serial(port=portIMU, baudrate=115200, timeout=0.001)
     while running:
         bytes_to_read = serial_port.inWaiting()
@@ -113,7 +56,9 @@ def read_sensors():
             data = bytearray(serial_port.read(bytes_to_read))
 
             # angle
-            ang = 0
+            b = ''.join(chr(i) for i in data[12:16])  # angle y
+            ang = struct.unpack('>f', b)
+            ang = ang[0]
             if ang >= 0:
                 ang = (ang / math.pi) * 180
             else:
@@ -121,6 +66,9 @@ def read_sensors():
             angle.append(ang)
 
             # angle speed
+            b = ''.join(chr(i) for i in data[24:28])  # gyro y
+            speed = struct.unpack('>f', b)
+            speed = speed[0]
             speed = speed / math.pi * 180
             # print speed
             # Filter speed
@@ -130,6 +78,7 @@ def read_sensors():
             angSpeedRefHistory.append(speed_ref)
             errorHistory.append(speed_ref - angSpeed[-1])
             counter += 1
+    serial_port.close()
 
 
 def check_angles(ang1, ang2):
@@ -140,6 +89,7 @@ def check_angles(ang1, ang2):
     elif abs(ang1 - ang2) > (360 - safety_range):
         good_angle = True
     return good_angle
+
 
 # Main function
 def main():
@@ -248,8 +198,8 @@ def main():
 ##########################################################################
 
 # IMU addresses
-addressPedal = 1
-addressRemoteControl = 3
+addressPedal = 3
+# addressRemoteControl = 3
 
 
 # Desired control frequency
@@ -257,7 +207,7 @@ control_freq = 100
 period = 1.0 / control_freq
 
 # Debug mode, for when there's no stimulation
-stimulation = True
+stimulation = False
 
 # Experiment mode
 ramps = False
@@ -355,12 +305,12 @@ try:
     if stimulation:
         serialPortStimulator = serial.Serial(portStimulator, timeout=1, writeTimeout=1, baudrate=115200)
 
-
     # Construct objects
     dng_device = ts_api.TSDongle(com_port=portIMU)
     IMUPedal = dng_device[addressPedal]
-    IMUPedal.setStreamingTiming(interval=0,delay=0,duration=0,timestamp=False)
+    IMUPedal.setStreamingTiming(interval=0, delay=0, duration=0, timestamp=False)
     IMUPedal.setStreamingSlots(slot0='getTaredOrientationAsEulerAngles', slot1='getNormalizedGyroRate')
+    IMUPedal.tareWithCurrentOrientation()
     IMUPedal.startStreaming()
     dng_device.close()
     # IMUPedal = imu.IMU(serialPortIMU, addressPedal)
@@ -371,26 +321,26 @@ try:
 
     # Setting up
     print "EMA here!"
-    print "Beginning calibration..."
-    calibrationError = 10
-    while calibrationError > 0.1:
-        ang_cal = []
-        while len(ang_cal) < 6:
-            IMUPedal.setEulerToYXZ()
-            IMUPedal.calibrate()
-            IMUPedal.tare()
-            ang_cal = IMUPedal.getEulerAngles()
-            ang_cal = ang_cal.split(",")
-        calibrationError = float(ang_cal[3]) + float(ang_cal[4]) + float(ang_cal[5])
-        if abs(calibrationError) < 1:
-            break
-        else:
-            print 'reopenning port'
-            serialPortIMU.close()
-            time.sleep(0.1)
-            serialPortIMU = serial.Serial(portIMU, timeout=1, baudrate=115200)
-        print calibrationError
-    print "Done"
+    # print "Beginning calibration..."
+    # calibrationError = 10
+    # while calibrationError > 0.1:
+    #     ang_cal = []
+    #     while len(ang_cal) < 6:
+            # IMUPedal.setEulerToYXZ()
+            # IMUPedal.calibrate()
+            # IMUPedal.tare()
+            # ang_cal = IMUPedal.getEulerAngles()
+            # ang_cal = ang_cal.split(",")
+        # calibrationError = float(ang_cal[3]) + float(ang_cal[4]) + float(ang_cal[5])
+        # if abs(calibrationError) < 1:
+        #     break
+        # else:
+        #     print 'reopenning port'
+        #     serialPortIMU.close()
+        #     time.sleep(0.1)
+        #     serialPortIMU = serial.Serial(portIMU, timeout=1, baudrate=115200)
+        # print calibrationError
+    # print "Done"
 
     # Asking for user input
     channels = 0
@@ -450,7 +400,11 @@ try:
     # Start real time plotter
     # realTimePlotter.RealTimePlotter(shown_angle, signal_femoral, signal_gastrocnemius, shown_speed,
     #                                 shown_control_signal, shown_ref_speed, shown_error, xRange, time_stamp)
-    stim.stop()
+    if stimulation:
+        stim.stop()
+    dng_device = ts_api.TSDongle(com_port=portIMU)
+    IMUPedal = dng_device[addressPedal]
+    IMUPedal.stopStreaming()
 
     # Save the data
     t = time.localtime()
@@ -537,7 +491,6 @@ try:
     if stimulation:
         stim.stop()
         serialPortStimulator.close()
-    serialPortIMU.close()
 
 except Exception as err:
     print "Error on the outer loop"

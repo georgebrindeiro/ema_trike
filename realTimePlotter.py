@@ -68,6 +68,7 @@ class RealTimePlotter:
                                 controlSignal, angSpeedRefHistory, errorHistory, running)
         self.timer.start()
 
+        pylab.ion()
         pylab.show()
 
     ####################################
