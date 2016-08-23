@@ -106,12 +106,30 @@ def get_angular_speed():
 
 def read_sensors():
     global angSpeed
+    serial_port = serial.Serial(port=portIMU, baudrate=115200, timeout=0.001)
     while running:
-        read_angles()
-        get_angular_speed()
-        # read_buttons()
-        time.sleep(0.001)
-        # print angSpeed[-1]
+        bytes_to_read = serial_port.inWaiting()
+        if bytes_to_read > 0:
+            data = bytearray(serial_port.read(bytes_to_read))
+
+            # angle
+            ang = 0
+            if ang >= 0:
+                ang = (ang / math.pi) * 180
+            else:
+                ang = 360 - ((-ang / math.pi) * 180)
+            angle.append(ang)
+
+            # angle speed
+            speed = speed / math.pi * 180
+            # print speed
+            # Filter speed
+            angSpeed.append(int(round(speed)))
+            if counter >= filter_size:
+                angSpeed[-1] = int(round(numpy.mean(angSpeed[-filter_size:])))
+            angSpeedRefHistory.append(speed_ref)
+            errorHistory.append(speed_ref - angSpeed[-1])
+            counter += 1
 
 
 def check_angles(ang1, ang2):
@@ -332,13 +350,20 @@ try:
     print "Hello!"
 
     # Open ports
-    serialPortIMU = serial.Serial(portIMU, timeout=1, baudrate=115200)
+    # serialPortIMU = serial.Serial(portIMU, timeout=1, baudrate=115200)
     serialPortStimulator = 0
     if stimulation:
         serialPortStimulator = serial.Serial(portStimulator, timeout=1, writeTimeout=1, baudrate=115200)
 
+
     # Construct objects
-    IMUPedal = imu.IMU(serialPortIMU, addressPedal)
+    dng_device = ts_api.TSDongle(com_port=portIMU)
+    IMUPedal = dng_device[addressPedal]
+    IMUPedal.setStreamingTiming(interval=0,delay=0,duration=0,timestamp=False)
+    IMUPedal.setStreamingSlots(slot0='getTaredOrientationAsEulerAngles', slot1='getNormalizedGyroRate')
+    IMUPedal.startStreaming()
+    dng_device.close()
+    # IMUPedal = imu.IMU(serialPortIMU, addressPedal)
     # IMURemoteControl = imu.IMU(serialPortIMU, addressRemoteControl)
     stim = 0
     if stimulation:
