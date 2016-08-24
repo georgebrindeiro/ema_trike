@@ -191,6 +191,7 @@ def main():
         except ValueError:
             stim.stop()
             running=False
+    stim.stop()
 
 
 ##########################################################################
@@ -198,7 +199,7 @@ def main():
 ##########################################################################
 
 # IMU addresses
-addressPedal = 3
+addressPedal = 2
 # addressRemoteControl = 3
 
 
@@ -207,11 +208,11 @@ control_freq = 100
 period = 1.0 / control_freq
 
 # Debug mode, for when there's no stimulation
-stimulation = False
+stimulation = True
 
 # Experiment mode
 ramps = False
-speed_ref = 300  # Slow speed
+speed_ref = 350  # Slow speed
 fast_speed = 250
 time_on_speed = 300
 
@@ -352,13 +353,15 @@ try:
         # current_str = '50,32,58,50,32,58'
         # current_str = '60,32,58,60,32,58'
         # current_str = '68,38,62,68,38,62' #40hz
-        current_str = '74,44,68,74,44,68' #30hz
+        # current_str = '74,44,68,74,44,68' #30hz
+        current_str = '74,48,68,78,44,68' #30hz
         # current_str = '62,40,60,62,40,60'
         # current_str = '45,24,44,45,24,44'
         # current_str = '30,16,29,30,16,29'
         # current_str = '40,1,1,40,1,1'
         # current_str = '50,32,50,50,32,50'
         # current_str = '46,2,2,46,2,2'
+        # current_str = '2,2,2,2,2,2'
         #raw_input("Input current: ")
         current = [int(i) for i in
                    (current_str.split(","))]
@@ -400,11 +403,17 @@ try:
     # Start real time plotter
     # realTimePlotter.RealTimePlotter(shown_angle, signal_femoral, signal_gastrocnemius, shown_speed,
     #                                 shown_control_signal, shown_ref_speed, shown_error, xRange, time_stamp)
+    running=False
+    time.sleep(1)
+
     if stimulation:
         stim.stop()
+
     dng_device = ts_api.TSDongle(com_port=portIMU)
     IMUPedal = dng_device[addressPedal]
     IMUPedal.stopStreaming()
+    IMUPedal.close()
+    dng_device.close()
 
     # Save the data
     t = time.localtime()
