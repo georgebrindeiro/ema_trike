@@ -101,10 +101,10 @@ def main():
     while running:
         try:
             # Control frequency
-            t_diff = time.time() - t1
-            if t_diff < period:
-                if not (period - t_diff - 0.004) < 0:
-                    time.sleep(period - t_diff - 0.004)
+            # t_diff = time.time() - t1
+            # if t_diff < period:
+            #     if not (period - t_diff - 0.004) < 0:
+            #         time.sleep(period - t_diff - 0.004)
             t1 = time.time()
             time_stamp.append(time.time() - t0)
 
@@ -199,7 +199,7 @@ def main():
 ##########################################################################
 
 # IMU addresses
-addressPedal = 2
+addressPedal = 1
 # addressRemoteControl = 3
 
 
@@ -301,7 +301,6 @@ try:
     print "Hello!"
 
     # Open ports
-    # serialPortIMU = serial.Serial(portIMU, timeout=1, baudrate=115200)
     serialPortStimulator = 0
     if stimulation:
         serialPortStimulator = serial.Serial(portStimulator, timeout=1, writeTimeout=1, baudrate=115200)
@@ -314,7 +313,6 @@ try:
     IMUPedal.tareWithCurrentOrientation()
     IMUPedal.startStreaming()
     dng_device.close()
-    # IMUPedal = imu.IMU(serialPortIMU, addressPedal)
     # IMURemoteControl = imu.IMU(serialPortIMU, addressRemoteControl)
     stim = 0
     if stimulation:
@@ -322,46 +320,39 @@ try:
 
     # Setting up
     print "EMA here!"
-    # print "Beginning calibration..."
-    # calibrationError = 10
-    # while calibrationError > 0.1:
-    #     ang_cal = []
-    #     while len(ang_cal) < 6:
-            # IMUPedal.setEulerToYXZ()
-            # IMUPedal.calibrate()
-            # IMUPedal.tare()
-            # ang_cal = IMUPedal.getEulerAngles()
-            # ang_cal = ang_cal.split(",")
-        # calibrationError = float(ang_cal[3]) + float(ang_cal[4]) + float(ang_cal[5])
-        # if abs(calibrationError) < 1:
-        #     break
-        # else:
-        #     print 'reopenning port'
-        #     serialPortIMU.close()
-        #     time.sleep(0.1)
-        #     serialPortIMU = serial.Serial(portIMU, timeout=1, baudrate=115200)
-        # print calibrationError
-    # print "Done"
 
     # Asking for user input
     channels = 0
     if stimulation:
         freq = 30
         # int(raw_input("Input frequency: "))
-        channels = 119
+        channels = 119 # 6 Channels
+        # Channel 1: Left quads
+        # Channel 2: Left hams
+        # Channel 3: Left gluteus
+        # Channel 4: Nothing
+        # Channel 5: Right quads
+        # Channel 6: Right hams
+        # Channel 7: Right gluteus
+        # Channel 8: Nothing
+
         #int(raw_input("Input channels: "))
-        # current_str = '50,32,58,50,32,58'
-        # current_str = '60,32,58,60,32,58'
-        # current_str = '68,38,62,68,38,62' #40hz
-        # current_str = '74,44,68,74,44,68' #30hz
-        current_str = '74,48,68,78,44,68' #30hz
-        # current_str = '62,40,60,62,40,60'
-        # current_str = '45,24,44,45,24,44'
+
+        # Main frequencies used on trainings. Uncomment only the one to use.
+        current_str = '2,2,2,2,2,2'  # System check
         # current_str = '30,16,29,30,16,29'
+        # current_str = '50,32,58,54,32,58'
+        # current_str = '68,38,62,68,38,62' # only 40hz or lower
+        # current_str = '74,48,68,78,44,68' # only 30hz or lower
+
+        # Other frequencies.
+        # current_str = '60,32,58,60,32,58'
+        # current_str = '74,44,68,74,44,68' # only 30hz or lower
+        # current_str = '62,40,60,62,40,60'
         # current_str = '40,1,1,40,1,1'
+        # current_str = '45,24,44,45,24,44'
         # current_str = '50,32,50,50,32,50'
         # current_str = '46,2,2,46,2,2'
-        # current_str = '2,2,2,2,2,2'
         #raw_input("Input current: ")
         current = [int(i) for i in
                    (current_str.split(","))]
@@ -375,7 +366,7 @@ try:
         print "Stimulation is deactivated"
 
     # Ready to go. 
-    print "Whenever you're ready, press button 1 (the left one)!"
+    # print "Whenever you're ready, press button 1 (the left one)!"
 
     # Wait until the user presses the 'Start' button
     # while not (IMURemoteControl.checkButtons() == 1):
@@ -391,19 +382,16 @@ try:
 
     # Start main function
     thread.start_new_thread(main, ())
-    # thread.start_new_thread(plot, ())
-    graph = realTimePlotter.RealTimePlotter(control_angle, signal_channel[0], signal_channel[1], angSpeed, angSpeed,
+
+    GUI = False
+    if GUI:
+        graph = realTimePlotter.RealTimePlotter(control_angle, signal_channel[0], signal_channel[1], angSpeed, angSpeed,
                                             controlSignal, actual_ref_speed, control_error, xRange, running)
-    # while running:
-    #     pass
-    #    main()
-    # raw_input('Press ENTER to stop')
-    # stim.stop()
-    # running = False
-    # Start real time plotter
-    # realTimePlotter.RealTimePlotter(shown_angle, signal_femoral, signal_gastrocnemius, shown_speed,
-    #                                 shown_control_signal, shown_ref_speed, shown_error, xRange, time_stamp)
-    running=False
+
+    else:
+        raw_input('Press ENTER to stop')
+
+    running = False
     time.sleep(1)
 
     if stimulation:
