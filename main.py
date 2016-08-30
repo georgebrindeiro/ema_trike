@@ -43,6 +43,11 @@ def get_port(device):
         for p in ports:
             if p[2] == 'DNG':
                 port = p[0]
+    elif sys.platform.startswith('linux'):
+        if device == 'imu':
+            port = '/dev/ttyACM0'
+        elif device == 'stimulator':
+            port = '/dev/ttyUSB0'
     return port
 
 
@@ -365,7 +370,7 @@ try:
     else:
         print "Stimulation is deactivated"
 
-    # Ready to go. 
+    # Ready to go.
     # print "Whenever you're ready, press button 1 (the left one)!"
 
     # Wait until the user presses the 'Start' button
