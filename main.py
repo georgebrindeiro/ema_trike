@@ -91,6 +91,28 @@ def check_angles(ang1, ang2):
     return good_angle
 
 
+def read_current_input():
+    global current
+    print current
+    while running:
+
+        more_or_less = raw_input("Current (m/l): ")
+        if more_or_less == "m":
+            current = [i+2 for i in current]
+            current[4] = 12
+        elif more_or_less == "l":
+            current = [i-2 for i in current]
+            current[4] = 12
+        else:
+            current = [int(i) for i in
+                   (more_or_less.split(","))]
+        print current
+
+        # current_str = raw_input("Input current: ")
+
+        # print current
+
+
 # Main function
 def main():
     global running, controlSignal, signal_channel
@@ -191,7 +213,8 @@ def main():
         except ValueError:
             stim.stop()
             running=False
-    stim.stop()
+    if stimulation:
+        stim.stop()
 
 
 ##########################################################################
@@ -323,39 +346,40 @@ try:
 
     # Asking for user input
     channels = 0
-    if stimulation:
-        freq = 30
-        # int(raw_input("Input frequency: "))
-        channels = 119 # 6 Channels
-        # Channel 1: Left quads
-        # Channel 2: Left hams
-        # Channel 3: Left gluteus
-        # Channel 4: Nothing
-        # Channel 5: Right quads
-        # Channel 6: Right hams
-        # Channel 7: Right gluteus
-        # Channel 8: Nothing
+    # if stimulation:
+    freq = 30
+    # int(raw_input("Input frequency: "))
+    channels = 119  # 6 Channels
+    # Channel 1: Left quads
+    # Channel 2: Left hams
+    # Channel 3: Left gluteus
+    # Channel 4: Nothing
+    # Channel 5: Right quads
+    # Channel 6: Right hams
+    # Channel 7: Right gluteus
+    # Channel 8: Nothing
 
-        #int(raw_input("Input channels: "))
+    #int(raw_input("Input channels: "))
 
-        # Main frequencies used on trainings. Uncomment only the one to use.
-        current_str = '2,2,2,2,2,2'  # System check
-        # current_str = '30,16,29,30,16,29'
-        # current_str = '50,32,58,54,32,58'
-        # current_str = '68,38,62,68,38,62' # only 40hz or lower
-        # current_str = '74,48,68,78,44,68' # only 30hz or lower
+    # Main frequencies used on trainings. Uncomment only the one to use.
+    # current_str = '2,2,2,2,2,2'  # System check
+    # current_str = '30,16,29,30,16,29'
+    # current_str = '50,32,58,54,14,58'
+    # current_str = '68,38,62,68,38,62' # only 40hz or lower
+    current_str = '74,44,68,74,12,68' # only 30hz or lower
 
-        # Other frequencies.
-        # current_str = '60,32,58,60,32,58'
-        # current_str = '74,44,68,74,44,68' # only 30hz or lower
-        # current_str = '62,40,60,62,40,60'
-        # current_str = '40,1,1,40,1,1'
-        # current_str = '45,24,44,45,24,44'
-        # current_str = '50,32,50,50,32,50'
-        # current_str = '46,2,2,46,2,2'
-        #raw_input("Input current: ")
-        current = [int(i) for i in
-                   (current_str.split(","))]
+    # Other frequencies.
+    # current_str = '60,32,58,60,32,58'
+    # current_str = '74,44,68,74,44,68' # only 30hz or lower
+    # current_str = '62,40,60,62,40,60'
+    # current_str = '40,1,1,40,1,1'
+    # current_str = '45,4,44,45,4,44'
+    # current_str = '50,32,50,50,32,50'
+    # current_str = '54,26,42,54,12,42'
+    # current_str = '82,16,72,82,16,72'
+    #raw_input("Input current: ")
+    current = [int(i) for i in
+               (current_str.split(","))]
 
     # Initialize stimulator
     if stimulation:
@@ -382,8 +406,9 @@ try:
 
     # Start main function
     thread.start_new_thread(main, ())
+    thread.start_new_thread(read_current_input, ())
 
-    GUI = False
+    GUI = True
     if GUI:
         graph = realTimePlotter.RealTimePlotter(control_angle, signal_channel[0], signal_channel[1], angSpeed, angSpeed,
                                             controlSignal, actual_ref_speed, control_error, xRange, running)
@@ -391,8 +416,13 @@ try:
     else:
         raw_input('Press ENTER to stop')
 
+    try:
+        if stimulation:
+            stim.stop()
+    except Exception:
+        print "Can't stop stimulation"
     running = False
-    time.sleep(1)
+    time.sleep(0.2)
 
     if stimulation:
         stim.stop()
