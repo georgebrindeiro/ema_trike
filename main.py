@@ -43,6 +43,11 @@ def get_port(device):
         for p in ports:
             if p[2] == 'DNG':
                 port = p[0]
+    elif sys.platform.startswith('linux'):
+        if device == 'imu':
+            port = '/dev/ttyACM0'
+        elif device == 'stimulator':
+            port = '/dev/ttyUSB0'
     return port
 
 
@@ -55,20 +60,35 @@ def read_sensors():
         if bytes_to_read > 0:
             data = bytearray(serial_port.read(bytes_to_read))
 
+            if bytes_to_read != 36:
+                continue
+
+            pkt = ''.join(chr(i) for i in data[0:37])  # packet
+            p = struct.unpack('>BiBBBfffffff', pkt)
+            # print ":".join("{:02x}".format(ord(c)) for c in pkt)
+            # print p
+
             # angle
-            b = ''.join(chr(i) for i in data[12:16])  # angle y
-            ang = struct.unpack('>f', b)
-            ang = ang[0]
+            # b = ''.join(chr(i) for i in data[12:16])  # angle y
+            # ang = struct.unpack('>f', b)
+            # ang = ang[0]
+            (qx,qy,qz,qw) = p[5:9]
+            qw = qw/math.sqrt(qx*qx+qy*qy+qz*qz+qw*qw) # apparently quaternions aren't coming normalized
+            # print (qx,qy,qz,qw)
+            ang = 2*math.acos(qw)
+            
             if ang >= 0:
                 ang = (ang / math.pi) * 180
             else:
                 ang = 360 - ((-ang / math.pi) * 180)
+            # print ang
             angle.append(ang)
 
             # angle speed
-            b = ''.join(chr(i) for i in data[24:28])  # gyro y
-            speed = struct.unpack('>f', b)
-            speed = speed[0]
+            # b = ''.join(chr(i) for i in data[24:28])  # gyro y
+            # speed = struct.unpack('>f', b)
+            # speed = speed[0]
+            speed = p[10]
             speed = speed / math.pi * 180
             # print speed
             # Filter speed
@@ -332,7 +352,7 @@ try:
     dng_device = ts_api.TSDongle(com_port=portIMU)
     IMUPedal = dng_device[addressPedal]
     IMUPedal.setStreamingTiming(interval=0, delay=0, duration=0, timestamp=False)
-    IMUPedal.setStreamingSlots(slot0='getTaredOrientationAsEulerAngles', slot1='getNormalizedGyroRate')
+    IMUPedal.setStreamingSlots(slot0='getTaredOrientationAsQuaternion', slot1='getNormalizedGyroRate')
     IMUPedal.tareWithCurrentOrientation()
     IMUPedal.startStreaming()
     dng_device.close()
@@ -389,7 +409,7 @@ try:
     else:
         print "Stimulation is deactivated"
 
-    # Ready to go. 
+    # Ready to go.
     # print "Whenever you're ready, press button 1 (the left one)!"
 
     # Wait until the user presses the 'Start' button
