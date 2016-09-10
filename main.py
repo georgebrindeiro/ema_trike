@@ -60,35 +60,20 @@ def read_sensors():
         if bytes_to_read > 0:
             data = bytearray(serial_port.read(bytes_to_read))
 
-            if bytes_to_read != 36:
-                continue
-
-            pkt = ''.join(chr(i) for i in data[0:37])  # packet
-            p = struct.unpack('>BiBBBfffffff', pkt)
-            # print ":".join("{:02x}".format(ord(c)) for c in pkt)
-            # print p
-
             # angle
-            # b = ''.join(chr(i) for i in data[12:16])  # angle y
-            # ang = struct.unpack('>f', b)
-            # ang = ang[0]
-            (qx,qy,qz,qw) = p[5:9]
-            qw = qw/math.sqrt(qx*qx+qy*qy+qz*qz+qw*qw) # apparently quaternions aren't coming normalized
-            # print (qx,qy,qz,qw)
-            ang = 2*math.acos(qw)
-            
+            b = ''.join(chr(i) for i in data[12:16])  # angle y
+            ang = struct.unpack('>f', b)
+            ang = ang[0]
             if ang >= 0:
                 ang = (ang / math.pi) * 180
             else:
                 ang = 360 - ((-ang / math.pi) * 180)
-            # print ang
             angle.append(ang)
 
             # angle speed
-            # b = ''.join(chr(i) for i in data[24:28])  # gyro y
-            # speed = struct.unpack('>f', b)
-            # speed = speed[0]
-            speed = p[10]
+            b = ''.join(chr(i) for i in data[24:28])  # gyro y
+            speed = struct.unpack('>f', b)
+            speed = speed[0]
             speed = speed / math.pi * 180
             # print speed
             # Filter speed
@@ -117,20 +102,26 @@ def read_current_input():
     while running:
 
         more_or_less = raw_input("Current (m/l): ")
+        temp = current[4]
+        temp1 = current[1]
+        # temp2 = current[2]
+        # temp3 = current[5]
         if more_or_less == "m":
             current = [i+2 for i in current]
-            current[4] = 12
+            current[4] = temp
+            current[1] = temp1
+            # current[2] = temp2
+            # current[5] = temp3
         elif more_or_less == "l":
             current = [i-2 for i in current]
-            current[4] = 12
+            current[4] = temp
+            current[1] = temp1
+            # current[2] = temp2
+            # current[5] = temp3
         else:
             current = [int(i) for i in
                    (more_or_less.split(","))]
         print current
-
-        # current_str = raw_input("Input current: ")
-
-        # print current
 
 
 # Main function
@@ -352,7 +343,7 @@ try:
     dng_device = ts_api.TSDongle(com_port=portIMU)
     IMUPedal = dng_device[addressPedal]
     IMUPedal.setStreamingTiming(interval=0, delay=0, duration=0, timestamp=False)
-    IMUPedal.setStreamingSlots(slot0='getTaredOrientationAsQuaternion', slot1='getNormalizedGyroRate')
+    IMUPedal.setStreamingSlots(slot0='getTaredOrientationAsEulerAngles', slot1='getNormalizedGyroRate')
     IMUPedal.tareWithCurrentOrientation()
     IMUPedal.startStreaming()
     dng_device.close()
@@ -382,15 +373,17 @@ try:
     #int(raw_input("Input channels: "))
 
     # Main frequencies used on trainings. Uncomment only the one to use.
+    # current_str = '0,0,0,0,0,0'  # System check
     # current_str = '2,2,2,2,2,2'  # System check
-    # current_str = '30,16,29,30,16,29'
-    # current_str = '50,32,58,54,14,58'
+    # current_str = '30,0,29,30,0,29'
+    current_str = '60,0,58,60,0,58'
     # current_str = '68,38,62,68,38,62' # only 40hz or lower
-    current_str = '74,44,68,74,12,68' # only 30hz or lower
+    # current_str = '74,44,68,74,2,68' # only 30hz or lower
 
     # Other frequencies.
+    # current_str = '2,0,0,2,0,0'
     # current_str = '60,32,58,60,32,58'
-    # current_str = '74,44,68,74,44,68' # only 30hz or lower
+    # current_str = '74,44,68,ls74,44,68' # only 30hz or lower
     # current_str = '62,40,60,62,40,60'
     # current_str = '40,1,1,40,1,1'
     # current_str = '45,4,44,45,4,44'
@@ -409,7 +402,7 @@ try:
     else:
         print "Stimulation is deactivated"
 
-    # Ready to go.
+    # Ready to go. 
     # print "Whenever you're ready, press button 1 (the left one)!"
 
     # Wait until the user presses the 'Start' button
