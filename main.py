@@ -37,7 +37,8 @@ def get_port(device):
         if device == 'imu':
             port = glob.glob('/dev/tty.usbmodem*')[0]
         elif device == 'stimulator':
-            port = '/dev/tty.usbserial-HMQYVD6B'
+            # port = '/dev/tty.usbserial-HMQYVD6B'
+            port = '/dev/tty.usbserial-HMCX9Q6D'
     elif sys.platform.startswith('win'):
         ports = ts_api.getComPorts()
         for p in ports:
@@ -108,14 +109,14 @@ def read_current_input():
         # temp3 = current[5]
         if more_or_less == "m":
             current = [i+2 for i in current]
-            current[4] = temp
-            current[1] = temp1
+            current[4] = temp+1
+            current[1] = temp1+1
             # current[2] = temp2
             # current[5] = temp3
         elif more_or_less == "l":
             current = [i-2 for i in current]
-            current[4] = temp
-            current[1] = temp1
+            current[4] = temp-1
+            current[1] = temp1-1
             # current[2] = temp2
             # current[5] = temp3
         else:
@@ -375,8 +376,8 @@ try:
     # Main frequencies used on trainings. Uncomment only the one to use.
     # current_str = '0,0,0,0,0,0'  # System check
     # current_str = '2,2,2,2,2,2'  # System check
-    # current_str = '30,0,29,30,0,29'
-    current_str = '60,0,58,60,0,58'
+    # current_str = '40,0,39,40,0,39'
+    current_str = '60,28,58,60,28,58'
     # current_str = '68,38,62,68,38,62' # only 40hz or lower
     # current_str = '74,44,68,74,2,68' # only 30hz or lower
 
