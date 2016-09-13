@@ -35,7 +35,7 @@ def get_port(device):
     port = 0
     if sys.platform.startswith('darwin'):
         if device == 'imu':
-            port = glob.glob('/dev/tty.usbmodem*')[0]
+            port = glob.glob('/dev/tty.usbmodemFD*')[0]
         elif device == 'stimulator':
             # port = '/dev/tty.usbserial-HMQYVD6B'
             port = '/dev/tty.usbserial-HMCX9Q6D'
@@ -52,6 +52,34 @@ def get_port(device):
     return port
 
 
+def user_interface():
+    global current
+    ui_serial_port = serial.Serial(port=ui_port, baudrate=115200, timeout=0.01)
+    # t0 = time.time()
+    current_to_write = ""
+    time.sleep(1)
+    idle = True
+    while running:
+        while ui_serial_port.inWaiting() == 0:
+            if not current_to_write == str(current[0]):
+                current_to_write = str(current[0])
+                ui_serial_port.write(current_to_write)
+
+        bytes_to_read = ui_serial_port.inWaiting()
+        # print("Algo para ler.")
+        data = ui_serial_port.read(1)
+        if idle:
+            if data == '2':
+                decrease_current()
+                idle = False
+            elif data == '1':
+                increase_current()
+                idle = False
+        elif data == '5':
+            idle = True
+        # print data
+
+
 def read_sensors():
     global angSpeed
     global counter, angSpeed
@@ -61,14 +89,24 @@ def read_sensors():
         if bytes_to_read > 0:
             data = bytearray(serial_port.read(bytes_to_read))
 
+            # accel_z
+            accelz = ''.join(chr(i) for i in data[40:44]) # angle y
+            # b = ''.join(chr(i) for i in data[24:28]) # gyro y
+            accelz = struct.unpack('>f', accelz)
+            accelz = accelz[0]
+
             # angle
             b = ''.join(chr(i) for i in data[12:16])  # angle y
-            ang = struct.unpack('>f', b)
-            ang = ang[0]
-            if ang >= 0:
-                ang = (ang / math.pi) * 180
+            ang_rad = struct.unpack('>f', b)
+            ang_rad = ang_rad[0]
+            ang = ang_rad/math.pi*180
+            if ang < 0:
+                ang = 360 + ang
+                if accelz < 0:
+                    ang = ang - 2*(ang - 270)
             else:
-                ang = 360 - ((-ang / math.pi) * 180)
+                if accelz < 0:
+                    ang = ang + 2*(90 - ang)
             angle.append(ang)
 
             # angle speed
@@ -83,6 +121,8 @@ def read_sensors():
                 angSpeed[-1] = int(round(numpy.mean(angSpeed[-filter_size:])))
             angSpeedRefHistory.append(speed_ref)
             errorHistory.append(speed_ref - angSpeed[-1])
+
+
             counter += 1
     serial_port.close()
 
@@ -95,6 +135,34 @@ def check_angles(ang1, ang2):
     elif abs(ang1 - ang2) > (360 - safety_range):
         good_angle = True
     return good_angle
+
+
+def increase_current():
+    global current
+    temp = current[4]
+    temp1 = current[1]
+    # temp2 = current[2]
+    # temp3 = current[5]
+    current = [i+2 for i in current]
+    current[4] = temp+1
+    current[1] = temp1+1
+    # current[2] = temp2
+    # current[5] = temp3
+    print(current)
+
+
+def decrease_current():
+    global current
+    temp = current[4]
+    temp1 = current[1]
+    # temp2 = current[2]
+    # temp3 = current[5]
+    current = [i-2 for i in current]
+    current[4] = temp-1
+    current[1] = temp1-1
+    # current[2] = temp2
+    # current[5] = temp3
+    print(current)
 
 
 def read_current_input():
@@ -134,6 +202,8 @@ def main():
     safety = 0
     while running:
         try:
+            if not stimulation:
+                time.sleep(0.001)
             # Control frequency
             # t_diff = time.time() - t1
             # if t_diff < period:
@@ -243,7 +313,8 @@ control_freq = 100
 period = 1.0 / control_freq
 
 # Debug mode, for when there's no stimulation
-stimulation = True
+stimulation = False
+ui_used = True
 
 # Experiment mode
 ramps = False
@@ -267,6 +338,8 @@ channel_max[5] = 500
 filter_size = 5
 
 # Ports and addresses
+if ui_used:
+    ui_port = '/dev/tty.usbmodemFA131'
 # portIMU = 'COM4'  # Windows
 # portIMU = '/dev/ttyACM0'  # Linux
 portIMU = get_port('imu')  # Works on Mac. Should also work on Windows.
@@ -343,8 +416,9 @@ try:
     # Construct objects
     dng_device = ts_api.TSDongle(com_port=portIMU)
     IMUPedal = dng_device[addressPedal]
+    IMUPedal.setEulerAngleDecompositionOrder(3)
     IMUPedal.setStreamingTiming(interval=0, delay=0, duration=0, timestamp=False)
-    IMUPedal.setStreamingSlots(slot0='getTaredOrientationAsEulerAngles', slot1='getNormalizedGyroRate')
+    IMUPedal.setStreamingSlots(slot0='getTaredOrientationAsEulerAngles', slot1='getNormalizedGyroRate', slot2='getNormalizedAccelerometerVector')
     IMUPedal.tareWithCurrentOrientation()
     IMUPedal.startStreaming()
     dng_device.close()
@@ -412,6 +486,8 @@ try:
 
     running = True
     thread.start_new_thread(read_sensors, ())
+    if ui_used:
+        thread.start_new_thread(user_interface, ())
 
     raw_input('Press ENTER to start')
 
