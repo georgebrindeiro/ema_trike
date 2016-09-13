@@ -339,12 +339,15 @@ filter_size = 5
 
 # Ports and addresses
 if ui_used:
-    ui_port = '/dev/tty.usbmodemFA131'
+    # ui_port = '/dev/tty.usbmodemFA131'
+    ui_port = '/dev/ui' # rPi
 # portIMU = 'COM4'  # Windows
 # portIMU = '/dev/ttyACM0'  # Linux
-portIMU = get_port('imu')  # Works on Mac. Should also work on Windows.
+# portIMU = get_port('imu')  # Works on Mac. Should also work on Windows.
+portIMU = '/dev/imu' # rPi
 if stimulation:
-    portStimulator = get_port('stimulator')  # Works only on Mac.
+    # portStimulator = get_port('stimulator')  # Works only on Mac.
+    portStimulator = '/dev/ttyUSB0' # rPi
     # portStimulator = '/dev/tty.usbserial-HMCX9Q6D' #get_port('stimulator')  # Works only on Mac.
     # portStimulator = 'COM4'
 # print portIMU
