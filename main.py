@@ -15,7 +15,6 @@ import perfil
 import time
 import math
 import numpy
-import realTimePlotter
 import control
 import thread
 import sys
@@ -501,6 +500,8 @@ try:
 
 
     if GUI:
+
+        import realTimePlotter
         graph = realTimePlotter.RealTimePlotter(control_angle, signal_channel[0], signal_channel[1], angSpeed, angSpeed,
                                             controlSignal, actual_ref_speed, control_error, xRange, running)
 
