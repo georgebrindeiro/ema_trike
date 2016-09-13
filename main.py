@@ -315,6 +315,7 @@ period = 1.0 / control_freq
 # Debug mode, for when there's no stimulation
 stimulation = False
 ui_used = True
+GUI = False
 
 # Experiment mode
 ramps = False
@@ -498,7 +499,7 @@ try:
     thread.start_new_thread(main, ())
     thread.start_new_thread(read_current_input, ())
 
-    GUI = True
+
     if GUI:
         graph = realTimePlotter.RealTimePlotter(control_angle, signal_channel[0], signal_channel[1], angSpeed, angSpeed,
                                             controlSignal, actual_ref_speed, control_error, xRange, running)
