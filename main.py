@@ -52,8 +52,7 @@ def get_port(device):
 
 
 def user_interface():
-    global current, running, start
-    ui_serial_port = serial.Serial(port=ui_port, baudrate=115200, timeout=0.01)
+    global current, running, start, ui_serial_port
     # t0 = time.time()
     current_to_write = ""
     time.sleep(1)
@@ -61,8 +60,13 @@ def user_interface():
     while running:
         while ui_serial_port.inWaiting() == 0:
             if not current_to_write == str(current[0]):
-                current_to_write = str(current[0])
-                ui_serial_port.write(current_to_write)
+                if start:
+                    current_to_write = str(current[0])
+                    ui_serial_port.write(current_to_write)
+                else:
+                    current_to_write = str(current[0])
+                    ui_serial_port.write(current_to_write + ' - Pronto')
+
 
         bytes_to_read = ui_serial_port.inWaiting()
         # print("Algo para ler.")
@@ -351,6 +355,7 @@ if ui_used:
 # portIMU = '/dev/ttyACM0'  # Linux
 # portIMU = get_port('imu')  # Works on Mac. Should also work on Windows.
 portIMU = '/dev/imu' # rPi
+ui_serial_port = serial.Serial(port=ui_port, baudrate=115200, timeout=0.01)
 if stimulation:
     # portStimulator = get_port('stimulator')  # Works only on Mac.
     portStimulator = '/dev/ttyUSB0' # rPi
@@ -535,11 +540,14 @@ try:
     if stimulation:
         stim.stop()
 
+    ui_serial_port.write('Fim')
+
     dng_device = ts_api.TSDongle(com_port=portIMU)
     IMUPedal = dng_device[addressPedal]
     IMUPedal.stopStreaming()
     IMUPedal.close()
     dng_device.close()
+    ui_serial_port.close()
 
     # Save the data
     t = time.localtime()
