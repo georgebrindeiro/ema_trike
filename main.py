@@ -52,7 +52,7 @@ def get_port(device):
 
 
 def user_interface():
-    global current
+    global current, running, start
     ui_serial_port = serial.Serial(port=ui_port, baudrate=115200, timeout=0.01)
     # t0 = time.time()
     current_to_write = ""
@@ -73,6 +73,12 @@ def user_interface():
                 idle = False
             elif data == '1':
                 increase_current()
+                idle = False
+            elif data == '3':
+                start = True
+                idle = False
+            elif data == '0':
+                running = False
                 idle = False
         elif data == '5':
             idle = True
@@ -399,6 +405,7 @@ time_stamp = []
 wait_time = 0.000
 running = False
 reading = False
+start = False
 counter = 1
 time_start = time.time()
 
@@ -492,7 +499,11 @@ try:
     if ui_used:
         thread.start_new_thread(user_interface, ())
 
-    raw_input('Press ENTER to start')
+    print('Ready to go!')
+    # raw_input('Press ENTER to start')
+
+    while not start:
+        pass
 
     # Keep on until the user presses the "Stop" button
     print "Here we go!"
@@ -509,7 +520,9 @@ try:
                                             controlSignal, actual_ref_speed, control_error, xRange, running)
 
     else:
-        raw_input('Press ENTER to stop')
+        # raw_input('Press ENTER to stop')
+        while running:
+            pass
 
     try:
         if stimulation:
