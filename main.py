@@ -52,7 +52,7 @@ def get_port(device):
 
 
 def user_interface():
-    global current, running, start, ui_serial_port
+    global current, running, start, ui_serial_port, stimulation, stim
     # t0 = time.time()
     current_to_write = ""
     time.sleep(1)
@@ -83,6 +83,15 @@ def user_interface():
                 idle = False
             elif data == '0':
                 running = False
+                idle = False
+            elif data == '4' and stimulation:
+                stimulation = False
+                stim.update(119, [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0])
+                print('no stim')
+                idle = False
+            elif data == '4' and not stimulation:
+                stimulation = True
+                print('yes stim')
                 idle = False
         elif data == '5':
             idle = True
@@ -324,7 +333,7 @@ period = 1.0 / control_freq
 # Debug mode, for when there's no stimulation
 stimulation = False
 ui_used = True
-GUI = False
+GUI = True
 
 # Experiment mode
 ramps = False
@@ -349,16 +358,16 @@ filter_size = 5
 
 # Ports and addresses
 if ui_used:
-    # ui_port = '/dev/tty.usbmodemFA131'
-    ui_port = '/dev/ui' # rPi
+    ui_port = '/dev/tty.usbmodemFA131'
+    # ui_port = '/dev/ui' # rPi
 # portIMU = 'COM4'  # Windows
 # portIMU = '/dev/ttyACM0'  # Linux
-# portIMU = get_port('imu')  # Works on Mac. Should also work on Windows.
-portIMU = '/dev/imu' # rPi
+portIMU = get_port('imu')  # Works on Mac. Should also work on Windows.
+# portIMU = '/dev/imu' # rPi
 ui_serial_port = serial.Serial(port=ui_port, baudrate=115200, timeout=0.01)
 if stimulation:
-    # portStimulator = get_port('stimulator')  # Works only on Mac.
-    portStimulator = '/dev/ttyUSB0' # rPi
+    portStimulator = get_port('stimulator')  # Works only on Mac.
+    # portStimulator = '/dev/ttyUSB0' # rPi
     # portStimulator = '/dev/tty.usbserial-HMCX9Q6D' #get_port('stimulator')  # Works only on Mac.
     # portStimulator = 'COM4'
 # print portIMU
