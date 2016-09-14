@@ -34,7 +34,7 @@ def get_port(device):
     port = 0
     if sys.platform.startswith('darwin'):
         if device == 'imu':
-            port = glob.glob('/dev/tty.usbmodemFD*')[0]
+            port = glob.glob('/dev/tty.usbmodemFD1211')[0]
         elif device == 'stimulator':
             # port = '/dev/tty.usbserial-HMQYVD6B'
             port = '/dev/tty.usbserial-HMCX9Q6D'
@@ -107,24 +107,14 @@ def read_sensors():
         if bytes_to_read > 0:
             data = bytearray(serial_port.read(bytes_to_read))
 
-            # accel_z
-            accelz = ''.join(chr(i) for i in data[40:44]) # angle y
-            # b = ''.join(chr(i) for i in data[24:28]) # gyro y
-            accelz = struct.unpack('>f', accelz)
-            accelz = accelz[0]
-
             # angle
             b = ''.join(chr(i) for i in data[12:16])  # angle y
-            ang_rad = struct.unpack('>f', b)
-            ang_rad = ang_rad[0]
-            ang = ang_rad/math.pi*180
-            if ang < 0:
-                ang = 360 + ang
-                if accelz < 0:
-                    ang = ang - 2*(ang - 270)
+            ang = struct.unpack('>f', b)
+            ang = ang[0]
+            if ang >= 0:
+                ang = (ang / math.pi) * 180
             else:
-                if accelz < 0:
-                    ang = ang + 2*(90 - ang)
+                ang = 360 - ((-ang / math.pi) * 180)
             angle.append(ang)
 
             # angle speed
@@ -177,7 +167,11 @@ def decrease_current():
     # temp3 = current[5]
     current = [i-2 for i in current]
     current[4] = temp-1
+    if current[4] < 0:
+        current[4] = 0
     current[1] = temp1-1
+    if current[1] < 0:
+        current[1] = 0
     # current[2] = temp2
     # current[5] = temp3
     print(current)
@@ -440,9 +434,9 @@ try:
     # Construct objects
     dng_device = ts_api.TSDongle(com_port=portIMU)
     IMUPedal = dng_device[addressPedal]
-    IMUPedal.setEulerAngleDecompositionOrder(3)
+    IMUPedal.setEulerAngleDecompositionOrder(5)
     IMUPedal.setStreamingTiming(interval=0, delay=0, duration=0, timestamp=False)
-    IMUPedal.setStreamingSlots(slot0='getTaredOrientationAsEulerAngles', slot1='getNormalizedGyroRate', slot2='getNormalizedAccelerometerVector')
+    IMUPedal.setStreamingSlots(slot0='getTaredOrientationAsEulerAngles', slot1='getNormalizedGyroRate')
     IMUPedal.tareWithCurrentOrientation()
     IMUPedal.startStreaming()
     dng_device.close()
@@ -474,8 +468,8 @@ try:
     # Main frequencies used on trainings. Uncomment only the one to use.
     # current_str = '0,0,0,0,0,0'  # System check
     # current_str = '2,2,2,2,2,2'  # System check
-    # current_str = '40,0,39,40,0,39'
-    current_str = '60,28,58,60,28,58'
+    current_str = '50,10,49,50,10,49'
+    # current_str = '60,28,58,60,28,58'
     # current_str = '68,38,62,68,38,62' # only 40hz or lower
     # current_str = '74,44,68,74,2,68' # only 30hz or lower
 
