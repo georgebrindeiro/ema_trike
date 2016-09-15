@@ -108,14 +108,29 @@ def read_sensors():
             data = bytearray(serial_port.read(bytes_to_read))
 
             # angle
+            b = ''.join(chr(i) for i in data[8:12])  # angle y
+            ang = struct.unpack('>f', b)
+            x = ang[0]
+            # print(x)
+
+            # angle
             b = ''.join(chr(i) for i in data[12:16])  # angle y
             ang = struct.unpack('>f', b)
             ang = ang[0]
             if ang >= 0:
                 ang = (ang / math.pi) * 180
+                # if abs(x) > (math.pi*0.75):
+                #     ang = ang + 2*(90-ang)
             else:
-                ang = 360 - ((-ang / math.pi) * 180)
+                ang = 360 + ((ang / math.pi) * 180)
+                # if abs(x) > (math.pi*0.75):
+                #     ang = ang - 2*(ang-270)
+
+            print(ang)
             angle.append(ang)
+            # if counter >= filter_size and ((ang > 60 and ang < 120) or (ang > 240 and ang < 300)):
+            #     angle[-1] = numpy.mean(angle[-filter_size:])
+            # print(angle[-1])
 
             # angle speed
             b = ''.join(chr(i) for i in data[24:28])  # gyro y
@@ -137,7 +152,7 @@ def read_sensors():
 
 def check_angles(ang1, ang2):
     good_angle = False
-    safety_range = 50
+    safety_range = 15
     if abs(ang1 - ang2) < safety_range:
         good_angle = True
     elif abs(ang1 - ang2) > (360 - safety_range):
@@ -227,7 +242,7 @@ def main():
             # Check if angles are good
             ang1 = angle[-1]
             ang2 = angle[-2]
-            if (ang1 == 0 or ang2 == 0) and safety < 3:
+            if not check_angles(ang1, ang2) and safety < 3:
                 safety = safety + 1
                 print("safety +")
             else:
@@ -316,7 +331,7 @@ def main():
 ##########################################################################
 
 # IMU addresses
-addressPedal = 1
+addressPedal = 5
 # addressRemoteControl = 3
 
 
@@ -326,7 +341,7 @@ period = 1.0 / control_freq
 
 # Debug mode, for when there's no stimulation
 stimulation = False
-ui_used = True
+ui_used = False
 GUI = True
 
 # Experiment mode
@@ -354,11 +369,13 @@ filter_size = 5
 if ui_used:
     ui_port = '/dev/tty.usbmodemFA131'
     # ui_port = '/dev/ui' # rPi
+    ui_serial_port = serial.Serial(port=ui_port, baudrate=115200, timeout=0.01)
 # portIMU = 'COM4'  # Windows
 # portIMU = '/dev/ttyACM0'  # Linux
-portIMU = get_port('imu')  # Works on Mac. Should also work on Windows.
+portIMU = '/dev/tty.usbmodemFA131'
+# portIMU = get_port('imu')  # Works on Mac. Should also work on Windows.
 # portIMU = '/dev/imu' # rPi
-ui_serial_port = serial.Serial(port=ui_port, baudrate=115200, timeout=0.01)
+
 if stimulation:
     portStimulator = get_port('stimulator')  # Works only on Mac.
     # portStimulator = '/dev/ttyUSB0' # rPi
@@ -434,7 +451,9 @@ try:
     # Construct objects
     dng_device = ts_api.TSDongle(com_port=portIMU)
     IMUPedal = dng_device[addressPedal]
-    IMUPedal.setEulerAngleDecompositionOrder(5)
+    IMUPedal.setEulerAngleDecompositionOrder(3)
+    IMUPedal.setCompassEnabled(0)
+    IMUPedal.setFilterMode(1)
     IMUPedal.setStreamingTiming(interval=0, delay=0, duration=0, timestamp=False)
     IMUPedal.setStreamingSlots(slot0='getTaredOrientationAsEulerAngles', slot1='getNormalizedGyroRate')
     IMUPedal.tareWithCurrentOrientation()
@@ -508,10 +527,13 @@ try:
         thread.start_new_thread(user_interface, ())
 
     print('Ready to go!')
-    # raw_input('Press ENTER to start')
 
-    while not start:
-        pass
+
+    if ui_used:
+        while not start:
+            pass
+    else:
+        raw_input('Press ENTER to start')
 
     # Keep on until the user presses the "Stop" button
     print "Here we go!"
@@ -520,17 +542,17 @@ try:
     thread.start_new_thread(main, ())
     thread.start_new_thread(read_current_input, ())
 
-
     if GUI:
-
         import realTimePlotter
         graph = realTimePlotter.RealTimePlotter(control_angle, signal_channel[0], signal_channel[1], angSpeed, angSpeed,
                                             controlSignal, actual_ref_speed, control_error, xRange, running)
 
     else:
-        # raw_input('Press ENTER to stop')
-        while running:
-            pass
+        if ui_used:
+            while running:
+                pass
+        else:
+            raw_input('Press ENTER to stop')
 
     try:
         if stimulation:
@@ -543,7 +565,8 @@ try:
     if stimulation:
         stim.stop()
 
-    ui_serial_port.write('Fim')
+    if ui_used:
+        ui_serial_port.write('Fim')
 
     dng_device = ts_api.TSDongle(com_port=portIMU)
     IMUPedal = dng_device[addressPedal]
