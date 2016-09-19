@@ -119,17 +119,17 @@ def read_sensors():
             ang = ang[0]
             if ang >= 0:
                 ang = (ang / math.pi) * 180
-                # if abs(x) > (math.pi*0.75):
-                #     ang = ang + 2*(90-ang)
+                if abs(x) > (math.pi*0.75):
+                    ang = ang + 2*(90-ang)
             else:
                 ang = 360 + ((ang / math.pi) * 180)
-                # if abs(x) > (math.pi*0.75):
-                #     ang = ang - 2*(ang-270)
+                if abs(x) > (math.pi*0.75):
+                    ang = ang - 2*(ang-270)
 
-            print(ang)
+            # print(ang)
             angle.append(ang)
-            # if counter >= filter_size and ((ang > 60 and ang < 120) or (ang > 240 and ang < 300)):
-            #     angle[-1] = numpy.mean(angle[-filter_size:])
+            if counter >= filter_size and ((ang > 60 and ang < 120) or (ang > 240 and ang < 300)):
+                angle[-1] = numpy.mean(angle[-filter_size:])
             # print(angle[-1])
 
             # angle speed
@@ -161,17 +161,18 @@ def check_angles(ang1, ang2):
 
 
 def increase_current():
-    global current
-    temp = current[4]
-    temp1 = current[1]
-    # temp2 = current[2]
-    # temp3 = current[5]
-    current = [i+2 for i in current]
-    current[4] = temp+1
-    current[1] = temp1+1
-    # current[2] = temp2
-    # current[5] = temp3
-    print(current)
+    global current, current_limit
+    if current[0] <= current_limit-2:
+        temp = current[4]
+        temp1 = current[1]
+        # temp2 = current[2]
+        # temp3 = current[5]
+        current = [i+2 for i in current]
+        current[4] = temp+1
+        current[1] = temp1+1
+        # current[2] = temp2
+        # current[5] = temp3
+        print(current)
 
 
 def decrease_current():
@@ -181,12 +182,14 @@ def decrease_current():
     # temp2 = current[2]
     # temp3 = current[5]
     current = [i-2 for i in current]
-    current[4] = temp-1
-    if current[4] < 0:
+    if current[4] <= 2:
         current[4] = 0
-    current[1] = temp1-1
-    if current[1] < 0:
+    else:
+        current[4] = temp-1
+    if current[1] <= 2:
         current[1] = 0
+    else:
+        current[1] = temp1-1
     # current[2] = temp2
     # current[5] = temp3
     print(current)
@@ -210,8 +213,14 @@ def read_current_input():
             # current[5] = temp3
         elif more_or_less == "l":
             current = [i-2 for i in current]
-            current[4] = temp-1
-            current[1] = temp1-1
+            if current[4] <= 2:
+                current[4] = 0
+            else:
+                current[4] = temp-1
+            if current[1] <= 2:
+                current[1] = 0
+            else:
+                current[1] = temp1-1
             # current[2] = temp2
             # current[5] = temp3
         else:
@@ -242,21 +251,21 @@ def main():
             # Check if angles are good
             ang1 = angle[-1]
             ang2 = angle[-2]
-            if not check_angles(ang1, ang2) and safety < 3:
-                safety = safety + 1
-                print("safety +")
-            else:
-                if not check_angles(ang1, ang2):
+            if not check_angles(ang1, ang2):
+                if safety < 3:
+                    safety = safety + 1
+                    print("safety +")
+                else:
                     print "Bad angles. Aborting."
                     print ang1
                     print ang2
                     stim.stop()
                     running = False
                     break
-                else:
-                    if not safety == 0:
-                        print("safety zero")
-                        safety = 0
+            else:
+                if not safety == 0:
+                    print("safety zero")
+                    safety = 0
 
             # Get data from sensors
             control_angle.append(ang1)
@@ -331,7 +340,7 @@ def main():
 ##########################################################################
 
 # IMU addresses
-addressPedal = 5
+addressPedal = 1
 # addressRemoteControl = 3
 
 
@@ -340,8 +349,8 @@ control_freq = 100
 period = 1.0 / control_freq
 
 # Debug mode, for when there's no stimulation
-stimulation = False
-ui_used = False
+stimulation = True
+ui_used = True
 GUI = True
 
 # Experiment mode
@@ -361,18 +370,19 @@ channel_max[2] = 500
 channel_max[3] = 500
 channel_max[4] = 500
 channel_max[5] = 500
+current_limit = 90
 
 # Angular speed moving average filter size
 filter_size = 5
 
 # Ports and addresses
 if ui_used:
-    ui_port = '/dev/tty.usbmodemFA131'
+    ui_port = '/dev/tty.usbmodemFA1341'
     # ui_port = '/dev/ui' # rPi
     ui_serial_port = serial.Serial(port=ui_port, baudrate=115200, timeout=0.01)
 # portIMU = 'COM4'  # Windows
 # portIMU = '/dev/ttyACM0'  # Linux
-portIMU = '/dev/tty.usbmodemFA131'
+portIMU = '/dev/tty.usbmodemFA1331'
 # portIMU = get_port('imu')  # Works on Mac. Should also work on Windows.
 # portIMU = '/dev/imu' # rPi
 
@@ -487,7 +497,8 @@ try:
     # Main frequencies used on trainings. Uncomment only the one to use.
     # current_str = '0,0,0,0,0,0'  # System check
     # current_str = '2,2,2,2,2,2'  # System check
-    current_str = '50,10,49,50,10,49'
+    current_str = '60,25,59,60,25,59'
+    # current_str = '30,0,29,30,0,29'
     # current_str = '60,28,58,60,28,58'
     # current_str = '68,38,62,68,38,62' # only 40hz or lower
     # current_str = '74,44,68,74,2,68' # only 30hz or lower
