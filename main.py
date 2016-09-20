@@ -341,7 +341,7 @@ def main():
 ##########################################################################
 
 # IMU addresses
-addressPedal = 1
+addressPedal = 0
 # addressRemoteControl = 3
 
 
@@ -350,8 +350,8 @@ control_freq = 100
 period = 1.0 / control_freq
 
 # Debug mode, for when there's no stimulation
-stimulation = True
-ui_used = True
+stimulation = False
+ui_used = False
 GUI = True
 
 # Experiment mode
@@ -381,9 +381,9 @@ if ui_used:
     ui_port = '/dev/tty.usbmodemFA1341'
     # ui_port = '/dev/ui' # rPi
     ui_serial_port = serial.Serial(port=ui_port, baudrate=115200, timeout=0.01)
-# portIMU = 'COM4'  # Windows
+portIMU = 'COM6'  # Windows
 # portIMU = '/dev/ttyACM0'  # Linux
-portIMU = '/dev/tty.usbmodemFA1331'
+# portIMU = '/dev/tty.usbmodemFA1331'
 # portIMU = get_port('imu')  # Works on Mac. Should also work on Windows.
 # portIMU = '/dev/imu' # rPi
 
