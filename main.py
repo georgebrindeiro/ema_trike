@@ -259,7 +259,8 @@ def main():
                     print "Bad angles. Aborting."
                     print ang1
                     print ang2
-                    stim.stop()
+                    if stimulation:
+                        stim.stop()
                     running = False
                     break
             else:
@@ -584,7 +585,8 @@ try:
     IMUPedal.stopStreaming()
     IMUPedal.close()
     dng_device.close()
-    ui_serial_port.close()
+    if ui_used:
+        ui_serial_port.close()
 
     # Save the data
     t = time.localtime()
