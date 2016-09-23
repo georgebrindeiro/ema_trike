@@ -163,36 +163,16 @@ def check_angles(ang1, ang2):
 def increase_current():
     global current, current_limit
     if current[0] <= current_limit-2:
-        temp = current[4]
-        temp1 = current[1]
-        # temp2 = current[2]
-        # temp3 = current[5]
         current = [i+2 for i in current]
-        current[4] = temp+1
-        current[1] = temp1+1
-        # current[2] = temp2
-        # current[5] = temp3
         print(current)
 
 
 def decrease_current():
     global current
-    temp = current[4]
-    temp1 = current[1]
-    # temp2 = current[2]
-    # temp3 = current[5]
-    current = [i-2 for i in current]
-    if current[4] <= 2:
-        current[4] = 0
-    else:
-        current[4] = temp-1
-    if current[1] <= 2:
-        current[1] = 0
-    else:
-        current[1] = temp1-1
-    # current[2] = temp2
-    # current[5] = temp3
-    print(current)
+    temp_current = [i for i in current if i < 2]
+    if len(temp_current) == 0:
+        current = [i-2 for i in current]
+        print(current)
 
 
 def read_current_input():
