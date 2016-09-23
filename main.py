@@ -100,6 +100,8 @@ def read_sensors():
     global angSpeed
     global counter, angSpeed
     serial_port = serial.Serial(port=portIMU, baudrate=115200, timeout=0.001)
+    t0 = time.time()
+    angle_timestamp.append(t0)
     while running:
         bytes_to_read = serial_port.inWaiting()
         if bytes_to_read > 0:
@@ -117,17 +119,18 @@ def read_sensors():
             ang = ang[0]
             if ang >= 0:
                 ang = (ang / math.pi) * 180
-                if abs(x) > (math.pi*0.75):
+                if abs(x) > (math.pi*0.5):
                     ang = ang + 2*(90-ang)
             else:
                 ang = 360 + ((ang / math.pi) * 180)
-                if abs(x) > (math.pi*0.75):
+                if abs(x) > (math.pi*0.5):
                     ang = ang - 2*(ang-270)
 
             # print(ang)
             angle.append(ang)
-            if counter >= filter_size and ((ang > 60 and ang < 120) or (ang > 240 and ang < 300)):
-                angle[-1] = numpy.mean(angle[-filter_size:])
+            angle_timestamp.append(time.time()-t0)
+            # if counter >= filter_size and ((ang > 60 and ang < 120) or (ang > 240 and ang < 300)):
+            #     angle[-1] = numpy.mean(angle[-5*filter_size:])
             # print(angle[-1])
 
             # angle speed
@@ -150,7 +153,7 @@ def read_sensors():
 
 def check_angles(ang1, ang2):
     good_angle = False
-    safety_range = 15
+    safety_range = 27
     if abs(ang1 - ang2) < safety_range:
         good_angle = True
     elif abs(ang1 - ang2) > (360 - safety_range):
@@ -230,9 +233,10 @@ def main():
             ang1 = angle[-1]
             ang2 = angle[-2]
             if not check_angles(ang1, ang2):
-                if safety < 3:
+                if safety < safety_value:
                     safety = safety + 1
                     print("safety +")
+                    continue
                 else:
                     print "Bad angles. Aborting."
                     print ang1
@@ -362,6 +366,7 @@ channel_max[3] = 500
 channel_max[4] = 500
 channel_max[5] = 500
 current_limit = 100
+safety_value = 5
 
 # Angular speed moving average filter size
 filter_size = 5
@@ -391,6 +396,7 @@ if stimulation:
 # Initialize variables
 xRange = control_freq * 20
 angle = [0 for x in range(xRange)]
+angle_timestamp = []
 control_angle = [0 for x in range(xRange)]
 angSpeed = [0 for x in range(xRange)]
 control_speed = [0 for x in range(xRange)]
@@ -643,6 +649,10 @@ try:
             f.write(str(s * 1) + '\n')
     with open(os.path.join(folder, 'data_reference'), 'w') as f:
         for s in actual_ref_speed:
+            f.write(str(s * 1) + '\n')
+        f.close()
+    with open(os.path.join(folder, 'data_angle_timestamp'), 'w') as f:
+        for s in angle_timestamp:
             f.write(str(s * 1) + '\n')
         f.close()
     with open(os.path.join(folder, 'data_parameters'), 'w') as f:
