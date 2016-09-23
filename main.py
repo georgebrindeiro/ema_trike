@@ -84,14 +84,12 @@ def user_interface():
             elif data == '0':
                 running = False
                 idle = False
-            elif data == '4' and stimulation:
-                stimulation = False
-                stim.update(119, [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0])
-                print('no stim')
-                idle = False
-            elif data == '4' and not stimulation:
-                stimulation = True
-                print('yes stim')
+            elif data == '4':
+                if quad_channel == 1:
+                    quad_channel = 2
+                elif quad_channel == 2:
+                    quad_channel = 1
+                print('Quad channel: ',quad_channel)
                 idle = False
         elif data == '5':
             idle = True
@@ -280,14 +278,16 @@ def main():
             else:
                 signal_channel[0].append(
                     (perfil.left_quad(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
-                signal_channel[1].append(
-                    (perfil.left_hams(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
+                # signal_channel[1].append(
+                #     (perfil.left_hams(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
+                signal_channel[1].append(signal_channel[0][-1])
                 signal_channel[2].append(
                     (perfil.left_gluteus(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
                 signal_channel[3].append(
                     (perfil.right_quad(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
-                signal_channel[4].append(
-                    (perfil.right_hams(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
+                # signal_channel[4].append(
+                #     (perfil.right_hams(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
+                signal_channel[4].append(signal_channel[3][-1])
                 signal_channel[5].append(
                     (perfil.right_gluteus(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
 
@@ -302,10 +302,19 @@ def main():
 
             pulse_width = channel_stim
 
+            # Check quad channels
+            sent_current = current
+            if quad_channel == 1:
+                sent_current[1] = 0
+                sent_current[4] = 0
+            elif quad_channel == 2:
+                sent_current[0] = 0
+                sent_current[3] = 0
+
             # Electrical stimulator signal update
             if stimulation:
                 # print pulse_width
-                stim.update(channels, pulse_width, current)
+                stim.update(channels, pulse_width, sent_current)
 
             # running = False
             this_instant += 1
@@ -342,6 +351,7 @@ time_on_speed = 300
 
 # Number of channels
 number_of_channels = 6
+quad_channel = 1
 
 # Max pulse width
 channel_max = [0 for x in range(number_of_channels)]
@@ -478,7 +488,7 @@ try:
     # Main frequencies used on trainings. Uncomment only the one to use.
     # current_str = '0,0,0,0,0,0'  # System check
     # current_str = '2,2,2,2,2,2'  # System check
-    current_str = '60,0,59,60,0,59'
+    current_str = '60,60,60,60,60,60'
     # current_str = '30,0,29,30,0,29'
     # current_str = '60,28,58,60,28,58'
     # current_str = '68,38,62,68,38,62' # only 40hz or lower
