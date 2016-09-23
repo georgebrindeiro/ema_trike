@@ -339,8 +339,8 @@ control_freq = 100
 period = 1.0 / control_freq
 
 # Debug mode, for when there's no stimulation
-stimulation = True
-ui_used = True
+stimulation = False
+ui_used = False
 GUI = True
 
 # Experiment mode
@@ -373,7 +373,7 @@ if ui_used:
     ui_serial_port = serial.Serial(port=ui_port, baudrate=115200, timeout=0.01)
 # portIMU = 'COM4'  # Windows
 # portIMU = '/dev/ttyACM0'  # Linux
-portIMU = '/dev/tty.usbmodemFA131'
+portIMU = '/dev/tty.usbmodemFD1241'
 # portIMU = get_port('imu')  # Works on Mac. Should also work on Windows.
 # portIMU = '/dev/imu' # rPi
 
@@ -457,7 +457,8 @@ try:
     IMUPedal.setFilterMode(1)
     IMUPedal.setStreamingTiming(interval=0, delay=0, duration=0, timestamp=False)
     IMUPedal.setStreamingSlots(slot0='getTaredOrientationAsEulerAngles', slot1='getNormalizedGyroRate')
-    IMUPedal.tareWithCurrentOrientation()
+    # IMUPedal.tareWithCurrentOrientation()
+    IMUPedal.tareWithQuaternion([0.02386031299829483, -0.7226513028144836, -0.6906803250312805, -0.012902911752462387])
     IMUPedal.startStreaming()
     dng_device.close()
     # IMURemoteControl = imu.IMU(serialPortIMU, addressRemoteControl)
