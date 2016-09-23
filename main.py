@@ -371,19 +371,19 @@ channel_max[2] = 500
 channel_max[3] = 500
 channel_max[4] = 500
 channel_max[5] = 500
-current_limit = 90
+current_limit = 100
 
 # Angular speed moving average filter size
 filter_size = 5
 
 # Ports and addresses
 if ui_used:
-    ui_port = '/dev/tty.usbmodemFA1341'
+    ui_port = '/dev/tty.usbmodemFD1221'
     # ui_port = '/dev/ui' # rPi
     ui_serial_port = serial.Serial(port=ui_port, baudrate=115200, timeout=0.01)
 # portIMU = 'COM4'  # Windows
 # portIMU = '/dev/ttyACM0'  # Linux
-portIMU = '/dev/tty.usbmodemFA1331'
+portIMU = '/dev/tty.usbmodemFA131'
 # portIMU = get_port('imu')  # Works on Mac. Should also work on Windows.
 # portIMU = '/dev/imu' # rPi
 
@@ -498,7 +498,7 @@ try:
     # Main frequencies used on trainings. Uncomment only the one to use.
     # current_str = '0,0,0,0,0,0'  # System check
     # current_str = '2,2,2,2,2,2'  # System check
-    current_str = '60,25,59,60,25,59'
+    current_str = '60,0,59,60,0,59'
     # current_str = '30,0,29,30,0,29'
     # current_str = '60,28,58,60,28,58'
     # current_str = '68,38,62,68,38,62' # only 40hz or lower
