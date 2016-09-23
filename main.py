@@ -88,6 +88,8 @@ def user_interface():
                 if quad_channel == 1:
                     quad_channel = 2
                 elif quad_channel == 2:
+                    quad_channel = 3
+                elif quad_channel == 3:
                     quad_channel = 1
                 print('Quad channel: ',quad_channel)
                 idle = False
@@ -314,6 +316,8 @@ def main():
             elif quad_channel == 2:
                 sent_current[0] = 0
                 sent_current[3] = 0
+            elif quad_channel == 3:
+                sent_current = [0 for z in current]
 
             # Electrical stimulator signal update
             if stimulation:
