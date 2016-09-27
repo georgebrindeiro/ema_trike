@@ -51,8 +51,10 @@ def get_port(device):
     return port
 
 
-def user_interface():
-    global current, running, start, ui_serial_port, stimulation, stim, quad_channel
+# thread
+def user_interface(ui_port):
+    global current, running, start, stimulation, quad_channel
+    ui_serial_port = serial.Serial(port=ui_port, baudrate=115200, timeout=0.01)
     # t0 = time.time()
     current_to_write = ""
     time.sleep(1)
@@ -68,7 +70,7 @@ def user_interface():
                     ui_serial_port.write(current_to_write + ' - Pronto')
 
 
-        bytes_to_read = ui_serial_port.inWaiting()
+        # bytes_to_read = ui_serial_port.inWaiting()
         # print("Algo para ler.")
         data = ui_serial_port.read(1)
         if idle:
@@ -125,12 +127,18 @@ def user_interface():
     ui_serial_port.close()
 
 
-def read_sensors():
-    global angSpeed
-    global counter, angSpeed
+# thread
+def read_sensors(portIMU):
+    angSpeed = []
+    counter = 0
+    angle = []
+    angle_timestamp = []
+    last_angle = 0
+    last_angle_speed = 0
     serial_port = serial.Serial(port=portIMU, baudrate=115200, timeout=0.001)
     t0 = time.time()
     angle_timestamp.append(t0)
+
     while running:
         bytes_to_read = serial_port.inWaiting()
         if bytes_to_read > 0:
@@ -157,6 +165,7 @@ def read_sensors():
 
             # print(ang)
             angle.append(ang)
+            last_angle = ang
             angle_timestamp.append(time.time()-t0)
             # if counter >= filter_size and ((ang > 60 and ang < 120) or (ang > 240 and ang < 300)):
             #     angle[-1] = numpy.mean(angle[-5*filter_size:])
@@ -172,12 +181,12 @@ def read_sensors():
             angSpeed.append(int(round(speed)))
             if counter >= filter_size:
                 angSpeed[-1] = int(round(numpy.mean(angSpeed[-filter_size:])))
-            angSpeedRefHistory.append(speed_ref)
-            errorHistory.append(speed_ref - angSpeed[-1])
+            last_angle_speed = angSpeed[-1]
+            # angSpeedRefHistory.append(speed_ref)
+            # errorHistory.append(speed_ref - angSpeed[-1])
 
 
             counter += 1
-
 
 
 def check_angles(ang1, ang2):
@@ -228,6 +237,7 @@ def main():
     t0 = time.time()
     t1 = -1
     safety = 0
+    old_angle = 0
     while running:
         try:
             if not stimulation:
@@ -241,8 +251,11 @@ def main():
             time_stamp.append(time.time() - t0)
 
             # Check if angles are good
-            ang1 = angle[-1]
-            ang2 = angle[-2]
+            angle = last_angle
+            if old_angle == 0:
+               old_angle = angle
+            ang1 = angle
+            ang2 = old_angle
             if not check_angles(ang1, ang2):
                 if safety < safety_value:
                     safety = safety + 1
@@ -262,14 +275,15 @@ def main():
                     safety = 0
 
             # Get data from sensors
-            control_angle.append(ang1)
-            control_speed.append(angSpeed[-1])
+            control_angle.append(angle)
+            angle_speed = last_angle_speed
+            control_speed.append(angle_speed)
 
             # Calculate error
             if ramps:
-                control_error.append(actual_ref_speed[this_instant] - angSpeed[-1])
+                control_error.append(actual_ref_speed[this_instant] - angle_speed)
             else:
-                control_error.append(speed_ref - angSpeed[-1])
+                control_error.append(speed_ref - angle_speed)
             # print len(angSpeed)
 
             # Calculate control signal
@@ -279,32 +293,32 @@ def main():
             # print actual_ref_speed[this_instant]
             if ramps:
                 signal_channel[0].append(
-                    (perfil.left_quad(angle[-1], angSpeed[-1], actual_ref_speed[this_instant])) * (controlSignal[-1]))
+                    (perfil.left_quad(angle, angle_speed, actual_ref_speed[this_instant])) * (controlSignal[-1]))
                 signal_channel[1].append(
-                    (perfil.left_hams(angle[-1], angSpeed[-1], actual_ref_speed[this_instant])) * (controlSignal[-1]))
+                    (perfil.left_hams(angle, angle_speed, actual_ref_speed[this_instant])) * (controlSignal[-1]))
                 signal_channel[2].append(
-                    (perfil.left_gluteus(angle[-1], angSpeed[-1], actual_ref_speed[this_instant])) * (controlSignal[-1]))
+                    (perfil.left_gluteus(angle, angle_speed, actual_ref_speed[this_instant])) * (controlSignal[-1]))
                 signal_channel[3].append(
-                    (perfil.right_quad(angle[-1], angSpeed[-1], actual_ref_speed[this_instant])) * (controlSignal[-1]))
+                    (perfil.right_quad(angle, angle_speed, actual_ref_speed[this_instant])) * (controlSignal[-1]))
                 signal_channel[4].append(
-                    (perfil.right_hams(angle[-1], angSpeed[-1], actual_ref_speed[this_instant])) * (controlSignal[-1]))
+                    (perfil.right_hams(angle, angle_speed, actual_ref_speed[this_instant])) * (controlSignal[-1]))
                 signal_channel[5].append(
-                    (perfil.right_gluteus(angle[-1], angSpeed[-1], actual_ref_speed[this_instant])) * (controlSignal[-1]))
+                    (perfil.right_gluteus(angle, angle_speed, actual_ref_speed[this_instant])) * (controlSignal[-1]))
             else:
                 signal_channel[0].append(
-                    (perfil.left_quad(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
+                    (perfil.left_quad(angle, angle_speed, speed_ref)) * (controlSignal[-1]))
                 signal_channel[1].append(
-                    (perfil.left_hams(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
+                    (perfil.left_hams(angle, angle_speed, speed_ref)) * (controlSignal[-1]))
                 signal_channel[3].append(signal_channel[0][-1])
                 signal_channel[2].append(
-                    (perfil.left_gluteus(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
+                    (perfil.left_gluteus(angle, angle_speed, speed_ref)) * (controlSignal[-1]))
                 signal_channel[4].append(
-                    (perfil.right_quad(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
+                    (perfil.right_quad(angle, angle_speed, speed_ref)) * (controlSignal[-1]))
                 signal_channel[5].append(
-                    (perfil.right_hams(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
+                    (perfil.right_hams(angle, angle_speed, speed_ref)) * (controlSignal[-1]))
                 signal_channel[7].append(signal_channel[4][-1])
                 signal_channel[6].append(
-                    (perfil.right_gluteus(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
+                    (perfil.right_gluteus(angle, angle_speed, speed_ref)) * (controlSignal[-1]))
 
             # Signal double safety saturation
             # Electrical stimulation parameters settings
@@ -393,7 +407,7 @@ filter_size = 5
 if ui_used:
     ui_port = '/dev/tty.usbmodemFA1321'
     # ui_port = '/dev/ui' # rPi
-    ui_serial_port = serial.Serial(port=ui_port, baudrate=115200, timeout=0.01)
+
 # portIMU = 'COM4'  # Windows
 # portIMU = '/dev/ttyACM0'  # Linux
 portIMU = '/dev/tty.usbmodemFA1311'
@@ -413,15 +427,15 @@ if stimulation:
 
 # Initialize variables
 xRange = control_freq * 20
-angle = [0 for x in range(xRange)]
-angle_timestamp = []
+# angle = [0 for x in range(xRange)]
+# angle_timestamp = []
 control_angle = [0 for x in range(xRange)]
-angSpeed = [0 for x in range(xRange)]
+# angSpeed = [0 for x in range(xRange)]
 control_speed = [0 for x in range(xRange)]
 signal_channel = [[] for x in range(number_of_channels)]
 for i in range(number_of_channels):
     signal_channel[i] = [0 for x in range(xRange)]
-angSpeedRefHistory = [0 for x in range(xRange)]
+# angSpeedRefHistory = [0 for x in range(xRange)]
 control_ref_speed = [0 for x in range(xRange)]
 actual_ref_speed = [0 for x in range(xRange)]
 if ramps:
@@ -449,14 +463,14 @@ else:
     # print actual_ref_speed
 channel_stim = [0 for x in range(number_of_channels)]
 controlSignal = [0 for x in range(xRange)]
-errorHistory = [0 for x in range(xRange)]
+# errorHistory = [0 for x in range(xRange)]
 control_error = [0 for x in range(xRange)]
 time_stamp = []
 wait_time = 0.000
 running = False
 reading = False
 start = False
-counter = 1
+# counter = 1
 time_start = time.time()
 quad_channel = 1
 
@@ -569,8 +583,8 @@ try:
     print "Here we go!"
 
     # Start main function
-    thread.start_new_thread(main, ())
-    thread.start_new_thread(read_current_input, ())
+    # thread.start_new_thread(main, ())
+    # thread.start_new_thread(read_current_input, ())
 
     if GUI:
         import realTimePlotter
@@ -579,8 +593,7 @@ try:
 
     else:
         if ui_used:
-            while running:
-                pass
+            main()
         else:
             raw_input('Press ENTER to stop')
 
@@ -629,10 +642,10 @@ try:
         for s in control_speed:
             f.write(str(s) + '\n')
         f.close()
-    with open(os.path.join(folder, 'data_angSpeed'), 'w') as f:
-        for s in angSpeed:
-            f.write(str(s) + '\n')
-        f.close()
+    # with open(os.path.join(folder, 'data_angSpeed'), 'w') as f:
+    #     for s in angSpeed:
+    #         f.write(str(s) + '\n')
+    #     f.close()
     with open(os.path.join(folder, 'data_time'), 'w') as f:
         for s in time_stamp:
             f.write(str(s) + '\n')
