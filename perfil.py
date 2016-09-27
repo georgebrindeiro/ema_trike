@@ -65,8 +65,6 @@ def update_right_leg():
 # How much the wheel must spin when in reference speed
 correction_factor = 35
 
-ramp_angle = 60
-
 
 ############################################################
 ############################################################
@@ -75,27 +73,13 @@ def left_quad(angle, ang_speed, speed_ref):
     # Calculate initial and final angles based on angular speed
     start_ang = left_quad_start_ang - (ang_speed / speed_ref) * correction_factor
     end_ang = start_ang + left_quad_range
-    start_ang += 360
-    end_ang += 360
-    angle += 360
+    if end_ang > 360:
+        end_ang -= 360
     # Stimulate if it is in the stimulation zone
-    # if end_ang + ramp_angle > 360:
-    #     angle += 360
-    if end_ang < start_ang:
-        end_ang += 360
-        angle += 360
-
-    if (start_ang - ramp_angle) < angle < start_ang:
-        # print 1 - ((start_ang - angle) / ramp_angle)
-        return 1 - ((start_ang - angle) / ramp_angle)
-    elif start_ang <= angle <= end_ang:
-        # print 1
+    if ((angle > start_ang) and (angle < end_ang)) or (
+                (end_ang < start_ang) and ((angle < end_ang) or (angle > start_ang))):
         return 1
-    elif end_ang < angle < (end_ang + ramp_angle):
-        # print 1 - ((angle - end_ang) / ramp_angle)
-        return 1 - ((angle - end_ang) / ramp_angle)
     else:
-        # print 0
         return 0
 
 
@@ -104,19 +88,12 @@ def right_quad(angle, ang_speed, speed_ref):
     # Calculate initial and final angles based on angular speed
     start_ang = right_quad_start_ang - (ang_speed / speed_ref) * correction_factor
     end_ang = start_ang + right_quad_range
-    start_ang += 360
-    end_ang += 360
-    angle += 360
+    if end_ang > 360:
+        end_ang -= 360
+
     # Stimulate if it is in the stimulation zone
-    if end_ang < start_ang:
-        end_ang += 360
-        angle += 360
-    if (start_ang - ramp_angle) < angle < start_ang:
-        return 1 - ((start_ang - angle) / ramp_angle)
-    elif start_ang <= angle <= end_ang:
+    if (angle > start_ang) and (angle < end_ang):
         return 1
-    elif end_ang < angle < (end_ang + ramp_angle):
-        return 1 - ((angle - end_ang) / ramp_angle)
     else:
         return 0
 
@@ -125,19 +102,12 @@ def left_gluteus(angle, ang_speed, speed_ref):
     # Calculate initial and final angles based on angular speed
     start_ang = left_gluteus_start_ang - (ang_speed / speed_ref) * correction_factor
     end_ang = start_ang + left_gluteus_range
-    start_ang += 360
-    end_ang += 360
-    angle += 360
+    if end_ang > 360:
+        end_ang -= 360
     # Stimulate if it is in the stimulation zone
-    if end_ang < start_ang:
-        end_ang += 360
-        angle += 360
-    if (start_ang - ramp_angle) < angle < start_ang:
-        return 1 - ((start_ang - angle) / ramp_angle)
-    elif start_ang <= angle <= end_ang:
+    if ((angle > start_ang) and (angle < end_ang)) or (
+                (end_ang < start_ang) and ((angle < end_ang) or (angle > start_ang))):
         return 1
-    elif end_ang < angle < (end_ang + ramp_angle):
-        return 1 - ((angle - end_ang) / ramp_angle)
     else:
         return 0
 
@@ -147,19 +117,12 @@ def right_gluteus(angle, ang_speed, speed_ref):
     # Calculate initial and final angles based on angular speed
     start_ang = right_gluteus_start_ang - (ang_speed / speed_ref) * correction_factor
     end_ang = start_ang + right_gluteus_range
-    start_ang += 360
-    end_ang += 360
-    angle += 360
+    if end_ang > 360:
+        end_ang -= 360
+
     # Stimulate if it is in the stimulation zone
-    if end_ang < start_ang:
-        end_ang += 360
-        angle += 360
-    if (start_ang - ramp_angle) < angle < start_ang:
-        return 1 - ((start_ang - angle) / ramp_angle)
-    elif start_ang <= angle <= end_ang:
+    if (angle > start_ang) and (angle < end_ang):
         return 1
-    elif end_ang < angle < (end_ang + ramp_angle):
-        return 1 - ((angle - end_ang) / ramp_angle)
     else:
         return 0
 
@@ -168,19 +131,12 @@ def left_hams(angle, ang_speed, speed_ref):
     # Calculate initial and final angles based on angular speed
     start_ang = left_hams_start_ang - (ang_speed / speed_ref) * correction_factor
     end_ang = start_ang + left_hams_range
-    start_ang += 360
-    end_ang += 360
-    angle += 360
+    if end_ang > 360:
+        end_ang -= 360
+
     # Stimulate if it is in the stimulation zone
-    if end_ang < start_ang:
-        end_ang += 360
-        angle += 360
-    if (start_ang - ramp_angle) < angle < start_ang:
-        return 1 - ((start_ang - angle) / ramp_angle)
-    elif start_ang <= angle <= end_ang:
+    if (angle > start_ang) and (angle < end_ang):
         return 1
-    elif end_ang < angle < (end_ang + ramp_angle):
-        return 1 - ((angle - end_ang) / ramp_angle)
     else:
         return 0
 
@@ -190,18 +146,11 @@ def right_hams(angle, ang_speed, speed_ref):
     # Calculate initial and final angles based on angular speed
     start_ang = right_hams_start_ang - (ang_speed / speed_ref) * correction_factor
     end_ang = start_ang + right_hams_range
-    start_ang += 360
-    end_ang += 360
-    angle += 360
+    if end_ang > 360:
+        end_ang -= 360
     # Stimulate if it is in the stimulation zone
-    if end_ang < start_ang:
-        end_ang += 360
-        angle += 360
-    if (start_ang - ramp_angle) < angle < start_ang:
-        return 1 - ((start_ang - angle) / ramp_angle)
-    elif start_ang <= angle <= end_ang:
+    if ((angle > start_ang) and (angle < end_ang)) or (
+                (end_ang < start_ang) and ((angle < end_ang) or (angle > start_ang))):
         return 1
-    elif end_ang < angle < (end_ang + ramp_angle):
-        return 1 - ((angle - end_ang) / ramp_angle)
     else:
         return 0

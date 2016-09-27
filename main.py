@@ -72,25 +72,40 @@ def user_interface():
         # print("Algo para ler.")
         data = ui_serial_port.read(1)
         if idle:
-            if data == '2':
+            if data == '1':
                 decrease_current()
                 idle = False
-            elif data == '1':
+            elif data == '2':
                 increase_current()
                 idle = False
             elif data == '3':
+                if not start:
+                    start = True
+                    ui_serial_port.write(str(0))
+                    ui_serial_port.write(str(current[0]))
+                else:
+                    if quad_channel == 1:
+                        quad_channel = 3
+                        print('OFF')
+                        ui_serial_port.write('OFF')
+                    elif quad_channel == 3:
+                        quad_channel = 1
+                        print('ON')
+                        ui_serial_port.write(str(current[0]))
+                idle = False
+            elif data == '4':
                 if not start:
                     start = True
                 else:
                     if quad_channel == 1:
                         quad_channel = 3
                         print('OFF')
+                        ui_serial_port.write('OFF')
                     elif quad_channel == 3:
                         quad_channel = 1
                         print('ON')
+                        ui_serial_port.write(str(current[0]))
                 idle = False
-            elif data == '0':
-                running = False
                 # idle = False
             # elif data == '4':
             #     if quad_channel == 1:
@@ -280,18 +295,16 @@ def main():
                     (perfil.left_quad(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
                 signal_channel[1].append(
                     (perfil.left_hams(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
-                # signal_channel[1].append(signal_channel[0][-1])
+                signal_channel[3].append(signal_channel[0][-1])
                 signal_channel[2].append(
                     (perfil.left_gluteus(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
-                # signal_channel[3].append(signal_channel[0][-1])
-                signal_channel[3].append(
-                    (perfil.right_quad(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
                 signal_channel[4].append(
-                    (perfil.right_hams(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
-                # signal_channel[4].append(signal_channel[3][-1])
+                    (perfil.right_quad(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
                 signal_channel[5].append(
+                    (perfil.right_hams(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
+                signal_channel[7].append(signal_channel[4][-1])
+                signal_channel[6].append(
                     (perfil.right_gluteus(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
-                # signal_channel[7].append(signal_channel[4][-1])
 
             # Signal double safety saturation
             # Electrical stimulation parameters settings
@@ -350,7 +363,7 @@ period = 1.0 / control_freq
 # Debug mode, for when there's no stimulation
 stimulation = True
 ui_used = True
-GUI = True
+GUI = False
 
 # Experiment mode
 ramps = False
@@ -359,7 +372,7 @@ fast_speed = 250
 time_on_speed = 300
 
 # Number of channels
-number_of_channels = 6
+number_of_channels = 8
 quad_channel = 1
 
 # Max pulse width
@@ -370,9 +383,7 @@ channel_max = [500 for x in range(number_of_channels)]
 # channel_max[3] = 500
 # channel_max[4] = 500
 # channel_max[5] = 500
-# channel_max[6] = 500
-# channel_max[7] = 500
-current_limit = 100
+current_limit = 96
 safety_value = 5
 
 # Angular speed moving average filter size
@@ -488,7 +499,8 @@ try:
     # if stimulation:
     freq = 30
     # int(raw_input("Input frequency: "))
-    channels = 119  # 6 Channels
+    # channels = 119  # 6 Channels
+    channels = 255  # 6 Channels
     # Channel 1: Left quads
     # Channel 2: Left hams
     # Channel 3: Left gluteus
@@ -502,7 +514,7 @@ try:
 
     # Main frequencies used on trainings. Uncomment only the one to use.
     # current_str = '0,0,0,0,0,0'  # System check
-    current_str = '22,2,22,22,2,22'  # System check
+    current_str = '10,2,22,10,10,2,22,10'  # System check
     # current_str = '62,42,62,62,42,62'
     # current_str = '60,60,60,60,60,60'
     # current_str = '30,0,29,30,0,29'
