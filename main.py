@@ -283,15 +283,15 @@ def main():
                 # signal_channel[1].append(signal_channel[0][-1])
                 signal_channel[2].append(
                     (perfil.left_gluteus(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
-                signal_channel[3].append(signal_channel[0][-1])
-                signal_channel[4].append(
+                # signal_channel[3].append(signal_channel[0][-1])
+                signal_channel[3].append(
                     (perfil.right_quad(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
-                signal_channel[5].append(
+                signal_channel[4].append(
                     (perfil.right_hams(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
                 # signal_channel[4].append(signal_channel[3][-1])
-                signal_channel[6].append(
+                signal_channel[5].append(
                     (perfil.right_gluteus(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
-                signal_channel[7].append(signal_channel[4][-1])
+                # signal_channel[7].append(signal_channel[4][-1])
 
             # Signal double safety saturation
             # Electrical stimulation parameters settings
@@ -348,8 +348,8 @@ control_freq = 100
 period = 1.0 / control_freq
 
 # Debug mode, for when there's no stimulation
-stimulation = False
-ui_used = False
+stimulation = True
+ui_used = True
 GUI = True
 
 # Experiment mode
@@ -359,7 +359,7 @@ fast_speed = 250
 time_on_speed = 300
 
 # Number of channels
-number_of_channels = 8
+number_of_channels = 6
 quad_channel = 1
 
 # Max pulse width
@@ -502,7 +502,7 @@ try:
 
     # Main frequencies used on trainings. Uncomment only the one to use.
     # current_str = '0,0,0,0,0,0'  # System check
-    current_str = '22,2,22,22,22,2,22,22'  # System check
+    current_str = '22,2,22,22,2,22'  # System check
     # current_str = '62,42,62,62,42,62'
     # current_str = '60,60,60,60,60,60'
     # current_str = '30,0,29,30,0,29'
