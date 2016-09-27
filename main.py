@@ -9,7 +9,7 @@ Channel 1: left
 Channel 2: right"""
 
 import serial
-import imu
+# import imu
 import stimulator
 import perfil
 import time
@@ -52,7 +52,7 @@ def get_port(device):
 
 
 def user_interface():
-    global current, running, start, ui_serial_port, stimulation, stim
+    global current, running, start, ui_serial_port, stimulation, stim, quad_channel
     # t0 = time.time()
     current_to_write = ""
     time.sleep(1)
@@ -79,23 +79,35 @@ def user_interface():
                 increase_current()
                 idle = False
             elif data == '3':
-                start = True
+                if not start:
+                    start = True
+                else:
+                    if quad_channel == 1:
+                        quad_channel = 3
+                        print('OFF')
+                    elif quad_channel == 3:
+                        quad_channel = 1
+                        print('ON')
                 idle = False
             elif data == '0':
                 running = False
-                idle = False
-            elif data == '4':
-                if quad_channel == 1:
-                    quad_channel = 2
-                elif quad_channel == 2:
-                    quad_channel = 3
-                elif quad_channel == 3:
-                    quad_channel = 1
-                print('Quad channel: ',quad_channel)
+                # idle = False
+            # elif data == '4':
+            #     if quad_channel == 1:
+            #         quad_channel = 2
+            #     elif quad_channel == 2:
+            #         quad_channel = 3
+            #     elif quad_channel == 3:
+            #         quad_channel = 1
+                # print('Quad channel: ',quad_channel)
+                # print quad_channel
                 idle = False
         elif data == '5':
             idle = True
         # print data
+    ui_serial_port.write('Fim')
+    time.sleep(0.5)
+    ui_serial_port.close()
 
 
 def read_sensors():
@@ -121,11 +133,11 @@ def read_sensors():
             ang = ang[0]
             if ang >= 0:
                 ang = (ang / math.pi) * 180
-                if abs(x) > (math.pi*0.5):
+                if abs(x) > (math.pi*0.6):
                     ang = ang + 2*(90-ang)
             else:
                 ang = 360 + ((ang / math.pi) * 180)
-                if abs(x) > (math.pi*0.5):
+                if abs(x) > (math.pi*0.6):
                     ang = ang - 2*(ang-270)
 
             # print(ang)
@@ -150,12 +162,12 @@ def read_sensors():
 
 
             counter += 1
-    serial_port.close()
+
 
 
 def check_angles(ang1, ang2):
     good_angle = False
-    safety_range = 27
+    safety_range = 35
     if abs(ang1 - ang2) < safety_range:
         good_angle = True
     elif abs(ang1 - ang2) > (360 - safety_range):
@@ -184,28 +196,10 @@ def read_current_input():
     while running:
 
         more_or_less = raw_input("Current (m/l): ")
-        temp = current[4]
-        temp1 = current[1]
-        # temp2 = current[2]
-        # temp3 = current[5]
         if more_or_less == "m":
             current = [i+2 for i in current]
-            current[4] = temp+1
-            current[1] = temp1+1
-            # current[2] = temp2
-            # current[5] = temp3
         elif more_or_less == "l":
             current = [i-2 for i in current]
-            if current[4] <= 2:
-                current[4] = 0
-            else:
-                current[4] = temp-1
-            if current[1] <= 2:
-                current[1] = 0
-            else:
-                current[1] = temp1-1
-            # current[2] = temp2
-            # current[5] = temp3
         else:
             current = [int(i) for i in
                    (more_or_less.split(","))]
@@ -214,7 +208,7 @@ def read_current_input():
 
 # Main function
 def main():
-    global running, controlSignal, signal_channel
+    global running, controlSignal, signal_channel, quad_channel
     this_instant = xRange+1
     t0 = time.time()
     t1 = -1
@@ -228,7 +222,7 @@ def main():
             # if t_diff < period:
             #     if not (period - t_diff - 0.004) < 0:
             #         time.sleep(period - t_diff - 0.004)
-            t1 = time.time()
+            # t1 = time.time()
             time_stamp.append(time.time() - t0)
 
             # Check if angles are good
@@ -284,16 +278,16 @@ def main():
             else:
                 signal_channel[0].append(
                     (perfil.left_quad(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
-                # signal_channel[1].append(
-                #     (perfil.left_hams(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
-                signal_channel[1].append(signal_channel[0][-1])
+                signal_channel[1].append(
+                    (perfil.left_hams(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
+                # signal_channel[1].append(signal_channel[0][-1])
                 signal_channel[2].append(
                     (perfil.left_gluteus(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
                 signal_channel[3].append(
                     (perfil.right_quad(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
-                # signal_channel[4].append(
-                #     (perfil.right_hams(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
-                signal_channel[4].append(signal_channel[3][-1])
+                signal_channel[4].append(
+                    (perfil.right_hams(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
+                # signal_channel[4].append(signal_channel[3][-1])
                 signal_channel[5].append(
                     (perfil.right_gluteus(angle[-1], angSpeed[-1], speed_ref)) * (controlSignal[-1]))
 
@@ -309,16 +303,21 @@ def main():
             pulse_width = channel_stim
 
             # Check quad channels
-            sent_current = current
+            sent_current = current[:]
+            # print(current)
             if quad_channel == 1:
-                sent_current[1] = 0
-                sent_current[4] = 0
-            elif quad_channel == 2:
-                sent_current[0] = 0
-                sent_current[3] = 0
+                sent_current = current[:]
+            #     sent_current[1] = 0
+            #     sent_current[4] = 0
+            #     # print(sent_current)
+            # elif quad_channel == 2:
+            #     sent_current[0] = 0
+            #     sent_current[3] = 0
+            #     # print(sent_current)
             elif quad_channel == 3:
                 sent_current = [0 for z in current]
-
+                # print(sent_current)
+            # print(quad_channel)
             # Electrical stimulator signal update
             if stimulation:
                 # print pulse_width
@@ -347,8 +346,8 @@ control_freq = 100
 period = 1.0 / control_freq
 
 # Debug mode, for when there's no stimulation
-stimulation = False
-ui_used = False
+stimulation = True
+ui_used = True
 GUI = True
 
 # Experiment mode
@@ -377,12 +376,12 @@ filter_size = 5
 
 # Ports and addresses
 if ui_used:
-    ui_port = '/dev/tty.usbmodemFD1221'
+    ui_port = '/dev/tty.usbmodemFA1321'
     # ui_port = '/dev/ui' # rPi
     ui_serial_port = serial.Serial(port=ui_port, baudrate=115200, timeout=0.01)
 # portIMU = 'COM4'  # Windows
 # portIMU = '/dev/ttyACM0'  # Linux
-portIMU = '/dev/tty.usbmodemFD1241'
+portIMU = '/dev/tty.usbmodemFA1311'
 # portIMU = get_port('imu')  # Works on Mac. Should also work on Windows.
 # portIMU = '/dev/imu' # rPi
 
@@ -444,6 +443,7 @@ reading = False
 start = False
 counter = 1
 time_start = time.time()
+quad_channel = 1
 
 
 ##########################################################################
@@ -498,8 +498,9 @@ try:
 
     # Main frequencies used on trainings. Uncomment only the one to use.
     # current_str = '0,0,0,0,0,0'  # System check
-    # current_str = '2,2,2,2,2,2'  # System check
-    current_str = '60,60,60,60,60,60'
+    current_str = '22,2,22,22,2,22'  # System check
+    # current_str = '62,42,62,62,42,62'
+    # current_str = '60,60,60,60,60,60'
     # current_str = '30,0,29,30,0,29'
     # current_str = '60,28,58,60,28,58'
     # current_str = '68,38,62,68,38,62' # only 40hz or lower
@@ -578,16 +579,16 @@ try:
     if stimulation:
         stim.stop()
 
-    if ui_used:
-        ui_serial_port.write('Fim')
+    # if ui_used:
+    #     ui_serial_port.write('Fim')
 
     dng_device = ts_api.TSDongle(com_port=portIMU)
     IMUPedal = dng_device[addressPedal]
     IMUPedal.stopStreaming()
     IMUPedal.close()
     dng_device.close()
-    if ui_used:
-        ui_serial_port.close()
+    # if ui_used:
+    #     ui_serial_port.close()
 
     # Save the data
     t = time.localtime()
