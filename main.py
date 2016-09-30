@@ -518,15 +518,15 @@ try:
         serialPortStimulator = serial.Serial(portStimulator, timeout=0.05, writeTimeout=0.05, baudrate=115200)
 
     # Construct objects
-    dng_device = ts_api.TSDongle(com_port=portIMU)
-    IMUPedal = dng_device[addressPedal]
-    IMUPedal.setEulerAngleDecompositionOrder(3)
-    IMUPedal.setCompassEnabled(0)
-    IMUPedal.setFilterMode(1)
-    IMUPedal.setStreamingTiming(interval=0, delay=0, duration=0, timestamp=False)
-    IMUPedal.setStreamingSlots(slot0='getTaredOrientationAsEulerAngles', slot1='getNormalizedGyroRate')
-    # IMUPedal.tareWithCurrentOrientation()
-    IMUPedal.tareWithQuaternion([0.02386031299829483, -0.7226513028144836, -0.6906803250312805, -0.012902911752462387])
+    # dng_device = ts_api.TSDongle(com_port=portIMU)
+    # IMUPedal = dng_device[addressPedal]
+    # IMUPedal.setEulerAngleDecompositionOrder(3)
+    # IMUPedal.setCompassEnabled(0)
+    # IMUPedal.setFilterMode(1)
+    # IMUPedal.setStreamingTiming(interval=0, delay=0, duration=0, timestamp=False)
+    # IMUPedal.setStreamingSlots(slot0='getTaredOrientationAsEulerAngles', slot1='getNormalizedGyroRate')
+    # # IMUPedal.tareWithCurrentOrientation()
+    # IMUPedal.tareWithQuaternion([0.02386031299829483, -0.7226513028144836, -0.6906803250312805, -0.012902911752462387])
     # IMUPedal.startStreaming()
     # dng_device.close()
     # IMURemoteControl = imu.IMU(serialPortIMU, addressRemoteControl)
@@ -556,8 +556,8 @@ try:
     #int(raw_input("Input channels: "))
 
     # Main frequencies used on trainings. Uncomment only the one to use.
-    current_str = '0,0,0,0,0,0,0,0'  # System check
-    #current_str = '10,2,22,10,10,2,22,10'  # System check
+    # current_str = '0,0,0,0,0,0,0,0'  # System check
+    current_str = '10,2,22,10,10,2,22,10'  # System check
     # current_str = '62,42,62,62,42,62'
     # current_str = '60,60,60,60,60,60'
     # current_str = '30,0,29,30,0,29'
@@ -629,6 +629,15 @@ try:
         while not start.value:
             pass
         print('Here we go')
+        dng_device = ts_api.TSDongle(com_port=portIMU)
+        IMUPedal = dng_device[addressPedal]
+        IMUPedal.setEulerAngleDecompositionOrder(3)
+        IMUPedal.setCompassEnabled(0)
+        IMUPedal.setFilterMode(1)
+        IMUPedal.setStreamingTiming(interval=0, delay=0, duration=0, timestamp=False)
+        IMUPedal.setStreamingSlots(slot0='getTaredOrientationAsEulerAngles', slot1='getNormalizedGyroRate')
+        # IMUPedal.tareWithCurrentOrientation()
+        IMUPedal.tareWithQuaternion([0.02386031299829483, -0.7226513028144836, -0.6906803250312805, -0.012902911752462387])
         IMUPedal.startStreaming()
         dng_device.close()
         multiprocessing.Process(target=read_sensors, args=(portIMU,running,last_angle,last_angle_speed)).start()
