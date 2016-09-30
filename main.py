@@ -527,8 +527,8 @@ try:
     IMUPedal.setStreamingSlots(slot0='getTaredOrientationAsEulerAngles', slot1='getNormalizedGyroRate')
     # IMUPedal.tareWithCurrentOrientation()
     IMUPedal.tareWithQuaternion([0.02386031299829483, -0.7226513028144836, -0.6906803250312805, -0.012902911752462387])
-    IMUPedal.startStreaming()
-    dng_device.close()
+    # IMUPedal.startStreaming()
+    # dng_device.close()
     # IMURemoteControl = imu.IMU(serialPortIMU, addressRemoteControl)
     stim = 0
     if stimulation.value:
@@ -599,7 +599,7 @@ try:
     # running = True
     running.value = 1
     # thread.start_new_thread(read_sensors, ())
-    multiprocessing.Process(target=read_sensors, args=(portIMU,running,last_angle,last_angle_speed)).start()
+
     if ui_used:
         # thread.start_new_thread(user_interface, ())
         multiprocessing.Process(target=user_interface, args=(ui_port,current,start,quad_channel,stimulation)).start()
@@ -629,6 +629,9 @@ try:
         while not start.value:
             pass
         print('Here we go')
+        IMUPedal.startStreaming()
+        dng_device.close()
+        multiprocessing.Process(target=read_sensors, args=(portIMU,running,last_angle,last_angle_speed)).start()
         main()
     else:
         # cannot Press ENTER to stop
