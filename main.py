@@ -217,7 +217,7 @@ def check_angles(ang1, ang2):
 
 def increase_current(current):
     # global current, current_limit
-    current_limit = 102
+    current_limit = 94
     if current[0] <= current_limit-2:
         #current = [i+2 for i in current]
         for i in range(len(current)):
@@ -331,19 +331,19 @@ def main():
                     (perfil.right_gluteus(angle, angle_speed, actual_ref_speed[this_instant])) * (controlSignal[-1]))
             else:
                 signal_channel[0].append(
-                    (perfil.left_quad(angle, angle_speed, speed_ref)) * (controlSignal[-1]))
+                    int((perfil.left_quad(angle, angle_speed, speed_ref)) * (controlSignal[-1])))
                 signal_channel[1].append(
-                    (perfil.left_hams(angle, angle_speed, speed_ref)) * (controlSignal[-1]))
+                    int((perfil.left_hams(angle, angle_speed, speed_ref)) * (controlSignal[-1])))
                 signal_channel[3].append(signal_channel[0][-1])
                 signal_channel[2].append(
-                    (perfil.left_gluteus(angle, angle_speed, speed_ref)) * (controlSignal[-1]))
+                    int((perfil.left_gluteus(angle, angle_speed, speed_ref)) * (controlSignal[-1])))
                 signal_channel[4].append(
-                    (perfil.right_quad(angle, angle_speed, speed_ref)) * (controlSignal[-1]))
+                    int((perfil.right_quad(angle, angle_speed, speed_ref)) * (controlSignal[-1])))
                 signal_channel[5].append(
-                    (perfil.right_hams(angle, angle_speed, speed_ref)) * (controlSignal[-1]))
+                    int((perfil.right_hams(angle, angle_speed, speed_ref)) * (controlSignal[-1])))
                 signal_channel[7].append(signal_channel[4][-1])
                 signal_channel[6].append(
-                    (perfil.right_gluteus(angle, angle_speed, speed_ref)) * (controlSignal[-1]))
+                    int((perfil.right_gluteus(angle, angle_speed, speed_ref)) * (controlSignal[-1])))
 
             # Signal double safety saturation
             # Electrical stimulation parameters settings
@@ -358,9 +358,25 @@ def main():
 
             # Check quad channels
             sent_current = current[:]
+            sent_current[0] = sent_current[0] * perfil.left_quad(angle, angle_speed, speed_ref)
+            sent_current[1] = sent_current[1] * perfil.left_hams(angle, angle_speed, speed_ref)
+            sent_current[2] = sent_current[2] * perfil.left_gluteus(angle, angle_speed, speed_ref)
+            sent_current[3] = sent_current[3] * perfil.left_quad(angle, angle_speed, speed_ref)
+            sent_current[4] = sent_current[4] * perfil.right_quad(angle, angle_speed, speed_ref)
+            sent_current[5] = sent_current[5] * perfil.right_hams(angle, angle_speed, speed_ref)
+            sent_current[6] = sent_current[6] * perfil.right_gluteus(angle, angle_speed, speed_ref)
+            sent_current[7] = sent_current[7] * perfil.right_quad(angle, angle_speed, speed_ref)
             # print(current)
             if quad_channel.value == 1:
                 sent_current = current[:]
+                sent_current[0] = sent_current[0] * perfil.left_quad(angle, angle_speed, speed_ref)
+                sent_current[1] = sent_current[1] * perfil.left_hams(angle, angle_speed, speed_ref)
+                sent_current[2] = sent_current[2] * perfil.left_gluteus(angle, angle_speed, speed_ref)
+                sent_current[3] = sent_current[3] * perfil.left_quad(angle, angle_speed, speed_ref)
+                sent_current[4] = sent_current[4] * perfil.right_quad(angle, angle_speed, speed_ref)
+                sent_current[5] = sent_current[5] * perfil.right_hams(angle, angle_speed, speed_ref)
+                sent_current[6] = sent_current[6] * perfil.right_gluteus(angle, angle_speed, speed_ref)
+                sent_current[7] = sent_current[7] * perfil.right_quad(angle, angle_speed, speed_ref)
             #     sent_current[1] = 0
             #     sent_current[4] = 0
             #     # print(sent_current)
@@ -386,9 +402,11 @@ def main():
                 # print(sent_current)
                 print('back to normal')
             # print(quad_channel.value)
+            # print sent_current[7]
+            print pulse_width
             # Electrical stimulator signal update
             if stimulation.value:
-                print pulse_width
+                # print pulse_width
                 # print(sent_current)
                 stim.update(channels, pulse_width, sent_current)
 
@@ -411,7 +429,7 @@ def main():
 # shared variables
 running = multiprocessing.Value('B', 0)
 start = multiprocessing.Value('B', 0)
-stimulation = multiprocessing.Value('B', 1)
+stimulation = multiprocessing.Value('B', 0)
 quad_channel = multiprocessing.Value('B', 1)
 last_angle = multiprocessing.Value('f', 0.0)
 last_angle_speed = multiprocessing.Value('f', 0.0)
@@ -462,6 +480,7 @@ if ui_used:
 # portIMU = 'COM4'  # Windows
 # portIMU = '/dev/ttyACM0'  # Linux
 portIMU = '/dev/tty.usbmodemFA1311'
+# portIMU = '/dev/tty.usbmodemFA131'
 # portIMU = get_port('imu')  # Works on Mac. Should also work on Windows.
 # portIMU = '/dev/imu' # rPi
 
@@ -548,6 +567,7 @@ try:
     IMUPedal.setStreamingSlots(slot0='getTaredOrientationAsEulerAngles', slot1='getNormalizedGyroRate')
     # IMUPedal.tareWithCurrentOrientation()
     IMUPedal.tareWithQuaternion([0.02386031299829483, -0.7226513028144836, -0.6906803250312805, -0.012902911752462387])
+
     IMUPedal.startStreaming()
     dng_device.close()
     # IMURemoteControl = imu.IMU(serialPortIMU, addressRemoteControl)
@@ -665,6 +685,7 @@ try:
         main()
     else:
         # cannot Press ENTER to stop
+        print('Here we go')
         main()
         raw_input('Press ENTER to stop')
 

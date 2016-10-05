@@ -13,12 +13,14 @@ left_quad_start_ang = 280
 left_quad_range = 95
 
 # Left gluteus
-left_gluteus_start_ang = 300
-left_gluteus_range = 140
+left_gluteus_start_ang = 310
+left_gluteus_range = 160
 
 # Left hamstrings
-left_hams_start_ang = 85 # melhor valor para isquios
+left_hams_start_ang = 100 # melhor valor para isquios
 left_hams_range = 105
+
+ramps = 60
 
 ############################################################
 ######################## Right leg #########################
@@ -79,6 +81,10 @@ def left_quad(angle, ang_speed, speed_ref):
     if ((angle > start_ang) and (angle < end_ang)) or (
                 (end_ang < start_ang) and ((angle < end_ang) or (angle > start_ang))):
         return 1
+    elif start_ang > angle > start_ang - ramps:
+        return 1-(start_ang - angle)/ramps
+    elif end_ang < angle < end_ang + ramps:
+        return 1-(angle-end_ang)/ramps
     else:
         return 0
 
@@ -94,6 +100,10 @@ def right_quad(angle, ang_speed, speed_ref):
     # Stimulate if it is in the stimulation zone
     if (angle > start_ang) and (angle < end_ang):
         return 1
+    elif start_ang > angle > start_ang - ramps:
+        return 1-(start_ang - angle)/ramps
+    elif end_ang < angle < end_ang + ramps:
+        return 1-(angle-end_ang)/ramps
     else:
         return 0
 
@@ -108,6 +118,10 @@ def left_gluteus(angle, ang_speed, speed_ref):
     if ((angle > start_ang) and (angle < end_ang)) or (
                 (end_ang < start_ang) and ((angle < end_ang) or (angle > start_ang))):
         return 1
+    elif start_ang > angle > start_ang - ramps:
+        return 1-(start_ang - angle)/ramps
+    elif end_ang < angle < end_ang + ramps:
+        return 1-(angle-end_ang)/ramps
     else:
         return 0
 
@@ -123,6 +137,10 @@ def right_gluteus(angle, ang_speed, speed_ref):
     # Stimulate if it is in the stimulation zone
     if (angle > start_ang) and (angle < end_ang):
         return 1
+    elif start_ang > angle > start_ang - ramps:
+        return 1-(start_ang - angle)/ramps
+    elif end_ang < angle < end_ang + ramps:
+        return 1-(angle-end_ang)/ramps
     else:
         return 0
 
@@ -137,6 +155,10 @@ def left_hams(angle, ang_speed, speed_ref):
     # Stimulate if it is in the stimulation zone
     if (angle > start_ang) and (angle < end_ang):
         return 1
+    elif start_ang > angle > start_ang - ramps:
+        return 1-(start_ang - angle)/ramps
+    elif end_ang < angle < end_ang + ramps:
+        return 1-(angle-end_ang)/ramps
     else:
         return 0
 
@@ -152,5 +174,9 @@ def right_hams(angle, ang_speed, speed_ref):
     if ((angle > start_ang) and (angle < end_ang)) or (
                 (end_ang < start_ang) and ((angle < end_ang) or (angle > start_ang))):
         return 1
+    elif start_ang > angle > start_ang - ramps:
+        return 1-(start_ang - angle)/ramps
+    elif end_ang < angle < end_ang + ramps:
+        return 1-(angle-end_ang)/ramps
     else:
         return 0
