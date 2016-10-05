@@ -84,27 +84,33 @@ def user_interface(ui_port,current,start,quad_channel,stimulation):
                 increase_current(current)
                 idle = False
             elif data == '3':
-                if not start.value:
-                    # start = True
-                    start.value = 1
-                    ui_serial_port.write(str(0))
-                    ui_serial_port.write(str(current[0]))
-                else:
-                    if quad_channel.value == 1:
-                        quad_channel.value = 3
-                        print('OFF')
-                        ui_serial_port.write('OFF')
-                    elif quad_channel.value == 3:
-                        quad_channel.value = 1
-                        print('ON')
-                        ui_serial_port.write(str(current[0]))
+                print('recupera')
+                quad_channel.value = 4
+                # if not start.value:
+                #     # start = True
+                #     start.value = 1
+                #     ui_serial_port.write(str(0))
+                #     ui_serial_port.write(str(current[0]))
+                # else:
+                #     if quad_channel.value == 1:
+                #         quad_channel.value = 3
+                #         print('OFF')
+                #         ui_serial_port.write('OFF')
+                #     elif quad_channel.value == 3:
+                #         quad_channel.value = 1
+                #         print('ON')
+                #         ui_serial_port.write(str(current[0]))
                 idle = False
             elif data == '4':
                 if not start.value:
                     # start = True
                     start.value = 1
                 else:
-                    if quad_channel.value == 1:
+                    if quad_channel.value == 4:
+                        quad_channel.value = 3
+                        print('OFF')
+                        ui_serial_port.write('OFF')
+                    elif quad_channel.value == 1:
                         quad_channel.value = 3
                         print('OFF')
                         ui_serial_port.write('OFF')
@@ -169,9 +175,9 @@ def read_sensors(portIMU,running,last_angle,last_angle_speed):
                 if abs(x) > (math.pi*0.6):
                     ang = ang - 2*(ang-270)
 
-            t1 = time.time()
+            # t1 = time.time()
             #print(t1-t0, ang)
-	    t0 = t1
+	    # t0 = t1
 
             angle.append(ang)
             last_angle.value = ang
@@ -211,7 +217,7 @@ def check_angles(ang1, ang2):
 
 def increase_current(current):
     # global current, current_limit
-    current_limit = 96
+    current_limit = 102
     if current[0] <= current_limit-2:
         #current = [i+2 for i in current]
         for i in range(len(current)):
@@ -364,11 +370,26 @@ def main():
             #     # print(sent_current)
             elif quad_channel.value == 3:
                 sent_current = [0 for z in current]
+            elif quad_channel.value == 4:
+                print('rotina de recuperacao')
+                if last_angle.value < 180:
+                    while not (last_angle.value < 350 and last_angle.value > 270):
+                        stim.update(channels, [0,500,0,0,500,0,500,500], sent_current)
+                        if quad_channel.value == 3 or quad_channel.value == 1:
+                            break
+                else:
+                    while not (last_angle.value < 165 and last_angle.value > 80):
+                        stim.update(channels, [500,0,500,500,0,500,0,0], sent_current)
+                        if quad_channel.value == 3 or quad_channel.value == 1:
+                            break
+                quad_channel.value = 1
                 # print(sent_current)
+                print('back to normal')
             # print(quad_channel.value)
             # Electrical stimulator signal update
             if stimulation.value:
-                # print pulse_width
+                print pulse_width
+                # print(sent_current)
                 stim.update(channels, pulse_width, sent_current)
 
             # running = False
@@ -396,7 +417,7 @@ last_angle = multiprocessing.Value('f', 0.0)
 last_angle_speed = multiprocessing.Value('f', 0.0)
 
 # IMU addresses
-addressPedal = 7
+addressPedal = 1
 # addressRemoteControl = 3
 
 
@@ -411,7 +432,7 @@ GUI = False
 
 # Experiment mode
 ramps = False
-speed_ref = 350  # Slow speed
+speed_ref = 300  # Slow speed
 fast_speed = 250
 time_on_speed = 300
 
@@ -435,18 +456,18 @@ filter_size = 5
 
 # Ports and addresses
 if ui_used:
-    # ui_port = '/dev/tty.usbmodemFA1321'
-    ui_port = '/dev/ui' # rPi
+    ui_port = '/dev/tty.usbmodemFA1341'
+    # ui_port = '/dev/ui' # rPi
 
 # portIMU = 'COM4'  # Windows
 # portIMU = '/dev/ttyACM0'  # Linux
-# portIMU = '/dev/tty.usbmodemFA1311'
+portIMU = '/dev/tty.usbmodemFA1311'
 # portIMU = get_port('imu')  # Works on Mac. Should also work on Windows.
-portIMU = '/dev/imu' # rPi
+# portIMU = '/dev/imu' # rPi
 
 if stimulation.value:
-#    portStimulator = get_port('stimulator')  # Works only on Mac.
-    portStimulator = '/dev/stimulator' # rPi
+   portStimulator = get_port('stimulator')  # Works only on Mac.
+    # portStimulator = '/dev/stimulator' # rPi
     # portStimulator = '/dev/tty.usbserial-HMCX9Q6D' #get_port('stimulator')  # Works only on Mac.
     # portStimulator = 'COM4'
 # print portIMU
@@ -557,7 +578,7 @@ try:
 
     # Main frequencies used on trainings. Uncomment only the one to use.
     # current_str = '0,0,0,0,0,0,0,0'  # System check
-    current_str = '10,2,10,10,10,2,10,10'  # System check
+    current_str = '30,20,30,30,30,20,30,30'  # System check
     # current_str = '62,42,62,62,42,62'
     # current_str = '60,60,60,60,60,60'
     # current_str = '30,0,29,30,0,29'

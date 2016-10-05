@@ -9,12 +9,12 @@ Created on Sat May 23 13:41:18 2015
 ############################################################
 
 # Left quadriceps
-left_quad_start_ang = 260
-left_quad_range = 105
+left_quad_start_ang = 280
+left_quad_range = 95
 
 # Left gluteus
-left_gluteus_start_ang = 0
-left_gluteus_range = 110
+left_gluteus_start_ang = 300
+left_gluteus_range = 140
 
 # Left hamstrings
 left_hams_start_ang = 85 # melhor valor para isquios
