@@ -38,7 +38,8 @@ def get_port(device):
             port = glob.glob('/dev/tty.usbmodemFD1211')[0]
         elif device == 'stimulator':
             # port = '/dev/tty.usbserial-HMQYVD6B'
-            port = '/dev/tty.usbserial-HMCX9Q6D'
+            # port = '/dev/tty.usbserial-HMCX9Q6D'
+            port = '/dev/tty.usbserial-HMCYIM2B'
     elif sys.platform.startswith('win'):
         ports = ts_api.getComPorts()
         for p in ports:
@@ -84,22 +85,24 @@ def user_interface(ui_port,current,start,quad_channel,stimulation):
                 increase_current(current)
                 idle = False
             elif data == '3':
-                print('recupera')
-                quad_channel.value = 4
-                # if not start.value:
-                #     # start = True
-                #     start.value = 1
-                #     ui_serial_port.write(str(0))
-                #     ui_serial_port.write(str(current[0]))
-                # else:
-                #     if quad_channel.value == 1:
-                #         quad_channel.value = 3
-                #         print('OFF')
-                #         ui_serial_port.write('OFF')
-                #     elif quad_channel.value == 3:
-                #         quad_channel.value = 1
-                #         print('ON')
-                #         ui_serial_port.write(str(current[0]))
+                # print('recupera')
+                # quad_channel.value = 4
+                if not start.value:
+                    # start = True
+                    start.value = 1
+                else:
+                    if quad_channel.value == 4:
+                        quad_channel.value = 3
+                        print('OFF')
+                        ui_serial_port.write('OFF')
+                    elif quad_channel.value == 1:
+                        quad_channel.value = 3
+                        print('OFF')
+                        ui_serial_port.write('OFF')
+                    elif quad_channel.value == 3:
+                        quad_channel.value = 1
+                        print('ON')
+                        ui_serial_port.write(str(current[0]))
                 idle = False
             elif data == '4':
                 if not start.value:
@@ -217,7 +220,7 @@ def check_angles(ang1, ang2):
 
 def increase_current(current):
     # global current, current_limit
-    current_limit = 94
+    current_limit = 120
     if current[0] <= current_limit-2:
         #current = [i+2 for i in current]
         for i in range(len(current)):
@@ -253,6 +256,7 @@ def read_current_input(current):
 
 # Main function
 def main():
+    print("main has started")
     this_instant = xRange+1
     t0 = time.time()
     t1 = -1
@@ -273,6 +277,7 @@ def main():
 
             # Check if angles are good
             angle = last_angle.value
+            # print(angle)
             if old_angle == 0:
                old_angle = angle
             ang1 = angle
@@ -319,25 +324,25 @@ def main():
             if ramps:
                 signal_channel[0].append(
                     (perfil.left_quad(angle, angle_speed, actual_ref_speed[this_instant])) * (controlSignal[-1]))
-                signal_channel[1].append(
+                signal_channel[3].append(
                     (perfil.left_hams(angle, angle_speed, actual_ref_speed[this_instant])) * (controlSignal[-1]))
                 signal_channel[2].append(
                     (perfil.left_gluteus(angle, angle_speed, actual_ref_speed[this_instant])) * (controlSignal[-1]))
-                signal_channel[3].append(
+                signal_channel[1].append(
                     (perfil.right_quad(angle, angle_speed, actual_ref_speed[this_instant])) * (controlSignal[-1]))
                 signal_channel[4].append(
                     (perfil.right_hams(angle, angle_speed, actual_ref_speed[this_instant])) * (controlSignal[-1]))
-                signal_channel[5].append(
-                    (perfil.right_gluteus(angle, angle_speed, actual_ref_speed[this_instant])) * (controlSignal[-1]))
+                # signal_channel[5].append(
+                #     (perfil.right_gluteus(angle, angle_speed, actual_ref_speed[this_instant])) * (controlSignal[-1]))
             else:
                 signal_channel[0].append(
                     int((perfil.left_quad(angle, angle_speed, speed_ref)) * (controlSignal[-1])))
-                signal_channel[1].append(
+                signal_channel[3].append(
                     int((perfil.left_hams(angle, angle_speed, speed_ref)) * (controlSignal[-1])))
                 signal_channel[3].append(signal_channel[0][-1])
                 signal_channel[2].append(
                     int((perfil.left_gluteus(angle, angle_speed, speed_ref)) * (controlSignal[-1])))
-                signal_channel[4].append(
+                signal_channel[1].append(
                     int((perfil.right_quad(angle, angle_speed, speed_ref)) * (controlSignal[-1])))
                 signal_channel[5].append(
                     int((perfil.right_hams(angle, angle_speed, speed_ref)) * (controlSignal[-1])))
@@ -358,25 +363,25 @@ def main():
 
             # Check quad channels
             sent_current = current[:]
-            sent_current[0] = sent_current[0] * perfil.left_quad(angle, angle_speed, speed_ref)
-            sent_current[1] = sent_current[1] * perfil.left_hams(angle, angle_speed, speed_ref)
-            sent_current[2] = sent_current[2] * perfil.left_gluteus(angle, angle_speed, speed_ref)
-            sent_current[3] = sent_current[3] * perfil.left_quad(angle, angle_speed, speed_ref)
-            sent_current[4] = sent_current[4] * perfil.right_quad(angle, angle_speed, speed_ref)
-            sent_current[5] = sent_current[5] * perfil.right_hams(angle, angle_speed, speed_ref)
-            sent_current[6] = sent_current[6] * perfil.right_gluteus(angle, angle_speed, speed_ref)
-            sent_current[7] = sent_current[7] * perfil.right_quad(angle, angle_speed, speed_ref)
+            sent_current[0] = int(sent_current[0] * perfil.left_quad(angle, angle_speed, speed_ref))
+            # sent_current[1] = int(sent_current[1] * perfil.left_hams(angle, angle_speed, speed_ref))
+            # sent_current[2] = int(sent_current[2] * perfil.left_gluteus(angle, angle_speed, speed_ref))
+            # sent_current[3] = int(sent_current[3] * perfil.left_quad(angle, angle_speed, speed_ref))
+            sent_current[1] = int(sent_current[4] * perfil.right_quad(angle, angle_speed, speed_ref))
+            # sent_current[5] = int(sent_current[5] * perfil.right_hams(angle, angle_speed, speed_ref))
+            # sent_current[6] = int(sent_current[6] * perfil.right_gluteus(angle, angle_speed, speed_ref))
+            # sent_current[7] = int(sent_current[7] * perfil.right_quad(angle, angle_speed, speed_ref))
             # print(current)
             if quad_channel.value == 1:
                 sent_current = current[:]
-                sent_current[0] = sent_current[0] * perfil.left_quad(angle, angle_speed, speed_ref)
-                sent_current[1] = sent_current[1] * perfil.left_hams(angle, angle_speed, speed_ref)
-                sent_current[2] = sent_current[2] * perfil.left_gluteus(angle, angle_speed, speed_ref)
-                sent_current[3] = sent_current[3] * perfil.left_quad(angle, angle_speed, speed_ref)
-                sent_current[4] = sent_current[4] * perfil.right_quad(angle, angle_speed, speed_ref)
-                sent_current[5] = sent_current[5] * perfil.right_hams(angle, angle_speed, speed_ref)
-                sent_current[6] = sent_current[6] * perfil.right_gluteus(angle, angle_speed, speed_ref)
-                sent_current[7] = sent_current[7] * perfil.right_quad(angle, angle_speed, speed_ref)
+                sent_current[0] = int(sent_current[0] * perfil.left_quad(angle, angle_speed, speed_ref))
+                # sent_current[1] = int(sent_current[1] * perfil.left_hams(angle, angle_speed, speed_ref))
+                # sent_current[2] = int(sent_current[2] * perfil.left_gluteus(angle, angle_speed, speed_ref))
+                # sent_current[3] = int(sent_current[3] * perfil.left_quad(angle, angle_speed, speed_ref))
+                sent_current[1] = int(sent_current[4] * perfil.right_quad(angle, angle_speed, speed_ref))
+                # sent_current[5] = int(sent_current[5] * perfil.right_hams(angle, angle_speed, speed_ref))
+                # sent_current[6] = int(sent_current[6] * perfil.right_gluteus(angle, angle_speed, speed_ref))
+                # sent_current[7] = int(sent_current[7] * perfil.right_quad(angle, angle_speed, speed_ref))
             #     sent_current[1] = 0
             #     sent_current[4] = 0
             #     # print(sent_current)
@@ -386,25 +391,34 @@ def main():
             #     # print(sent_current)
             elif quad_channel.value == 3:
                 sent_current = [0 for z in current]
-            elif quad_channel.value == 4:
-                print('rotina de recuperacao')
-                if last_angle.value < 180:
-                    while not (last_angle.value < 350 and last_angle.value > 270):
-                        stim.update(channels, [0,500,0,0,500,0,500,500], sent_current)
-                        if quad_channel.value == 3 or quad_channel.value == 1:
-                            break
-                else:
-                    while not (last_angle.value < 165 and last_angle.value > 80):
-                        stim.update(channels, [500,0,500,500,0,500,0,0], sent_current)
-                        if quad_channel.value == 3 or quad_channel.value == 1:
-                            break
-                quad_channel.value = 1
-                # print(sent_current)
-                print('back to normal')
+            # elif quad_channel.value == 4:
+            #     print('rotina de recuperacao')
+            #     if last_angle.value < 180:
+            #         while not (last_angle.value < 350 and last_angle.value > 270):
+            #             sent_current = current[:]
+            #             stim.update(channels, [0,0,0,0,500,0,500,500], sent_current)
+            #             if quad_channel.value == 3 or quad_channel.value == 1:
+            #                 break
+            #     else:
+            #         while not (last_angle.value < 165 and last_angle.value > 80):
+            #             sent_current = current[:]
+            #             stim.update(channels, [500,0,500,500,0,0,0,0], sent_current)
+            #             if quad_channel.value == 3 or quad_channel.value == 1:
+            #                 break
+            #     quad_channel.value = 1
+            #     # print(sent_current)
+            #     print('back to normal')
             # print(quad_channel.value)
-            # print sent_current[7]
-            print pulse_width
+            # print sent_current[0]
+            # print pulse_width
             # Electrical stimulator signal update
+            # sent_current[1] = 0
+            sent_current[2] = 0
+            sent_current[3] = 0
+            sent_current[4] = 0
+            sent_current[5] = 0
+            sent_current[6] = 0
+            sent_current[7] = 0
             if stimulation.value:
                 # print pulse_width
                 # print(sent_current)
@@ -415,6 +429,8 @@ def main():
             this_instant += 1
         except ValueError:
             stim.stop()
+            print("erro in inner loop")
+            print(ValueError.message)
             # running=False
             running.value = 0
     if stimulation.value:
@@ -429,13 +445,13 @@ def main():
 # shared variables
 running = multiprocessing.Value('B', 0)
 start = multiprocessing.Value('B', 0)
-stimulation = multiprocessing.Value('B', 0)
+stimulation = multiprocessing.Value('B', 1)
 quad_channel = multiprocessing.Value('B', 1)
 last_angle = multiprocessing.Value('f', 0.0)
 last_angle_speed = multiprocessing.Value('f', 0.0)
 
 # IMU addresses
-addressPedal = 1
+addressPedal = 7
 # addressRemoteControl = 3
 
 
@@ -474,19 +490,19 @@ filter_size = 5
 
 # Ports and addresses
 if ui_used:
-    ui_port = '/dev/tty.usbmodemFA1341'
-    # ui_port = '/dev/ui' # rPi
+    # ui_port = '/dev/tty.usbmodemFD1241'
+    ui_port = '/dev/ui' # rPi
 
 # portIMU = 'COM4'  # Windows
 # portIMU = '/dev/ttyACM0'  # Linux
-portIMU = '/dev/tty.usbmodemFA1311'
+# portIMU = '/dev/tty.usbmodemFD1211'
 # portIMU = '/dev/tty.usbmodemFA131'
 # portIMU = get_port('imu')  # Works on Mac. Should also work on Windows.
-# portIMU = '/dev/imu' # rPi
+portIMU = '/dev/imu' # rPi
 
 if stimulation.value:
-   portStimulator = get_port('stimulator')  # Works only on Mac.
-    # portStimulator = '/dev/stimulator' # rPi
+   # portStimulator = get_port('stimulator')  # Works only on Mac.
+    portStimulator = '/dev/stimulator' # rPi
     # portStimulator = '/dev/tty.usbserial-HMCX9Q6D' #get_port('stimulator')  # Works only on Mac.
     # portStimulator = 'COM4'
 # print portIMU
@@ -566,8 +582,8 @@ try:
     IMUPedal.setStreamingTiming(interval=0, delay=0, duration=0, timestamp=False)
     IMUPedal.setStreamingSlots(slot0='getTaredOrientationAsEulerAngles', slot1='getNormalizedGyroRate')
     # IMUPedal.tareWithCurrentOrientation()
-    IMUPedal.tareWithQuaternion([0.02386031299829483, -0.7226513028144836, -0.6906803250312805, -0.012902911752462387])
-
+    # IMUPedal.tareWithQuaternion([0.02386031299829483, -0.7226513028144836, -0.6906803250312805, -0.012902911752462387])
+    IMUPedal.tareWithQuaternion([0.6468755602836609, 0.27426788210868835, 0.3308035731315613, 0.629998505115509])
     IMUPedal.startStreaming()
     dng_device.close()
     # IMURemoteControl = imu.IMU(serialPortIMU, addressRemoteControl)
@@ -581,7 +597,7 @@ try:
     # Asking for user input
     channels = 0
     # if stimulation:
-    freq = 30
+    freq = 50
     # int(raw_input("Input frequency: "))
     # channels = 119  # 6 Channels
     channels = 255  # 6 Channels
@@ -598,7 +614,7 @@ try:
 
     # Main frequencies used on trainings. Uncomment only the one to use.
     # current_str = '0,0,0,0,0,0,0,0'  # System check
-    current_str = '30,20,30,30,30,20,30,30'  # System check
+    current_str = '0,0,0,0,0,0,0,0'  # System check
     # current_str = '62,42,62,62,42,62'
     # current_str = '60,60,60,60,60,60'
     # current_str = '30,0,29,30,0,29'

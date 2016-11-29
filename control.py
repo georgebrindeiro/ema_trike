@@ -29,4 +29,4 @@ def control(error):
             
     except ValueError:
         return "Control error"
-    return signal
+    return 1
