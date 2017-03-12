@@ -8,8 +8,8 @@ import pylab
 
 #from pylab import *
 
-address = 0#1
-addressButon = 1#0
+address = 1#1
+addressButon = 7#0
 global run
 run = True
 
@@ -19,8 +19,8 @@ command1 = 1 #get Euler angles
 command2 = 33 #get gyro data
 #port_IMU = "/dev/tty.usbmodemfd121"
 #port_stim = "/dev/tty.usbserial-HMQYVD6B"
-port_IMU = "/dev/tty.usbmodemfd121"
-port_stim = "/dev/tty.usbserial-HMQYVD6B"
+port_IMU = "/dev/tty.usbmodemFD1231"
+port_stim = "/dev/tty.usbserial-HMCX9Q6D"
 time_lim = 5
 filter_size = 20 ###
 stim_max = 500
@@ -103,10 +103,10 @@ def RealtimePloter(arg):
 #  line2[0].set_data(CurrentXAxis,pylab.array(filtered_speed[-xRange:]))
   line3[0].set_data(CurrentXAxis,pylab.array(signal_femoral[-xRange:]))  
   line4[0].set_data(CurrentXAxis,pylab.array(signal_gastrocnemius[-xRange:]))
-  line9[0].set_data(CurrentXAxis,pylab.array(signal_gluteos_e[-xRange:]))
-  line10[0].set_data(CurrentXAxis,pylab.array(signal_gluteos_d[-xRange:]))
-  line11[0].set_data(CurrentXAxis,pylab.array(signal_hamstring_e[-xRange:]))
-  line12[0].set_data(CurrentXAxis,pylab.array(signal_hamstring_d[-xRange:]))
+  # line9[0].set_data(CurrentXAxis,pylab.array(signal_gluteos_e[-xRange:]))
+  # line10[0].set_data(CurrentXAxis,pylab.array(signal_gluteos_d[-xRange:]))
+  # line11[0].set_data(CurrentXAxis,pylab.array(signal_hamstring_e[-xRange:]))
+  # line12[0].set_data(CurrentXAxis,pylab.array(signal_hamstring_d[-xRange:]))
   line5[0].set_data(CurrentXAxis,pylab.array(filtered_speed[-xRange:]))
   line6[0].set_data(CurrentXAxis,pylab.array(speed[-xRange:]))  
   line7[0].set_data(CurrentXAxis,pylab.array(signal_speed_actual[-xRange:])) 
@@ -157,6 +157,10 @@ error_speed = []
 error_speed = [0 for x in range(xRange)]
 
 time_stamp = []
+time_sensor = []
+time_control = []
+time_stimulator = []
+t_zero = 0
 
 ####################################
 ####################################
@@ -435,11 +439,12 @@ def getEulerAngles():
     print("Getting euler angles.")
     i = 1
     
-    t0 = time.clock()
+    t0 = time.time()
+    t_zero = time.time()
     while run :
         
-        time.sleep(.020)        
-        
+        time.sleep(.020)
+
         if not usingPort:
             usingPort = True            
             serial_port_IMU.write(msg_com1) # e escreve na porta
@@ -489,8 +494,11 @@ def getEulerAngles():
                     speed.append(inst_speed)
                     signal_speed_ref.append(speed_ref)
                     error_speed.append(speed_ref - filtered_speed[-1])
-                    time_stamp.append(time.clock()-t0)
-                
+                    time_stamp.append(time.time()-t0)
+
+                    time_sensor.append(time.time() - t_zero)
+                    t_zero = time.time()
+
                     if i >= filter_size:
                             filtered_speed.append(numpy.mean(speed[-filter_size:]))
                             signal_speed_actual.append(control(error_speed))  
@@ -523,7 +531,9 @@ def getEulerAngles():
                                 if signal_hamstring_d[-1] > 1:
                                     signal_hamstring_d[-1] = 1
                                 stim_hamstring_d = signal_hamstring_d[-1]*stim_max
-                                pulse_width = [stim_gluteos_e, stim_gluteos_d, stim_femoral, stim_hamstring_e, stim_gastrocnemius, stim_hamstring_d]
+                                # pulse_width = [stim_gluteos_e, stim_gluteos_d, stim_femoral, stim_hamstring_e,
+                                #                stim_gastrocnemius, stim_hamstring_d]
+                                pulse_width = [stim_femoral, stim_gastrocnemius, 0, 0, 0, 0]
                                 print pulse_width
             #                    print old_signal_femoral
             #                    print signal_femoral
@@ -539,7 +549,15 @@ def getEulerAngles():
             #                    print channels 
             #                    print pulse_width
             #                    print current
+
+                                time_control.append(time.time() - t_zero)
+                                t_zero = time.time()
+
                                 update(channels, pulse_width, current)
+
+                                time_stimulator.append(time.time() - t_zero)
+                                t_zero = time.time()
+
             #                    print "Update DONE"
             #        if (ang < 230) & (ang > 120):
     #            pulse_width = [0, 500]
@@ -631,7 +649,7 @@ def checkButtons():
                 print error_speed[-1]
                 
             elif (int(botao) == 2) & readingAngles:
-                print "Good Bye!"
+                print "Good Bye (saving data)!"
                 run = False 
                 stop()
                 with open("angles", 'w') as f:
@@ -642,6 +660,15 @@ def checkButtons():
                         f.write(str(s) + '\n')
                 with open("time", 'w') as f:
                     for s in time_stamp:
+                        f.write(str(s) + '\n')
+                with open("time_sensor", 'w') as f:
+                    for s in time_sensor:
+                        f.write(str(s) + '\n')
+                with open("time_control", 'w') as f:
+                    for s in time_control:
+                        f.write(str(s) + '\n')
+                with open("time_stimulator", 'w') as f:
+                    for s in time_stimulator:
                         f.write(str(s) + '\n')
                 with open("fe", 'w') as f:
                     for s in signal_femoral:
@@ -808,7 +835,7 @@ def update(channels, width, current):
             i += 1
 #            print "esperando resposta"
             if i > 10:
-                print "no answer"
+                print "no answer on update"
                 break        
             
         dados = data.decode()  # transforma bytearray em string
