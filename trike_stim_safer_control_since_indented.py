@@ -19,8 +19,8 @@ command1 = 1 #get Euler angles
 command2 = 33 #get gyro data
 #port_IMU = "/dev/tty.usbmodemfd121"
 #port_stim = "/dev/tty.usbserial-HMQYVD6B"
-port_IMU = "/dev/tty.usbmodemFD1231"
-port_stim = "/dev/tty.usbserial-HMCX9Q6D"
+port_IMU = "/dev/ttyACM0"#"/dev/tty.usbmodemFD1231"
+port_stim = "/dev/ttyUSB0"#"/dev/tty.usbserial-HMCX9Q6D"
 time_lim = 5
 filter_size = 20 ###
 stim_max = 500
@@ -101,21 +101,21 @@ def RealtimePloter(arg):
   CurrentXAxis=pylab.arange(len(values)-xRange,len(values),1)
   line1[0].set_data(CurrentXAxis,pylab.array(values[-xRange:]))
 #  line2[0].set_data(CurrentXAxis,pylab.array(filtered_speed[-xRange:]))
-  line3[0].set_data(CurrentXAxis,pylab.array(signal_femoral[-xRange:]))  
+  line3[0].set_data(CurrentXAxis,pylab.array(signal_femoral[-xRange:]))
   line4[0].set_data(CurrentXAxis,pylab.array(signal_gastrocnemius[-xRange:]))
   # line9[0].set_data(CurrentXAxis,pylab.array(signal_gluteos_e[-xRange:]))
   # line10[0].set_data(CurrentXAxis,pylab.array(signal_gluteos_d[-xRange:]))
   # line11[0].set_data(CurrentXAxis,pylab.array(signal_hamstring_e[-xRange:]))
   # line12[0].set_data(CurrentXAxis,pylab.array(signal_hamstring_d[-xRange:]))
   line5[0].set_data(CurrentXAxis,pylab.array(filtered_speed[-xRange:]))
-  line6[0].set_data(CurrentXAxis,pylab.array(speed[-xRange:]))  
-  line7[0].set_data(CurrentXAxis,pylab.array(signal_speed_actual[-xRange:])) 
-  line8[0].set_data(CurrentXAxis,pylab.array(signal_speed_ref[-xRange:])) 
+  line6[0].set_data(CurrentXAxis,pylab.array(speed[-xRange:]))
+  line7[0].set_data(CurrentXAxis,pylab.array(signal_speed_actual[-xRange:]))
+  line8[0].set_data(CurrentXAxis,pylab.array(signal_speed_ref[-xRange:]))
   ax2.axis([CurrentXAxis.min(),CurrentXAxis.max(),-0.2,1.2])
   ax.axis([CurrentXAxis.min(),CurrentXAxis.max(),-5,365])
   ax3.axis([CurrentXAxis.min(),CurrentXAxis.max(),-5,1200])
   ax4.axis([CurrentXAxis.min(),CurrentXAxis.max(),-1.2,1.2])
-  manager.canvas.draw()    
+  manager.canvas.draw()
 
     
 ####################################
@@ -165,35 +165,21 @@ t_zero = 0
 ####################################
 ####################################
 def phase(ang):
-    if (ang > 342) | (ang < 18):
-        return 0
-    elif ang < 54:
+    if (ang > 300) or (ang < 40):
         return 1
-    elif ang < 90:
+    elif (ang > 120) and (ang < 220):
         return 2
-    elif ang < 126:
-        return 3
-    elif ang < 162:
-        return 4
-    elif ang < 198:
-        return 5
-    elif ang < 234:
-        return 6
-    elif ang < 270:
-        return 7
-    elif ang < 306:
-        return 8
-    elif ang <= 342:
-        return 9
-    return    
+    else:
+        return 0
+    return
 ####################################
 ####################################
 def femoral(phase): ### femoral esquerdo
     out = 0
     if phase == 0:
-        out = float(20)/30
+        out = float(0)/30
     elif phase == 1:
-        out = float(8)/30
+        out = float(30)/30
     elif phase == 2:
         out = float(0)/30
     elif phase == 3:
@@ -211,7 +197,7 @@ def femoral(phase): ### femoral esquerdo
     elif phase == 9:
         out = float(25)/30
     out = out * scale
-    return out  
+    return out
 ####################################
 ####################################
 def gastrocnemius(phase): ##### femoral direito
@@ -236,17 +222,17 @@ def gastrocnemius(phase): ##### femoral direito
 #        out = float(20)/30
 #    elif phase == 9:
 #        out = float(25)/30
-    if phase <= 4:
-        phase += 5
-    else:
-        phase -= 5
+    # if phase <= 4:
+    #     phase += 5
+    # else:
+    #     phase -= 5
         
     if phase == 0:
-        out = float(20)/30
-    elif phase == 1:
-        out = float(8)/30
-    elif phase == 2:
         out = float(0)/30
+    elif phase == 1:
+        out = float(0)/30
+    elif phase == 2:
+        out = float(30)/30
     elif phase == 3:
         out = float(0)/30
     elif phase == 4:
@@ -262,7 +248,7 @@ def gastrocnemius(phase): ##### femoral direito
     elif phase == 9:
         out = float(25)/30
     out = out * scale
-    return out    
+    return out
 ####################################
 ####################################
 def gluteos_e(phase):  ## gluteos esquerdos
@@ -288,7 +274,7 @@ def gluteos_e(phase):  ## gluteos esquerdos
     elif phase == 9:
         out = float(20)/30
     out = out * scale
-    return out  
+    return out
 ####################################
 ####################################
 def gluteos_d(phase):  ## gluteos direitos
@@ -318,7 +304,7 @@ def gluteos_d(phase):  ## gluteos direitos
     elif phase == 9:
         out = float(20)/30
     out = out * scale
-    return out  
+    return out
 ####################################
 ####################################
 def hamstring_e(phase):  ## hamstring esquerdos
@@ -344,7 +330,7 @@ def hamstring_e(phase):  ## hamstring esquerdos
     elif phase == 9:
         out = float(0)/30
     out = out * scale
-    return out  
+    return out
 ####################################
 ####################################
 def hamstring_d(phase):  ## hamstring direito
@@ -352,7 +338,7 @@ def hamstring_d(phase):  ## hamstring direito
     if phase <= 4:
         phase += 5
     else:
-        phase -= 5    
+        phase -= 5
     if phase == 0:
         out = float(0)/30
     elif phase == 1:
@@ -374,13 +360,13 @@ def hamstring_d(phase):  ## hamstring direito
     elif phase == 9:
         out = float(0)/30
     out = out * scale
-    return out  
+    return out
 ####################################
 ####################################
 def control(error):
     global error_speed
     signal = 0
-    try:    
+    try:
         p = 1/float(5000)
         i = 1/float(100000)
         if (error[-2] > 0) & (error[-1] <= 0):
@@ -399,19 +385,19 @@ def control(error):
             error[-1] = 0
     except ValueError:
         pass
-    return signal    
+    return signal
 ####################################
 ####################################
 
 def singleCommand(address, command):
     global serial_port
 #    out = 0
-    try:    
+    try:
         if serial_port_IMU is not None:
             dados = ""
             i=1
             serial_port_IMU.write(">" + address + "," + command + "\n") # e escreve na porta
-            while dados == "":            
+            while dados == "":
                 serial_port_IMU.flush()
                 data = serial_port_IMU.read(serial_port_IMU.inWaiting()) # le da porta bytearray
                 dados = data.decode()  # transforma bytearray em string
@@ -446,7 +432,7 @@ def getEulerAngles():
         time.sleep(.020)
 
         if not usingPort:
-            usingPort = True            
+            usingPort = True
             serial_port_IMU.write(msg_com1) # e escreve na porta
             usingPort = False
           
@@ -458,7 +444,7 @@ def getEulerAngles():
             data = serial_port_IMU.read(serial_port_IMU.inWaiting()) # le da porta bytearray
             dados = data.decode()  # transforma bytearray em string
             usingPort = False
-        if not dados == "":                
+        if not dados == "":
 #                print "Leitura: %i" %i
 #                print "Dados: " + dados
             ang = dados.split(",")
@@ -476,7 +462,7 @@ def getEulerAngles():
 #                        if (ang > 320) & (ang < 90):
                 
                 if not usingPort:
-                    usingPort = True            
+                    usingPort = True
                     serial_port_IMU.write(msg_com2) # e escreve na porta
                     usingPort = False
                 dados = ""
@@ -485,11 +471,11 @@ def getEulerAngles():
                     serial_port_IMU.flush()
                     data = serial_port_IMU.read(serial_port_IMU.inWaiting()) # le da porta bytearray
                     dados = data.decode()  # transforma bytearray em string
-                    usingPort = False    
+                    usingPort = False
                 
                 inst_speed = dados.split(",")
                 if len(inst_speed) == 6:
-                    inst_speed = float(inst_speed[4])        
+                    inst_speed = float(inst_speed[4])
                     inst_speed = inst_speed/(math.pi) * 180
                     speed.append(inst_speed)
                     signal_speed_ref.append(speed_ref)
@@ -501,7 +487,7 @@ def getEulerAngles():
 
                     if i >= filter_size:
                             filtered_speed.append(numpy.mean(speed[-filter_size:]))
-                            signal_speed_actual.append(control(error_speed))  
+                            signal_speed_actual.append(control(error_speed))
                             signal_gastrocnemius.append((gastrocnemius(phase(ang)))*(1+signal_speed_actual[-1]))
                             signal_femoral.append((femoral(phase(ang)))*(1+signal_speed_actual[-1]))
                             signal_gluteos_e.append((gluteos_e(phase(ang)))*(1+signal_speed_actual[-1]))
@@ -545,8 +531,8 @@ def getEulerAngles():
                                 old_signal_gluteos_d = signal_gluteos_d[-1]
                                 old_signal_hamstring_e = signal_hamstring_e[-1]
                                 old_signal_hamstring_d = signal_hamstring_d[-1]
-            #                    print "updating..."   
-            #                    print channels 
+            #                    print "updating..."
+            #                    print channels
             #                    print pulse_width
             #                    print current
 
@@ -563,7 +549,7 @@ def getEulerAngles():
     #            pulse_width = [0, 500]
 ##                            current = [4,6]
 #            if (current != old_current) | (pulse_width != old_pulse_width):
-#                old_current = current 
+#                old_current = current
 #                old_pulse_width = pulse_width
 #                update(channels, pulse_width, current) #atualiza
 ##                        elif (ang > 90) & (ang < 250):
@@ -589,17 +575,17 @@ def getEulerAngles():
 #            print dados
 
 #            print "tempo de resposta: %f" %t, "ms\n\n"
-        i += 1  
+        i += 1
         checkButtons()
     if run:
-        serial_port_IMU.close()    
+        serial_port_IMU.close()
     readingAngles = False
     return
 
 def checkButtons():
     global run, time_lim, serial_port, readingAngles, usingPort
 #    print "Check buttons"
-    try:  
+    try:
 #        print "Diff = " + str(tDiff)
         if serial_port_IMU is not None:
             i = 1
@@ -612,7 +598,7 @@ def checkButtons():
                 usingPort = True
                 serial_port_IMU.write((">" + str(addressButon) + ",250\n".encode())) #Get button state) # e escreve na porta
                 usingPort = False
-        while dados == "":            
+        while dados == "":
             
             if not usingPort:
                 usingPort = True
@@ -629,19 +615,19 @@ def checkButtons():
 #        print "Dados: " + dados
         botao = dados.split(",")
         if len(botao) == 4:
-#                    print "botao"                    
+#                    print "botao"
             botao = botao[3]
 #                    print botao
             if (int(botao) == 1) & (not readingAngles):
-                print "botao 1"                        
-                run = True                        
+                print "botao 1"
+                run = True
                 thread.start_new_thread( getEulerAngles, () )
                 
                 readingAngles = True
                 return 1
             elif (int(botao) == 1) & (readingAngles):
                 print "================"
-                print values[-1]                
+                print values[-1]
                 print signal_femoral[-1]
                 print signal_gastrocnemius[-1]
                 print signal_speed_actual[-1]
@@ -650,7 +636,7 @@ def checkButtons():
                 
             elif (int(botao) == 2) & readingAngles:
                 print "Good Bye (saving data)!"
-                run = False 
+                run = False
                 stop()
                 with open("angles", 'w') as f:
                     for s in values:
@@ -695,7 +681,7 @@ def checkButtons():
     
 #        else:
 #            print("Comando perdido")
-#        
+#
 #            print("==================================================")
           
     except ValueError:
@@ -725,7 +711,7 @@ def initialization(freq, channels):
     init_4 = ((channel_lf & 7) << 4) | (group_time >> 3)
     init_5 =  ((group_time & 7) << 4) | (main_time >> 7)
     init_6 = main_time & 127
-#        
+#
 #        print(group_time)
 #        print(init_1)
 #        print(init_2)
@@ -739,7 +725,7 @@ def initialization(freq, channels):
     dados = ""
     i=1
     serial_port_stim.write(init) # e escreve na porta
-    while dados == "":   
+    while dados == "":
 #            print "reading"
         time.sleep(delay)
         serial_port_stim.flush()
@@ -748,7 +734,7 @@ def initialization(freq, channels):
         i += 1
         if i > 10:
             print "no answer"
-            break        
+            break
         
     dados = data.decode()  # transforma bytearray em string
 #        print "resposta: " + dados
@@ -762,12 +748,12 @@ def initialization(freq, channels):
 def stop():
     try:
         stop_1 = 192
-        stop = bytearray([stop_1])  
+        stop = bytearray([stop_1])
         i=1
         serial_port_stim.write(stop) # e escreve na porta
         data = ""
         
-        while data == "":   
+        while data == "":
 #            print "reading"
             time.sleep(delay)
             serial_port_stim.flush()
@@ -776,7 +762,7 @@ def stop():
             i += 1
             if i > 10:
                 print "no answer"
-                break        
+                break
             
 #        dados = data.decode()  # transforma bytearray em string
 #        print "resposta: " + dados
@@ -804,8 +790,8 @@ def update(channels, width, current):
         init_b = []
         for i in range(len(width)*3+1):
             init_b.append(0)
-        init_b[0] = (1<<7) | (1<<5) | (check) 
-        for i in range(len(width)):         
+        init_b[0] = (1<<7) | (1<<5) | (check)
+        for i in range(len(width)):
             init_b[i*3+1] = (mode<<5) | (int(pulse_width[i])>>7)
             init_b[i*3+2] = (int(pulse_width[i]) & 127)
             init_b[i*3+3] = pulse_current[i]
@@ -827,7 +813,7 @@ def update(channels, width, current):
         serial_port_stim.write(init) # e escreve na porta
         dados = ""
 #        print "escreveu"
-        while dados == "":   
+        while dados == "":
 #            print "reading"
             time.sleep(delay)
             data = serial_port_stim.read(serial_port_stim.inWaiting()) # le da porta bytearray
@@ -836,13 +822,13 @@ def update(channels, width, current):
 #            print "esperando resposta"
             if i > 10:
                 print "no answer on update"
-                break        
+                break
             
         dados = data.decode()  # transforma bytearray em string
 #        print "resposta: " + dados
 #        print data
                     
-#        
+#
 #        serial_port_stim.flush()
 #        data = serial_port_stim.read(1) # le da porta bytearray
 #        t = time.clock()
@@ -873,19 +859,19 @@ def startRunning():
         pass
 #            print "Updating..."
 #            update(channels,pulse_width,current)
-#            print "DONE"            
-    while run:               
+#            print "DONE"
+    while run:
         pass
     return
 
-try:  
+try:
     
     if serial_port_IMU is not None:
         print "Beggining calibration..."
         error = 10
         while error > 0.1 :
-            singleCommand(str(address),"16,1") 
-            singleCommand(str(address),"165") 
+            singleCommand(str(address),"16,1")
+            singleCommand(str(address),"165")
             singleCommand(str(address),"96")
             dados = singleCommand(str(address),"1")
             error = float(dados[3]) + float(dados[4]) + float(dados[5])
@@ -911,11 +897,11 @@ try:
             old_current = current
 #            print "Updating..."
 #            update(channels,pulse_width,current)
-#            print "DONE"    
+#            print "DONE"
 #            print channels
 #            print pulse_width
 #            print current
-            print "Whenever you're ready, press button 1 (the left one)"  
+            print "Whenever you're ready, press button 1 (the left one)"
             timer = fig.canvas.new_timer(interval=10)
             timer.add_callback(RealtimePloter, ())
         #            timer2 = fig.canvas.new_timer(interval=10)
@@ -923,11 +909,11 @@ try:
             timer.start()
         #            timer2.start()
             thread.start_new_thread(startRunning, ())
-            pylab.show()  
+            pylab.show()
 #            print "passou"
             
             #stop()
-            print "Good Bye!" 
+            print "Good Bye!"
             serial_port_stim.close()
     else:
         print("Comando perdido")
@@ -940,6 +926,3 @@ except ValueError:
     serial_port_stim.close()
     
 print "FIM DA EXECUCAO"
-
-
-
