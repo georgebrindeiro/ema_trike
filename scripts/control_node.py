@@ -108,7 +108,7 @@ def main():
     stimMsg = Stimulator()
     stimMsg.channel = [1, 2]
     stimMsg.mode = ['single', 'single']
-    stimMsg.pulse_current = [5, 5]
+    stimMsg.pulse_current = [18, 18]
     
     # build basic angle message
     angleMsg = Float64()

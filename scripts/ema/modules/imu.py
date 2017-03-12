@@ -161,7 +161,7 @@ class IMU:
 # Check Buttons
 ########################################
 
-    def checkButtons(self, name): ## G: getButtonState, works with TSWLSensor (don't do for dongle)
+    def getButtonState(self, name): ## G: getButtonState, works with TSWLSensor (don't do for dongle)
         dev_type = self.config_dict['dev_type'][name]
 
         if dev_type == 'WL':

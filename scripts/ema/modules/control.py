@@ -30,8 +30,8 @@ class Control:
         return 0
     
     def g(self, error):
-        Kp = 0.01
-        Ki = 0.00001
+        Kp = 1/float(5000)
+        Ki = 1/float(100000)
         
         # If there is a change of signal, reset
         if ((error[-2] >= 0) and (error[-1] < 0)) or ((error[-2] < 0) and (error[-1] >= 0)):
